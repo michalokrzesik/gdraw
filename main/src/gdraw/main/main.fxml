@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gdraw.MainController">
+   <center>
+      <GridPane alignment="center" hgap="1.0" vgap="1.0">
+         <rowConstraints>
+            <RowConstraints percentHeight="50.0" />
+            <RowConstraints />
+         </rowConstraints>
+         <columnConstraints>
+            <ColumnConstraints percentWidth="25.0" />
+            <ColumnConstraints percentWidth="50.0" />
+            <ColumnConstraints percentWidth="25.0" />
+         </columnConstraints>
+         <children>
+            <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" text="Węzły" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2147483647" GridPane.vgrow="ALWAYS">
+               <content>
+                  <ScrollPane fitToHeight="true" fitToWidth="true">
+                     <content>
+                        <Accordion fx:id="nodeLibraryAccoridion" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity">
+                           <contextMenu>
+                              <ContextMenu>
+                                <items>
+                                <MenuItem mnemonicParsing="false" onAction="#addNodeToActiveLibrary" text="Dodaj obraz węzła" />
+                                    <MenuItem mnemonicParsing="false" onAction="#addNodeLibrary" text="Dodaj bibliotekę węzłów" />
+                                </items>
+                              </ContextMenu>
+                           </contextMenu>
+                        </Accordion>
+                     </content></ScrollPane>
+               </content>
+            </TitledPane>
+            <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Hierarchia" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+               <content>
+                  <ScrollPane fitToHeight="true" fitToWidth="true" />
+               </content>
+            </TitledPane>
+            <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Właściwości" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+               <content>
+                  <ScrollPane />
+               </content>
+            </TitledPane>
+            <TabPane tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowSpan="2147483647" />
+         </children>
+      </GridPane>
+   </center>
+   <top>
+      <GridPane BorderPane.alignment="CENTER">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <ToolBar prefHeight="40.0" prefWidth="200.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
+              <items>
+                <Button mnemonicParsing="false" text="New" />
+                  <Button layoutX="10.0" layoutY="13.0" mnemonicParsing="false" text="Open" />
+                  <Button layoutX="54.0" layoutY="13.0" mnemonicParsing="false" text="Save" />
+                  <Button layoutX="104.0" layoutY="13.0" mnemonicParsing="false" text="Cut" />
+                  <Button layoutX="149.0" layoutY="13.0" mnemonicParsing="false" text="Copy" />
+                  <Button layoutX="188.0" layoutY="13.0" mnemonicParsing="false" text="Paste" />
+                  <Button layoutX="236.0" layoutY="13.0" mnemonicParsing="false" text="Delete" />
+                  <Button layoutX="285.0" layoutY="13.0" mnemonicParsing="false" text="Undo" />
+                  <Button layoutX="340.0" layoutY="13.0" mnemonicParsing="false" text="Redo" />
+                  <Button layoutX="350.0" layoutY="23.0" mnemonicParsing="false" text="Zoom In" />
+                  <Button layoutX="360.0" layoutY="33.0" mnemonicParsing="false" text="Zoom Out" />
+                  <Button layoutX="370.0" layoutY="43.0" mnemonicParsing="false" text="Zoom Reset" />
+                  <Button layoutX="380.0" layoutY="53.0" mnemonicParsing="false" text="Show Full Graph" />
+                  <Button layoutX="390.0" layoutY="63.0" mnemonicParsing="false" text="Add Node" />
+                  <Button layoutX="400.0" layoutY="73.0" mnemonicParsing="false" text="Add Vertex" />
+                  <ChoiceBox prefWidth="150.0" />
+                  <ChoiceBox prefWidth="150.0" />
+                  <ColorPicker />
+              </items>
+            </ToolBar>
+            <MenuBar GridPane.columnSpan="2147483647">
+              <menus>
+                <Menu mnemonicParsing="false" text="Plik">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Nowy projekt" />
+                        <MenuItem mnemonicParsing="false" text="Otwórz" />
+                        <MenuItem mnemonicParsing="false" text="Zapisz" />
+                        <MenuItem mnemonicParsing="false" text="Zapisz jako" />
+                        <MenuItem mnemonicParsing="false" text="Eksportuj" />
+                        <MenuItem mnemonicParsing="false" text="Zamknij projekt" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" text="Zamknij program" />
+                  </items>
+                </Menu>
+                  <Menu mnemonicParsing="false" text="Edycja">
+                    <items>
+                      <MenuItem mnemonicParsing="false" text="Cofnij" />
+                        <MenuItem mnemonicParsing="false" text="Ponów" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" text="Wytnij" />
+                        <MenuItem mnemonicParsing="false" text="Kopiuj" />
+                        <MenuItem mnemonicParsing="false" text="Wklej" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" text="Duplikuj" />
+                        <MenuItem mnemonicParsing="false" text="Usuń" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" text="Na wierzch" />
+                        <MenuItem mnemonicParsing="false" text="Pod spód" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <Menu mnemonicParsing="false" text="Grupowanie">
+                          <items>
+                            <MenuItem mnemonicParsing="false" text="Grupuj" />
+                              <MenuItem mnemonicParsing="false" text="Oddziel" />
+                          </items>
+                        </Menu>
+                    </items>
+                  </Menu>
+                <Menu mnemonicParsing="false" text="Węzły">
+                     <items>
+                        <MenuItem mnemonicParsing="false" onAction="#addNodeToActiveLibrary" text="Dodaj obraz węzła" />
+                        <MenuItem mnemonicParsing="false" onAction="#addNodeLibrary" text="Dodaj bibliotekę węzłów" />
+                     </items></Menu>
+                <Menu mnemonicParsing="false" text="Pomoc">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="O programie" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+         </children>
+      </GridPane>
+   </top>
+</BorderPane>

@@ -1,0 +1,65 @@
+1. Wêz³y:
+ a. kategorie = pliki zip
+	- FlowPane z ImageViewami?
+	- Po naciœniêciu na nie lewym zaznaczanie (t³o niebieskie), prawym zaznaczanie i menu kontekstowe:
+		 - Dodaj do grafu, Dodaj do kategorii, Usuñ z kategorii, Przenieœ do kategorii, Utwórz kategoriê z...
+
+2. Hierarchia
+ a. TreeView - Katalogi to grupy
+ b. Przedstawia te¿ warstwy - im wy¿ej w hierarchii tym bli¿ej u¿ytkownika.
+ c. Rysowanie z drzewa - root to t³o, rekursywne przechodzenie po drzewie 
+	- drawItem, children = getChildren
+	- if !children.isEmpty()
+		ListIterator<TreeItem<Node>> i;
+		for(i = children.listIterator(children.size()-1); i.hasPrevious(); i.previous()) i.draw()
+ d. setGraphic(item.graphics()), toString = item.name()
+ e. Menu kontekstowe - takie jak edytuj i na canvas?
+
+3. W³aœciwoœci - selectedItem.showProperties()
+		- Node:
+			-isGroup : Boolean
+			-graphics : ImageView?
+			-label : String
+			-width : Double
+			-height : Double
+			-Coordinates: Pair(Double, Double)
+			----------------------------------
+			-widthCollapsed: Double
+			-heightCollapsed: Double
+			-Vertices: List<Vertex>
+			-toString = (label.isEmpty() ? "<bez nazwy>" : label)
+
+		- Vertex:
+			-label: String
+			-fromNode : Node
+			-toNode : Node
+			-graphics : ImageView?
+			-isCurved : Boolean
+			-points : List<Point2D.Double>		//From JavaDRAW
+			-toString = (label.isEmpty() ? "<bez nazwy>" : label + (isValued ? " (" + value + ")" : "");
+			-type: DashType
+			-fromArrow : Boolean
+			-toArrow : Boolean
+			-isValued : Boolean
+			-value: Double			//For algorithms
+
+4. Canvas - jak w JavaDRAW
+ a. Zaznaczanie - prostok¹tne z JavaDRAW, punktowe (zasiêg +/- 1px) 
+	- Otoczenie wierzcho³ków siatk¹ (8 punktów - rogi i po³owy boków, przeci¹ganie zmienia rozmiar)
+	- Punkty szczególne krawêdzi (równie¿ zaokr¹gleñ dla krzywych) i po³owy "odcinków" miêdzy nimi.
+		= Punkty krzywych maj¹ orientacjê poziom¹, pionow¹ albo zerow¹, przedstawian¹ za pomoc¹ odpowiedniej zmiany kursora. 
+		= Punkty krañcowe s¹ zerowe
+		= Nie mo¿e byæ mniej ni¿ 5 punktów. 
+		= Je¿eli s¹siad o tej samej orientacji zostanie zmodyfikowany, punkt zmienia orientacjê.
+		= Je¿eli modyfikowany jest s¹siad punktu zerowego, pomiêdzy nim a punktem zerowym dodawany jest punkt o orientacji innej ni¿ modyfikowany
+		= Je¿eli modyfikowany jest punkt zerowy, pomiêdzy nim, a jego s¹siadem P1 dodawany jest punkt o orientacji innej ni¿ P1
+		= Rysowanie:
+			= Je¿eli jeden punkt jest zerowej orientacji, punkt kontrolny w (x1-x2/2, y1-y2/2) (linia prosta) 
+			= Je¿eli któraœ wspó³rzêdna jest taka sama, nie s¹ to przypadki krañcowe i wszystkich punktów jest > 5
+				Jeden punkt usuwamy, drugi przesuwany na ((x1-x2)/2,(y1-y2)/2)), cofamy siê i powtarzamy krok
+			= Je¿eli orientacja jest ró¿na:
+				Po prostu krzywa kubiczna z kontrolnym w max/min((x1,x2),(y1,y2)), w zale¿noœi od kierunku wyjœcia
+			= Je¿eli orientacja jest ta sama:
+				= Je¿eli wspó³rzêdna orientacyjna jest taka sama, usuwamy jedn¹, drug¹ przesuwamy na ((x1-x2)/2,(y1-y2)/2), cofamy siê i powtarzamy krok
+				= Je¿eli wspó³rzêdna orientacyjna jest ró¿na, utwórz punkt o przeciwnej orientacji w po³owie odcinka miêdzy nimi
+ b. Menu kontekstowe - jak w edycji i TreeView?

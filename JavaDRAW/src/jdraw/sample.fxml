@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<GridPane alignment="center" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gdraw.Controller">
+   <columnConstraints>
+      <ColumnConstraints />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints maxHeight="42.0" minHeight="10.0" prefHeight="33.0" />
+      <RowConstraints maxHeight="875.0" minHeight="848.0" prefHeight="857.0" />
+   </rowConstraints>
+   <children>
+      <MenuBar>
+        <menus>
+          <Menu mnemonicParsing="false" text="Plik">
+            <items>
+              <MenuItem fx:id="newMI" mnemonicParsing="false" onAction="#newProject" text="Nowy" />
+              <MenuItem fx:id="openMI" mnemonicParsing="false" onAction="#openProject" text="Otwórz" />
+              <MenuItem fx:id="saveMI" mnemonicParsing="false" onAction="#saveProject" text="Zapisz" />
+              <MenuItem fx:id="closeMI" mnemonicParsing="false" onAction="#closeProject" text="Zamknij Projekt" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Węzły">
+            <items>
+              <MenuItem fx:id="addNodeMI" mnemonicParsing="false" onAction="#addNodeImg" text="Dodaj obraz węzła" />
+              <MenuItem fx:id="addNodesMI" mnemonicParsing="false" onAction="#addNodeLib" text="Dodaj bibliotekę węzłów" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="O programie">
+            <items>
+              <MenuItem mnemonicParsing="false" text="graphDraw" />
+              <MenuItem mnemonicParsing="false" text="Praca licencjacka 2019" />
+              <MenuItem mnemonicParsing="false" text="Michał Okrzesik" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <GridPane gridLinesVisible="true" minHeight="0.0" minWidth="0.0" GridPane.rowIndex="1">
+           <children>
+              <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+              <TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" rotate="90.0" tabClosingPolicy="UNAVAILABLE" translateX="-245.0" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                <tabs>
+                  <Tab text="Menedżer obiektów">
+                     <content>
+                        <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="830.0" prefWidth="289.0" rotate="-90.0" translateX="290.0" translateY="-250.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints maxHeight="794.0" minHeight="10.0" prefHeight="768.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <ListView maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="797.0" prefWidth="289.0" />
+                           </children>
+                        </GridPane>
+                     </content></Tab>
+                  <Tab fx:id="settingsTab" onSelectionChanged="#onSelectionSettings" text="Właściwości">
+                     <content>
+                        <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="859.0" prefWidth="328.0" rotate="-90.0" translateX="267.0" translateY="-267.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="159.0" minWidth="10.0" prefWidth="136.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="192.0" minWidth="10.0" prefWidth="192.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                              <RowConstraints maxHeight="281.0" minHeight="10.0" prefHeight="155.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="281.0" minHeight="10.0" prefHeight="63.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="394.0" minHeight="10.0" prefHeight="61.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="652.0" minHeight="10.0" prefHeight="652.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <TextField fx:id="widthContour" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <TextField fx:id="heightObject" maxWidth="-Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <Label text=" Szerokość konturu" GridPane.rowIndex="1" />
+                              <Label text=" Wysokość obiektu" GridPane.rowIndex="2" />
+                              <GridPane GridPane.rowIndex="3">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints maxHeight="213.0" minHeight="0.0" prefHeight="51.0" vgrow="SOMETIMES" />
+                                  <RowConstraints maxHeight="529.0" minHeight="0.0" prefHeight="49.0" vgrow="SOMETIMES" />
+                                  <RowConstraints maxHeight="605.0" minHeight="10.0" prefHeight="552.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Label text=" Szerokość obiektu" />
+                                    <CheckBox fx:id="settingsCheckBox" mnemonicParsing="false" text="Domknięcie" translateX="10.0" translateY="-300.0" GridPane.rowIndex="2" />
+                                 </children>
+                              </GridPane>
+                              <GridPane GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints maxHeight="213.0" minHeight="0.0" prefHeight="48.0" vgrow="SOMETIMES" />
+                                  <RowConstraints maxHeight="502.0" minHeight="2.0" prefHeight="49.0" valignment="CENTER" vgrow="SOMETIMES" />
+                                  <RowConstraints maxHeight="575.0" minHeight="10.0" prefHeight="550.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <TextField fx:id="widthObject" maxWidth="-Infinity" />
+                                    <Button fx:id="settingsButton" mnemonicParsing="false" onAction="#settings" text="Zatwierdź" translateY="-300.0" GridPane.rowIndex="2" />
+                                 </children>
+                              </GridPane>
+                              <ColorPicker fx:id="colorPicker" prefHeight="31.0" prefWidth="185.0" translateY="50.0" GridPane.columnIndex="1" />
+                              <Label text=" Kolor konturu" translateY="50.0" />
+                           </children>
+                        </GridPane>
+                     </content></Tab>
+                </tabs>
+              </TabPane>
+            <ToolBar maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" rotate="90.0" translateX="-375.0" GridPane.rowIndex="0">
+              <items>
+                <Button fx:id="selectToolB" mnemonicParsing="false" onAction="#selection" rotate="-45.0" text="Zaznaczanie">
+                     <contextMenu>
+                        <ContextMenu>
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#setRectSelection" text="Zaznaczanie prostokątne" />
+                              <MenuItem mnemonicParsing="false" onAction="#setMoveSelection" text="Przesuwanie" />
+                          </items>
+                        </ContextMenu>
+                     </contextMenu></Button>
+                  <Button mnemonicParsing="false" onAction="#setFreeSelection" rotate="-45.0" text="Kształt" />
+                  <Button fx:id="lineButton" mnemonicParsing="false" onAction="#line" rotate="-45.0" text="Linia">
+                     <contextMenu>
+                        <ContextMenu>
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#drawLine" text="Linia między dwoma punktami" />
+                              <MenuItem mnemonicParsing="false" onAction="#drawBezier" text="Krzywa Beziera" />
+                              <MenuItem mnemonicParsing="false" onAction="#drawCurve" text="Linia sklejana" />
+                              <MenuItem mnemonicParsing="false" onAction="#drawPolygon" text="Łamana" />
+                          </items>
+                        </ContextMenu>
+                     </contextMenu></Button>
+                  <Button mnemonicParsing="false" onAction="#drawRect" rotate="-45.0" text="Prostokąt" />
+                  <Button mnemonicParsing="false" onAction="#drawOval" rotate="-45.0" text="Elipsa" />
+                  <Slider fx:id="slider" onMouseDragged="#onSlide" prefHeight="18.0" prefWidth="104.0" rotate="180.0" />
+                  <Label fx:id="sliderLabel" rotate="-90" />
+              </items>
+            </ToolBar>
+           </children>
+           <columnConstraints>
+            <ColumnConstraints maxWidth="1533.0" minWidth="31.0" prefWidth="99.0" />
+              <ColumnConstraints maxWidth="1950.0" minWidth="1087.0" prefWidth="1134.0" />
+              <ColumnConstraints maxWidth="440.0" minWidth="10.0" prefWidth="367.0" />
+           </columnConstraints>
+           <rowConstraints>
+              <RowConstraints />
+           </rowConstraints>
+        </GridPane>
+   </children>
+</GridPane>
