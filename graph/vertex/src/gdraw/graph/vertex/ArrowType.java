@@ -11,16 +11,39 @@ public enum ArrowType {
     Opened{
         @Override
         public void draw(GraphicsContext gc, Point2D source, Point2D destination) {
-
+            Pair<Point2D, Point2D> points = arrowPoints(source, destination, 5.0);
+            gc.setLineDashes(null);
+            gc.beginPath();
+            gc.moveTo(points.getKey().getX(), points.getKey().getY());
+            gc.lineTo(destination.getX(), destination.getY());
+            gc.lineTo(points.getValue().getX(), points.getValue().getY());
+            gc.stroke();
         }
-    }
+    },
+    Filled{
+        @Override
+        public void draw(GraphicsContext gc, Point2D source, Point2D destination) {
+            Pair<Point2D, Point2D> points = arrowPoints(source, destination, 5.0);
+            gc.setLineDashes(null);
+            double[] xPoints = {points.getKey().getX(), points.getValue().getX(), destination.getX()},
+                    yPoints = {points.getKey().getY(), points.getValue().getY(), destination.getY()};
+            gc.fillPolygon(xPoints, yPoints, 3);
+        }
+    };
 
-    private Pair<Point2D, Point2D> halfPerpendicularPoints(Point2D source, Point2D destination, double distance){
-        double A = (source.getY() - destination.getY())/(source.getX() - destination.getX());
-        double A1 = 2*A;
-        double A2 = 1/A1;
+    private static Pair<Point2D, Point2D> arrowPoints(Point2D source, Point2D destination, double arrowHeadSize){
+        //ArrowHead
+        double angle = Math.atan2((destination.getY() - source.getY()), (destination.getX() - source.getX())) - Math.PI / 2.0;
+        double sin = Math.sin(angle);
+        double cos = Math.cos(angle);
+        //point1
+        double x1 = (- 1.0 / 2.0 * cos + Math.sqrt(3) / 2 * sin) * arrowHeadSize + destination.getX();
+        double y1 = (- 1.0 / 2.0 * sin - Math.sqrt(3) / 2 * cos) * arrowHeadSize + destination.getY();
+        //point2
+        double x2 = (1.0 / 2.0 * cos + Math.sqrt(3) / 2 * sin) * arrowHeadSize + destination.getX();
+        double y2 = (1.0 / 2.0 * sin - Math.sqrt(3) / 2 * cos) * arrowHeadSize + destination.getY();
 
-
+        return new Pair<>(new Point2D(x1,y1), new Point2D(x2,y2));
     }
 
     abstract public void draw(GraphicsContext gc, Point2D source, Point2D destination);
