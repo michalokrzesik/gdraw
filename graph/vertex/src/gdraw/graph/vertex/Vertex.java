@@ -5,7 +5,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Arc;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
 import java.util.Iterator;
@@ -19,12 +20,11 @@ public class Vertex {
     private Node toNode;
     private LinkedList<VertexPoint> points;
     private boolean duplex;
-    private boolean curved;
+    private VertexType vertexType;
     private boolean selected;
     private GraphicsContext gc;
     private double width;
     private Path path;
-    private LinkedList<Arc> curvedPath;
 
     public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, GraphicsContext graphicsContext, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w){
         fromNode = from;
@@ -37,56 +37,51 @@ public class Vertex {
         points.addLast(new VertexPoint(toPoint));
         points.addFirst(new VertexPoint(fromPoint));
         duplex = isDuplex;
-        curved = isCurved;
+        vertexType = (isCurved ? VertexType.Curved : VertexType.Straight);
         width = w;
         path = new Path();
-        curvedPath = new LinkedList<>();
         draw();
     }
 
-    private void drawSelect(Point2D point){
+    private void drawSelect(VertexPoint point){
         Paint prev = gc.getFill();
-        gc.setFill(Color.BLUE);
+        gc.setFill((point.isHardPoint() ? Color.AQUA : Color.BLUE));
         gc.fillOval(point.getX() - width/2, point.getY() - width/2, width, width);
         gc.setFill(prev);
     }
 
 
     public boolean isInPath(Point2D point){
-        if(!curved) return path.contains(point);
-        return curvedPath.stream().anyMatch((curve) -> curve.contains(point));
+        return path.contains(point);
     }
 
 
-    public void draw(){
-        if(curved) drawCurved();
-        else{
-            Iterator<VertexPoint> it = points.iterator();
-            VertexPoint prev = null, now = null;
-            if(it.hasNext())  prev = it.next();
-            lineType.set(gc, width);
-            if(selected) drawSelect(prev.getPoint());
-            while(it.hasNext()){
-                now = it.next();
-                gc.strokeLine(prev.getX(), prev.getY(), now.getX(), now.getY());
-                if(prev.isHardPoint() && now.isHardPoint()){
-                    VertexPoint mid = new VertexPoint(prev.getPoint().midpoint(now.getPoint()), false);
-                    points.add(points.indexOf(now), mid);
-                    if(selected) drawSelect(mid.getPoint());
-                }
-                if(selected)
-                    drawSelect(prev.getPoint());
-            }
-            drawSelect(now.getPoint());
-            arrowType.draw(gc, prev, now);
-            if(duplex) arrowType.draw(gc, points.get(1), points.getFirst());
+    public void draw() {
+        path = new Path();
+
+        Iterator<VertexPoint> it = points.listIterator();
+        VertexPoint prev = null, now = null;
+        if (it.hasNext()) prev = it.next();
+        lineType.set(gc, width);
+        path.getElements().add(new MoveTo(prev.getX(), prev.getY()));
+        while (it.hasNext()) {
+            now = it.next();
+            path.getElements().add(vertexType.newElement(prev, now));
+            vertexType.createMid(points, prev, now);
+
+            it = points.listIterator(points.indexOf(prev));
+            now = it.next();
+            vertexType.draw(gc, prev, now);
+
+            if (selected) drawSelect(prev);
         }
+        if(selected) drawSelect(now);
+
+        arrowType.draw(gc, prev, now);
+        if (duplex) arrowType.draw(gc, points.get(1), points.getFirst());
 
     }
 
-    private void drawCurved() {
-
-    }
 
 
 }
