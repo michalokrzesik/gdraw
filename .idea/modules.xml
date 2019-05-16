@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/gdraw.iml" filepath="$PROJECT_DIR$/.idea/gdraw.iml" />
       <module fileurl="file://$PROJECT_DIR$/graph/graph.iml" filepath="$PROJECT_DIR$/graph/graph.iml" />
+      <module fileurl="file://$PROJECT_DIR$/graph/node/node.iml" filepath="$PROJECT_DIR$/graph/node/node.iml" />
       <module fileurl="file://$PROJECT_DIR$/graph/vertex/vertex.iml" filepath="$PROJECT_DIR$/graph/vertex/vertex.iml" />
     </modules>
   </component>

@@ -1,17 +1,16 @@
 package gdraw.graph.vertex;
 
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.util.Pair;
 
 public enum ArrowType {
     None{
-        public void draw(GraphicsContext gc, Point2D source, Point2D destination){}
+        public void draw(GraphicsContext gc, VertexPoint source, VertexPoint destination){}
     },
     Opened{
         @Override
-        public void draw(GraphicsContext gc, Point2D source, Point2D destination) {
-            Pair<Point2D, Point2D> points = arrowPoints(source, destination, 5.0);
+        public void draw(GraphicsContext gc, VertexPoint source, VertexPoint destination) {
+            Pair<VertexPoint, VertexPoint> points = arrowPoints(source, destination, 5.0);
             gc.setLineDashes(null);
             gc.beginPath();
             gc.moveTo(points.getKey().getX(), points.getKey().getY());
@@ -22,8 +21,8 @@ public enum ArrowType {
     },
     Filled{
         @Override
-        public void draw(GraphicsContext gc, Point2D source, Point2D destination) {
-            Pair<Point2D, Point2D> points = arrowPoints(source, destination, 5.0);
+        public void draw(GraphicsContext gc, VertexPoint source, VertexPoint destination) {
+            Pair<VertexPoint, VertexPoint> points = arrowPoints(source, destination, 5.0);
             gc.setLineDashes(null);
             double[] xPoints = {points.getKey().getX(), points.getValue().getX(), destination.getX()},
                     yPoints = {points.getKey().getY(), points.getValue().getY(), destination.getY()};
@@ -31,7 +30,7 @@ public enum ArrowType {
         }
     };
 
-    private static Pair<Point2D, Point2D> arrowPoints(Point2D source, Point2D destination, double arrowHeadSize){
+    private static Pair<VertexPoint, VertexPoint> arrowPoints(VertexPoint source, VertexPoint destination, double arrowHeadSize){
         //ArrowHead
         double angle = Math.atan2((destination.getY() - source.getY()), (destination.getX() - source.getX())) - Math.PI / 2.0;
         double sin = Math.sin(angle);
@@ -43,8 +42,8 @@ public enum ArrowType {
         double x2 = (1.0 / 2.0 * cos + Math.sqrt(3) / 2 * sin) * arrowHeadSize + destination.getX();
         double y2 = (1.0 / 2.0 * sin - Math.sqrt(3) / 2 * cos) * arrowHeadSize + destination.getY();
 
-        return new Pair<>(new Point2D(x1,y1), new Point2D(x2,y2));
+        return new Pair<>(new VertexPoint(x1,y1), new VertexPoint(x2,y2));
     }
 
-    abstract public void draw(GraphicsContext gc, Point2D source, Point2D destination);
+    abstract public void draw(GraphicsContext gc, VertexPoint source, VertexPoint destination);
     }
