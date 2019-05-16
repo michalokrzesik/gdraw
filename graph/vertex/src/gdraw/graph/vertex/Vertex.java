@@ -82,6 +82,12 @@ public class Vertex {
 
     }
 
+    private void center(VertexPoint mid){
+        mid.setPoint(
+                new Point2D(
 
+                )
+        );
+    }
 
 }
