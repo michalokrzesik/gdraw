@@ -5,6 +5,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.Path;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -21,6 +23,8 @@ public class Vertex {
     private boolean selected;
     private GraphicsContext gc;
     private double width;
+    private Path path;
+    private LinkedList<Arc> curvedPath;
 
     public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, GraphicsContext graphicsContext, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w){
         fromNode = from;
@@ -35,6 +39,8 @@ public class Vertex {
         duplex = isDuplex;
         curved = isCurved;
         width = w;
+        path = new Path();
+        curvedPath = new LinkedList<>();
         draw();
     }
 
@@ -43,6 +49,12 @@ public class Vertex {
         gc.setFill(Color.BLUE);
         gc.fillOval(point.getX() - width/2, point.getY() - width/2, width, width);
         gc.setFill(prev);
+    }
+
+
+    public boolean isInPath(Point2D point){
+        if(!curved) return path.contains(point);
+        return curvedPath.stream().anyMatch((curve) -> curve.contains(point));
     }
 
 
@@ -69,6 +81,10 @@ public class Vertex {
             arrowType.draw(gc, prev, now);
             if(duplex) arrowType.draw(gc, points.get(1), points.getFirst());
         }
+
+    }
+
+    private void drawCurved() {
 
     }
 
