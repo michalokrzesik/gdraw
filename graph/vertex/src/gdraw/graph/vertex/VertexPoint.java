@@ -39,8 +39,9 @@ public class VertexPoint {
         return point;
     }
 
-    public void setOrientation(VertexPointOrientation newOrientation){
+    public VertexPoint setOrientation(VertexPointOrientation newOrientation){
         orientation = newOrientation;
+        return this;
     }
 
     public VertexPointOrientation getOrientation(){

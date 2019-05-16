@@ -57,30 +57,37 @@ public enum VertexType {
                     if (prev.getOrientation() == VertexPointOrientation.NONE) {
                         points.removeFirst();
                         double distance = now.getX() - prev.getX() + now.getY() - prev.getY();
+                        VertexPointOrientation orientation = (prev.getX() == now.getX() ? VertexPointOrientation.VERTICAL : VertexPointOrientation.HORIZONTAL);
                         points.addFirst(
                                 new VertexPoint(
                                         new Point2D(
                                                 (sameX ? prev.getX() : now.getX() - distance/4),
                                                 (sameY ? prev.getY() : now.getY() - distance/4)),
-                                        false));
+                                        false).setOrientation(orientation));
                         points.addFirst(
                                 new VertexPoint(
                                         new Point2D(
                                                 (sameX ? prev.getX() : now.getX() - distance/2),
                                                 (sameY ? prev.getY() : now.getY() - distance/2)),
-                                        false));
+                                        false).setOrientation(orientation));
                         points.addFirst(
                                 new VertexPoint(
                                         new Point2D(
                                                 (sameX ? prev.getX() : prev.getX() + distance/4),
                                                 (sameY ? prev.getY() : prev.getY() + distance/4)),
-                                        false));
+                                        false).setOrientation(orientation));
                         points.addFirst(prev);
                     }
                     else{
                         prev.setPoint(new Point2D((prev.getX() + now.getX())/2, (prev.getY() + now.getY())/2));
                         points.remove(now);
                     }
+                }
+                else {
+                    VertexPoint mid = new VertexPoint(
+                            new Point2D((prev.getX() + now.getX()) / 2, (prev.getY() + now.getY()) / 2));
+                    mid.setOrientation((prev.getOrientation() == VertexPointOrientation.HORIZONTAL ? VertexPointOrientation.VERTICAL : VertexPointOrientation.HORIZONTAL));
+                    points.add(points.indexOf(now), mid);
                 }
             }
         }
