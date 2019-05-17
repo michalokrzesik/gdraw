@@ -5,7 +5,6 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
+
+import gdraw.graph.util.Label;
 
 public class Vertex {
 
@@ -27,6 +28,9 @@ public class Vertex {
     private GraphicsContext gc;
     private double width;
     private Path path;
+    private Label label;
+
+    private double value;
 
     public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, GraphicsContext graphicsContext, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w){
         fromNode = from;
@@ -42,6 +46,7 @@ public class Vertex {
         vertexType = (isCurved ? VertexType.Curved : VertexType.Straight);
         width = w;
         path = new Path();
+        value = 1.0;
         draw();
     }
 
@@ -57,6 +62,9 @@ public class Vertex {
         return path.contains(point);
     }
 
+    public void draw(Node from){
+        if(from == fromNode) draw();
+    }
 
     public void draw() {
         path = new Path();
@@ -112,4 +120,32 @@ public class Vertex {
             decideOnCenter((VertexPoint) it.next());
     }
 
+    public void setLabel(String newLabel){
+        newLabel += " (" + value + ")";
+        if(label == null){
+            label = new Label(
+                    newLabel,
+                    getCenterForLabel()
+            );
+        }
+        else label.setLabel(newLabel);
+
+    }
+
+    private Point2D getCenterForLabel() {
+        int size = points.size();
+        ListIterator it = points.listIterator(size/2);
+        VertexPoint point = (VertexPoint) it.next();
+        double x = point.getX(), y = point.getY();
+        if(size % 2 == 0){
+            VertexPoint next = (VertexPoint) it.next();
+            x += next.getX();
+            x /= 2;
+            y += next.getY();
+            y /= 2;
+        }
+        x -= 10;
+        y -= 10;
+        return new Point2D(x,y);
+    }
 }

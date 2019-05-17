@@ -14,6 +14,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.zip.ZipFile;
 
+import gdraw.graph.node.NodeLibrary;
+
 public class MainController {
 
     @FXML
