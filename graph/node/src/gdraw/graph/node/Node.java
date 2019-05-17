@@ -117,7 +117,7 @@ public class Node {
     }
 
     public void draw(){
-        vertices.forEach(Vertex::draw);
+        vertices.forEach((Vertex v) -> v.draw(this));
 
         double w = getWidth(), h = getHeight();
         double x = center.getX() - w/2, y = center.getY() - h/2;
@@ -137,12 +137,13 @@ public class Node {
             gc.fillOval(x + w/2 - 1, y - 1, 3, 3);
         }
 
-        if(isGroup) subNodes.forEach(Node::draw);
+        if(isGroup) subNodes.forEach((Node n) -> n.draw());
     }
 
     public void translate(double dx, double dy){
         double x = center.getX() + dx, y = center.getY() + dy;
         center = new Point2D(x, y);
         vertices.forEach((Vertex v) -> v.translateNode(this, dx, dy));
+        if(isGroup) subNodes.forEach((Node n) -> n.translate(dx, dy));
     }
 }
