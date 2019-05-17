@@ -161,4 +161,10 @@ public class Vertex {
         y -= 10;
         return new Point2D(x,y);
     }
+
+    public void translateNode(Node node, double dx, double dy) {
+        VertexPoint point = (node == fromNode ? points.getFirst() : points.getLast());
+        Point2D newPoint = new Point2D(point.getX() + dx, point.getY() + dy);
+        move(point, newPoint);
+    }
 }

@@ -139,4 +139,10 @@ public class Node {
 
         if(isGroup) subNodes.forEach(Node::draw);
     }
+
+    public void translate(double dx, double dy){
+        double x = center.getX() + dx, y = center.getY() + dy;
+        center = new Point2D(x, y);
+        vertices.forEach((Vertex v) -> v.translateNode(this, dx, dy));
+    }
 }
