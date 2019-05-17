@@ -12,6 +12,8 @@
 	- if !children.isEmpty()
 		ListIterator<TreeItem<Node>> i;
 		for(i = children.listIterator(children.size()-1); i.hasPrevious(); i.previous()) i.draw()
+	    ******************Jednak im ni¿ej w drzewie, tym bli¿ej u¿ytkownika***************************
+
  d. setGraphic(item.graphics()), toString = item.name()
  e. Menu kontekstowe - takie jak edytuj i na canvas?
 
