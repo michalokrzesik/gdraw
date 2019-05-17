@@ -1,4 +1,4 @@
-1. Wêz³y:
+//1. Wêz³y:
  a. kategorie = pliki zip
 	- FlowPane z ImageViewami?
 	- Po naciœniêciu na nie lewym zaznaczanie (t³o niebieskie), prawym zaznaczanie i menu kontekstowe:
@@ -7,7 +7,7 @@
 2. Hierarchia
  a. TreeView - Katalogi to grupy
  b. Przedstawia te¿ warstwy - im wy¿ej w hierarchii tym bli¿ej u¿ytkownika.
- c. Rysowanie z drzewa - root to t³o, rekursywne przechodzenie po drzewie 
+// c. Rysowanie z drzewa - root to t³o, rekursywne przechodzenie po drzewie
 	- drawItem, children = getChildren
 	- if !children.isEmpty()
 		ListIterator<TreeItem<Node>> i;

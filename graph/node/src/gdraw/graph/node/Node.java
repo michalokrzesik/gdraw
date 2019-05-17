@@ -112,8 +112,18 @@ public class Node {
         return isCollapsed ? heightCollapsed : height;
     }
 
+    public void setHeight(double h){
+        if(isCollapsed) heightCollapsed = h;
+        else height = h;
+    }
+
     public double getWidth() {
         return isCollapsed ? widthCollapsed : width;
+    }
+
+    public void setWidth(double w){
+        if(isCollapsed) widthCollapsed = w;
+        else width = w;
     }
 
     public void draw(){
