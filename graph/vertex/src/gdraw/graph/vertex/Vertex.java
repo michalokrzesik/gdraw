@@ -110,14 +110,24 @@ public class Vertex {
     }
 
     public void move(@NotNull VertexPoint point, Point2D newPoint){
-        point.setPoint(newPoint);
         ListIterator it = points.listIterator(points.indexOf(point));
+        if(!it.hasPrevious()) point.setPointBounded(newPoint, fromNode);
+        else{
+            it.next();
+            if(!it.hasNext()) point.setPointBounded(newPoint, toNode);
+            else point.setPoint(newPoint);
+            it.previous();
+        }
         if(it.hasPrevious()){
             decideOnCenter((VertexPoint) it.previous());
             it.next();
         }
+        it.next();
         if(it.hasNext())
             decideOnCenter((VertexPoint) it.next());
+        int centerPointI = points.size()/2, pointI = points.indexOf(point);
+        if(pointI == centerPointI || pointI == centerPointI + 1)
+            label.setUpperLeft(getCenterForLabel());
     }
 
     public void setLabel(String newLabel){
@@ -129,7 +139,6 @@ public class Vertex {
             );
         }
         else label.setLabel(newLabel);
-
     }
 
     private Point2D getCenterForLabel() {

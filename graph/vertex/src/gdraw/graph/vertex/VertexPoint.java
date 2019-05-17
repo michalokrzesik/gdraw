@@ -1,5 +1,6 @@
 package gdraw.graph.vertex;
 
+import gdraw.graph.node.Node;
 import javafx.geometry.Point2D;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,4 +58,19 @@ public class VertexPoint {
     }
 
 
+    public void setPointBounded(Point2D newPoint, Node node) {
+        double x = newPoint.getX(), y = newPoint.getY();
+        double xcenter = node.getCenter().getX(), ycenter = node.getCenter().getY();
+
+        if(Math.abs(x - xcenter) > Math.abs(y - ycenter)){
+            double height = node.getHeight()/2;
+            y = ycenter + (y > ycenter ? height : -height);
+        }
+        else {
+            double width = node.getWidth()/2;
+            x = xcenter + (x > xcenter ? width : -width);
+        }
+
+        setPoint(new Point2D(x, y));
+    }
 }
