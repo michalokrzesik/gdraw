@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import gdraw.graph.vertex.Vertex;
 import gdraw.graph.util.Label;
 
-public class Node {
+public class Node extends {
     public static Image NONE;
     private GraphicsContext gc;
     private Point2D center;
@@ -79,6 +79,23 @@ public class Node {
         subNodes.add(node);
     }
 
+    public ArrayList<Node> changeGroupToNode(){
+        if(!isGroup) return null;
+        ArrayList<Node> ret = subNodes;
+        subNodes = null;
+        isGroup = false;
+        return ret;
+    }
+
+    public void unGroup(ArrayList<Node> nodes){
+        if(isGroup) subNodes.removeAll(nodes);
+    }
+
+    public void unGroup(Node node){
+        if(isGroup) subNodes.remove(node);
+    }
+
+
     public Point2D getCenter() {
         return center;
     }
@@ -90,4 +107,6 @@ public class Node {
     public double getWidth() {
         return isCollapsed ? widthCollapsed : width;
     }
+
+    public void draw()
 }
