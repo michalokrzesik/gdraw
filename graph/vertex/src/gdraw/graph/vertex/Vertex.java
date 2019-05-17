@@ -8,9 +8,11 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 public class Vertex {
 
@@ -83,11 +85,31 @@ public class Vertex {
     }
 
     private void center(VertexPoint mid){
-        mid.setPoint(
-                new Point2D(
+        int midI = points.indexOf(mid);
+        VertexPoint prev = points.get(midI - 1), next = points.get(midI + 1);
+        vertexType.center(prev, mid, next);
+    }
 
-                )
-        );
+    private void decideOnCenter(VertexPoint point){
+        switch(vertexType) {
+            case Curved:
+                if(point.getOrientation() != VertexPointOrientation.NONE) center(point);
+                break;
+            case Straight:
+                if (!point.isHardPoint()) center(point);
+                break;
+        }
+    }
+
+    public void move(@NotNull VertexPoint point, Point2D newPoint){
+        point.setPoint(newPoint);
+        ListIterator it = points.listIterator(points.indexOf(point));
+        if(it.hasPrevious()){
+            decideOnCenter((VertexPoint) it.previous());
+            it.next();
+        }
+        if(it.hasNext())
+            decideOnCenter((VertexPoint) it.next());
     }
 
 }

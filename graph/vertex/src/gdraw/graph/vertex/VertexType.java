@@ -27,6 +27,16 @@ public enum VertexType {
                 points.add(points.indexOf(now), mid);
             }
         }
+
+        @Override
+        public void center(VertexPoint prev, VertexPoint mid, VertexPoint next) {
+            mid.setPoint(
+                    new Point2D(
+                            (prev.getX() + next.getX())/2,
+                            (prev.getY() + next.getY())/2
+                    )
+            );
+        }
     },
     Curved{
         private Point2D controlPoint(VertexPoint a, VertexPoint b){
@@ -91,6 +101,17 @@ public enum VertexType {
                 }
             }
         }
+
+        @Override
+        public void center(VertexPoint prev, VertexPoint mid, VertexPoint next) {
+            boolean midHorizon = mid.getOrientation() == VertexPointOrientation.HORIZONTAL;
+            mid.setPoint(
+                    new Point2D(
+                            (midHorizon ? (prev.getX() + next.getX())/2 : mid.getX()),
+                            (midHorizon ? mid.getY() : (prev.getY() + next.getY())/2)
+                    )
+            );
+        }
     };
 
 
@@ -98,4 +119,6 @@ public enum VertexType {
     abstract public PathElement newElement(VertexPoint a, VertexPoint b);
 
     public abstract void createMid(LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now);
+
+    public abstract void center(VertexPoint prev, VertexPoint mid, VertexPoint next);
 }
