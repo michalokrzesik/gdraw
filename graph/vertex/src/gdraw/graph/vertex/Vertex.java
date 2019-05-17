@@ -31,8 +31,9 @@ public class Vertex {
     private Label label;
 
     private double value;
+    private Paint color;
 
-    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, GraphicsContext graphicsContext, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w){
+    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, GraphicsContext graphicsContext, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w, Paint c){
         fromNode = from;
         toNode = to;
         gc = graphicsContext;
@@ -45,6 +46,7 @@ public class Vertex {
         duplex = isDuplex;
         vertexType = (isCurved ? VertexType.Curved : VertexType.Straight);
         width = w;
+        color = c;
         path = new Path();
         value = 1.0;
         draw();
@@ -72,6 +74,8 @@ public class Vertex {
         Iterator<VertexPoint> it = points.listIterator();
         VertexPoint prev = null, now = null;
         if (it.hasNext()) prev = it.next();
+        gc.setStroke(color);
+        gc.setLineWidth(width);
         lineType.set(gc, width);
         path.getElements().add(new MoveTo(prev.getX(), prev.getY()));
         while (it.hasNext()) {

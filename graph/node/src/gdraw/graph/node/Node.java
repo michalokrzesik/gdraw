@@ -10,8 +10,10 @@ import java.util.ArrayList;
 
 import gdraw.graph.vertex.Vertex;
 import gdraw.graph.util.Label;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
-public class Node extends {
+public class Node {
     public static Image NONE;
     private GraphicsContext gc;
     private Point2D center;
@@ -25,6 +27,7 @@ public class Node extends {
     private boolean isCollapsed;
     private double widthCollapsed;
     private double heightCollapsed;
+    private boolean selected;
 
     public Node(Point2D center, Image image, GraphicsContext graphicsContext){
         this.center = center;
@@ -37,12 +40,17 @@ public class Node extends {
         isGroup = false;
         vertices = new ArrayList<>();
         gc = graphicsContext;
+        selected = true;
     }
 
     public Node(Point2D center, Image image, GraphicsContext gc, boolean isGroup){
         this(center, image, gc);
         this.isGroup = isGroup;
         if(isGroup) subNodes = new ArrayList<>();
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
     public void setLabel(String newLabel){
@@ -55,12 +63,12 @@ public class Node extends {
         else label.setLabel(newLabel);
     }
 
-    public void newVertex(Point2D start, Point2D stop, Node toNode, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double width){
+    public void newVertex(Point2D start, Point2D stop, Node toNode, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double width, Paint color){
         VertexPoint startVP = new VertexPoint(start), stopVP = new VertexPoint(stop);
         startVP.setPointBounded(start, this);
         stopVP.setPointBounded(stop, toNode);
         vertices.add(
-                new Vertex(this, toNode, startVP.getPoint(), stopVP.getPoint(), gc, arrow, line, isDuplex, isCurved, width)
+                new Vertex(this, toNode, startVP.getPoint(), stopVP.getPoint(), gc, arrow, line, isDuplex, isCurved, width, color)
         );
     }
 
@@ -108,5 +116,27 @@ public class Node extends {
         return isCollapsed ? widthCollapsed : width;
     }
 
-    public void draw()
+    public void draw(){
+        vertices.forEach(Vertex::draw);
+
+        double w = getWidth(), h = getHeight();
+        double x = center.getX() - w/2, y = center.getY() - h/2;
+        gc.drawImage(image, x, y, w, h);
+        if(selected){
+            gc.setLineWidth(1);
+            gc.setStroke(Color.BLUE);
+            gc.strokeRect(x, y, w, h);
+
+            gc.fillOval(x - 1, y - 1, 3, 3);
+            gc.fillOval(x - 1, y + h/2 - 1, 3, 3);
+            gc.fillOval(x - 1, y + h - 1, 3, 3);
+            gc.fillOval(x + w/2 - 1, y + h - 1, 3, 3);
+            gc.fillOval(x + w - 1, y + h - 1, 3, 3);
+            gc.fillOval(x + w - 1, y + h/2- 1, 3, 3);
+            gc.fillOval(x + w - 1, y - 1, 3, 3);
+            gc.fillOval(x + w/2 - 1, y - 1, 3, 3);
+        }
+
+        if(isGroup) subNodes.forEach(Node::draw);
+    }
 }
