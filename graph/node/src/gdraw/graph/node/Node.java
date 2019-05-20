@@ -3,18 +3,22 @@ package gdraw.graph.node;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.VertexPoint;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.geometry.Point2D;
 import java.util.ArrayList;
 
-import gdraw.graph.vertex.Vertex;
-import gdraw.graph.util.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
+import gdraw.graph.vertex.Vertex;
+import gdraw.graph.util.Label;
+
 public class Node {
     public static Image NONE;
+    private Canvas canvas;
     private GraphicsContext gc;
     private Point2D center;
     private double width;
@@ -40,6 +44,15 @@ public class Node {
         isGroup = false;
         vertices = new ArrayList<>();
         gc = graphicsContext;
+        canvas = gc.getCanvas();
+        canvas.setOnMouseClicked(e -> setSelected(true));
+        canvas.setOnContextMenuRequested(e -> {
+
+        });
+        ImageView view = new ImageView(image);
+        view.setOnMousePressed(e -> {
+
+        });
         selected = true;
     }
 
@@ -51,6 +64,7 @@ public class Node {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+        draw();
     }
 
     public void setLabel(String newLabel){
@@ -131,6 +145,11 @@ public class Node {
 
         double w = getWidth(), h = getHeight();
         double x = center.getX() - w/2, y = center.getY() - h/2;
+        canvas.setWidth(w+2);
+        canvas.setHeight(h+2);
+        canvas.setLayoutX(x);
+        canvas.setLayoutY(y);
+        x = 1; y = 1;
         gc.drawImage(image, x, y, w, h);
         if(selected){
             gc.setLineWidth(1);

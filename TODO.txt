@@ -65,3 +65,18 @@
 				= Je¿eli wspó³rzêdna orientacyjna jest taka sama, usuwamy jedn¹, drug¹ przesuwamy na ((x1-x2)/2,(y1-y2)/2), cofamy siê i powtarzamy krok
 				= Je¿eli wspó³rzêdna orientacyjna jest ró¿na, utwórz punkt o przeciwnej orientacji w po³owie odcinka miêdzy nimi
  b. Menu kontekstowe - jak w edycji i TreeView?
+
+
+
+
+ Rozwi¹zanie bez canvas - group.
+    Ka¿dy node to osobny ImageView. Selected dodaje 8 obiektów Circle z:
+                        onMouseDragged zmienia odpowiednio rozmiar i po³o¿enie ImageView i aktualizuje po³o¿enie Circle'ów
+            OnMouseClicked oddelegowuje do MainControllera z parametrami this i isCtrlPressed. MC if isCtrlPressed sprawdza czy this jest w selected. Je¿eli tak, usuwa go z niej i ustawia isSelected na false. Else dodaje this do selected i ustawia isSelected na true.
+            OnMousePressed oddelegowuje do MainControllera z parametrem isSelected. MC if isSelected zapamiêtuje po³o¿enie kursora
+            OnMouseDragged oddelegowuje do MainControllera z parametrem isSelected. if isSelected, MC dokonuje translacji ka¿dego elementu z selected o dx,dy pomiêdzy obecnym po³o¿eniem kursora a poprzedniego i aktualizuje poprzedni.
+
+     Ka¿dy vertex to Path. Selected dodaje VertexPointy do grupy, ¿eby by³y wyœwietlane.
+            VertexPoint to Circle, onMouseDragged przesuwa.
+
+     Na spodzie jest Background extends Node, który zamiast ImageView ma Canvas obejmuj¹ce ca³oœæ Pane i posiadaj¹ce onMouseClicked resetuj¹ce selected w MC.
