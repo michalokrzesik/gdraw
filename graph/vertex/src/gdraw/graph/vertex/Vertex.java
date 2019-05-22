@@ -2,13 +2,15 @@ package gdraw.graph.vertex;
 
 import gdraw.graph.node.Node;
 import javafx.geometry.Point2D;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.Shape;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -25,43 +27,80 @@ public class Vertex {
     private boolean duplex;
     private VertexType vertexType;
     private boolean selected;
-    private GraphicsContext gc;
-    private double width;
+    private Group group;
     private Path path;
     private Label label;
+    private ArrayList<Shape> arrows;
 
     private double value;
-    private Paint color;
 
-    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, GraphicsContext graphicsContext, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w, Paint c){
+    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, Group group, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w, Paint c){
         fromNode = from;
         toNode = to;
-        gc = graphicsContext;
+        this.group = group;
         arrowType = arrow;
         lineType = line;
         selected = true;
         points = new LinkedList<>();
-        points.addLast(new VertexPoint(toPoint));
-        points.addFirst(new VertexPoint(fromPoint));
+        points.addLast(new VertexPoint(toPoint, this));
+        points.addFirst(new VertexPoint(fromPoint, this));
         duplex = isDuplex;
         vertexType = (isCurved ? VertexType.Curved : VertexType.Straight);
-        width = w;
-        color = c;
         path = new Path();
+        path.setStroke(c);
+        path.setStrokeWidth(w);
+        path.setStrokeDashOffset(w);
+        path.setOnMouseClicked(e -> setSelected(true));
+        arrows = new ArrayList<>();
         value = 1.0;
         draw();
     }
 
-    private void drawSelect(VertexPoint point){
-        Paint prev = gc.getFill();
-        gc.setFill((point.isHardPoint() ? Color.AQUA : Color.BLUE));
-        gc.fillOval(point.getX() - width/2, point.getY() - width/2, width, width);
-        gc.setFill(prev);
+    public Vertex(Node from, Node to, Vertex copy){
+        fromNode = from;
+        toNode = to;
+        toNode.addVertex(this);
+
+        ListIterator<VertexPoint> it = copy.getPoints().listIterator(copy.getPoints().size() - 1);
+        points.addLast(new VertexPoint(this, it.next()));
+        it.previous();
+        while(it.hasPrevious()){
+            points.addFirst(new VertexPoint(this, it.previous()));
+        }
     }
 
+    private LinkedList<VertexPoint> getPoints() {
+        return points;
+    }
 
-    public boolean isInPath(Point2D point){
-        return path.contains(point);
+    public void setColor(Color color){
+        path.setStroke(color);
+    }
+
+    public Paint getColor(){
+        return path.getStroke();
+    }
+
+    public void setLineWidth(double width){
+        path.setStrokeWidth(width);
+    }
+
+    public double getLineWidth(){
+        return path.getStrokeWidth();
+    }
+
+    public void setValue(double v){ value = v;}
+    public double getValue(){ return value; }
+
+
+
+    public void setSelected(boolean selected){
+        this.selected = selected;
+        if(!selected) points.forEach(point -> group.getChildren().remove(point.getCircle()));
+    }
+
+    private void drawSelect(VertexPoint point){
+        group.getChildren().add(point.getCircle());
     }
 
     public void draw(Node from){
@@ -69,30 +108,31 @@ public class Vertex {
     }
 
     public void draw() {
+        group.getChildren().removeAll(arrows);
+        group.getChildren().remove(path);
         path = new Path();
+        arrows.clear();
 
         Iterator<VertexPoint> it = points.listIterator();
         VertexPoint prev = null, now = null;
         if (it.hasNext()) prev = it.next();
-        gc.setStroke(color);
-        gc.setLineWidth(width);
-        lineType.set(gc, width);
+        lineType.set(path);
         path.getElements().add(new MoveTo(prev.getX(), prev.getY()));
         while (it.hasNext()) {
             now = it.next();
-            path.getElements().add(vertexType.newElement(prev, now));
-            vertexType.createMid(points, prev, now);
+            vertexType.createMid(this, points, prev, now);
 
             it = points.listIterator(points.indexOf(prev));
             now = it.next();
-            vertexType.draw(gc, prev, now);
 
+            path.getElements().add(vertexType.newElement(prev, now));
             if (selected) drawSelect(prev);
         }
         if(selected) drawSelect(now);
 
-        arrowType.draw(gc, prev, now);
-        if (duplex) arrowType.draw(gc, points.get(1), points.getFirst());
+        arrowType.draw(arrows, path.getStroke(), prev, now);
+        if (duplex) arrowType.draw(arrows, path.getStroke(), points.get(1), points.getFirst());
+        group.getChildren().addAll(arrows);
 
     }
 
@@ -166,5 +206,9 @@ public class Vertex {
         VertexPoint point = (node == fromNode ? points.getFirst() : points.getLast());
         Point2D newPoint = new Point2D(point.getX() + dx, point.getY() + dy);
         move(point, newPoint);
+    }
+
+    public Node getToNode() {
+        return toNode;
     }
 }

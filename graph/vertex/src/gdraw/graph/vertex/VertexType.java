@@ -11,19 +11,14 @@ import java.util.LinkedList;
 public enum VertexType {
     Straight{
         @Override
-        public void draw(GraphicsContext gc, VertexPoint a, VertexPoint b) {
-            gc.strokeLine(a.getX(), a.getY(), b.getX(), b.getY());
-        }
-
-        @Override
         public PathElement newElement(VertexPoint a, VertexPoint b) {
             return new LineTo(b.getX(),b.getY());
         }
 
         @Override
-        public void createMid(LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now) {
+        public void createMid(Vertex vertex, LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now) {
             if (prev.isHardPoint() && now.isHardPoint()) {
-                VertexPoint mid = new VertexPoint(prev.getPoint().midpoint(now.getPoint()), false);
+                VertexPoint mid = new VertexPoint(prev.getPoint().midpoint(now.getPoint()), vertex, false);
                 points.add(points.indexOf(now), mid);
             }
         }
@@ -45,22 +40,13 @@ public enum VertexType {
         }
 
         @Override
-        public void draw(GraphicsContext gc, VertexPoint a, VertexPoint b) {
-            Point2D c = controlPoint(a, b);
-            gc.beginPath();
-            gc.moveTo(a.getX(),a.getY());
-            gc.quadraticCurveTo(c.getX(), c.getY(), b.getX(), b.getY());
-            gc.stroke();
-        }
-
-        @Override
         public PathElement newElement(VertexPoint a, VertexPoint b) {
             Point2D c = controlPoint(a, b);
             return new QuadCurveTo(c.getX(), c.getY(), b.getX(), b.getY());
         }
 
         @Override
-        public void createMid(LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now) {
+        public void createMid(Vertex vertex, LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now) {
             if(prev.getOrientation() == now.getOrientation()){
                 boolean sameX = prev.getX() == now.getX(), sameY = prev.getY() == now.getY();
                 if(sameX || sameY) {
@@ -73,18 +59,21 @@ public enum VertexType {
                                         new Point2D(
                                                 (sameX ? prev.getX() : now.getX() - distance/4),
                                                 (sameY ? prev.getY() : now.getY() - distance/4)),
+                                        vertex,
                                         false).setOrientation(orientation));
                         points.addFirst(
                                 new VertexPoint(
                                         new Point2D(
                                                 (sameX ? prev.getX() : now.getX() - distance/2),
                                                 (sameY ? prev.getY() : now.getY() - distance/2)),
+                                        vertex,
                                         false).setOrientation(orientation));
                         points.addFirst(
                                 new VertexPoint(
                                         new Point2D(
                                                 (sameX ? prev.getX() : prev.getX() + distance/4),
                                                 (sameY ? prev.getY() : prev.getY() + distance/4)),
+                                        vertex,
                                         false).setOrientation(orientation));
                         points.addFirst(prev);
                     }
@@ -95,7 +84,7 @@ public enum VertexType {
                 }
                 else {
                     VertexPoint mid = new VertexPoint(
-                            new Point2D((prev.getX() + now.getX()) / 2, (prev.getY() + now.getY()) / 2));
+                            new Point2D((prev.getX() + now.getX()) / 2, (prev.getY() + now.getY()) / 2), vertex);
                     mid.setOrientation((prev.getOrientation() == VertexPointOrientation.HORIZONTAL ? VertexPointOrientation.VERTICAL : VertexPointOrientation.HORIZONTAL));
                     points.add(points.indexOf(now), mid);
                 }
@@ -115,10 +104,9 @@ public enum VertexType {
     };
 
 
-    abstract public void draw(GraphicsContext gc, VertexPoint a, VertexPoint b);
     abstract public PathElement newElement(VertexPoint a, VertexPoint b);
 
-    public abstract void createMid(LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now);
+    public abstract void createMid(Vertex vertex, LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now);
 
     public abstract void center(VertexPoint prev, VertexPoint mid, VertexPoint next);
 }
