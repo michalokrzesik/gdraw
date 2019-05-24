@@ -55,7 +55,7 @@ public class Node {
         view.setOnMousePressed(e -> {
 //TODO
         });
-        selected = true;
+        setSelected(true);
 
         setCircles();
         for(int i = 0; i < circles.length; i++){

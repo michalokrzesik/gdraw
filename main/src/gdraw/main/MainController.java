@@ -25,10 +25,11 @@ public class MainController {
         nodeLibraryAccordion.getPanes().addAll(
                 new NodeLibrary("./libraries/Ostatnie.zip", nodeLibraryAccordion, this)
         );
+        //TODO
     }
 
     public void addNodeToActiveLibrary(ActionEvent actionEvent) {
-
+        //TODO
     }
 
     public void addNodeLibrary(String path) throws IOException, URISyntaxException {
@@ -36,7 +37,7 @@ public class MainController {
         File zipFile = new File(zipUrl.toURI());
         ZipFile zip = new ZipFile(zipFile);
         InputStream is = zip.getInputStream(zip.getEntry("test.txt"));
-
+        //TODO
     }
 
     public void addNodeLibrary(ActionEvent actionEvent) throws URISyntaxException {
@@ -49,6 +50,10 @@ public class MainController {
     }
 
     public void addImageToCanvas(Image image) {
+        //TODO
+    }
 
+    public void clearSelected() {
+        //TODO
     }
 }
