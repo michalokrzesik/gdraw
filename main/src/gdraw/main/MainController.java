@@ -3,6 +3,7 @@ package gdraw.main;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.zip.ZipFile;
 
 import gdraw.graph.node.NodeLibrary;
@@ -19,7 +21,13 @@ import gdraw.graph.node.NodeLibrary;
 public class MainController {
 
     @FXML
-    Accordion nodeLibraryAccordion;
+    private Accordion nodeLibraryAccordion;
+
+    @FXML
+    private TabPane tabPane;
+
+    private ArrayList<Project> projects;
+    private Project activeProject;
 
     public void initialize() throws URISyntaxException {
         nodeLibraryAccordion.getPanes().addAll(
@@ -54,6 +62,10 @@ public class MainController {
     }
 
     public void clearSelected() {
-        //TODO
+        activeProject.clearSelected();
+    }
+
+    public void select(double x1, double y1, double x2, double y2) {
+        activeProject.checkSelect(x1, y1, x2, y2);
     }
 }

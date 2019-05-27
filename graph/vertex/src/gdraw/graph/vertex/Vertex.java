@@ -1,12 +1,14 @@
 package gdraw.graph.vertex;
 
 import gdraw.graph.node.Node;
+import gdraw.graph.util.Selectable;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +19,7 @@ import java.util.ListIterator;
 
 import gdraw.graph.util.Label;
 
-public class Vertex {
+public class Vertex implements Selectable {
 
     private ArrowType arrowType;
     private LineType lineType;
@@ -50,7 +52,10 @@ public class Vertex {
         path.setStroke(c);
         path.setStrokeWidth(w);
         path.setStrokeDashOffset(w);
-        path.setOnMouseClicked(e -> setSelected(true));
+        path.setOnMouseClicked(e -> {
+            setSelected(true);
+            draw();
+        });
         arrows = new ArrayList<>();
         value = 1.0;
         draw();
@@ -210,5 +215,14 @@ public class Vertex {
 
     public Node getToNode() {
         return toNode;
+    }
+
+    @Override
+    public void checkSelect(Rectangle rectangle) {
+        ListIterator<VertexPoint> it = points.listIterator();
+        boolean all = it.hasNext();                                 //Zabezpieczenie przed pustym vertexem
+        while(it.hasNext())
+            all = all && rectangle.contains(it.next().getPoint());
+        setSelected(all);
     }
 }

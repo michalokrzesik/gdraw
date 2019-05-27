@@ -1,5 +1,6 @@
 package gdraw.graph.node;
 
+import gdraw.graph.util.Selectable;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.VertexPoint;
@@ -17,8 +18,9 @@ import javafx.scene.paint.Paint;
 import gdraw.graph.vertex.Vertex;
 import gdraw.graph.util.Label;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 
-public class Node {
+public class Node implements Selectable {
     private ImageView imageView;
     protected Point2D center;
     protected double width;
@@ -34,10 +36,12 @@ public class Node {
     protected double heightCollapsed;
     protected boolean selected;
     private Circle[] circles = new Circle[8];
+    private boolean hidden;
 
     public Node(Point2D center, Image image, Group group){
         this.center = center;
         this.image = image;
+        hidden = true;
         width = image.getWidth();
         height = image.getHeight();
         widthCollapsed = width;
@@ -186,7 +190,10 @@ public class Node {
     }
 
     public void draw(){
+        hide();
         vertices.forEach((Vertex v) -> v.draw(this));
+        group.getChildren().add(imageView);
+        hidden = false;
 
         double w = getWidth(), h = getHeight();
         double x = center.getX() - w/2, y = center.getY() - h/2;
@@ -205,10 +212,25 @@ public class Node {
         if(isGroupNodes) subNodes.forEach((Node n) -> n.draw());
     }
 
+    private void hide() {
+        if(!hidden) {
+            group.getChildren().remove(imageView);
+            subNodes.forEach(node -> node.hide());
+            hidden = true;
+        }
+    }
+
     public void translate(double dx, double dy){
         double x = center.getX() + dx, y = center.getY() + dy;
         center = new Point2D(x, y);
         vertices.forEach((Vertex v) -> v.translateNode(this, dx, dy));
         if(isGroupNodes) subNodes.forEach((Node n) -> n.translate(dx, dy));
+    }
+
+    @Override
+    public void checkSelect(Rectangle rectangle) {
+        double w = getWidth()/2, h = getHeight()/2;
+        setSelected(rectangle.contains(center.getX() - w, center.getY() - h)
+                && rectangle.contains(center.getX() + w, center.getY() + h));
     }
 }
