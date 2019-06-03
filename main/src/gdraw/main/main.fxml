@@ -59,59 +59,58 @@
          <children>
             <ToolBar prefHeight="40.0" prefWidth="200.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
               <items>
-                <Button mnemonicParsing="false" text="New" />
-                  <Button layoutX="10.0" layoutY="13.0" mnemonicParsing="false" text="Open" />
-                  <Button layoutX="54.0" layoutY="13.0" mnemonicParsing="false" text="Save" />
-                  <Button layoutX="104.0" layoutY="13.0" mnemonicParsing="false" text="Cut" />
-                  <Button layoutX="149.0" layoutY="13.0" mnemonicParsing="false" text="Copy" />
-                  <Button layoutX="188.0" layoutY="13.0" mnemonicParsing="false" text="Paste" />
-                  <Button layoutX="236.0" layoutY="13.0" mnemonicParsing="false" text="Delete" />
-                  <Button layoutX="285.0" layoutY="13.0" mnemonicParsing="false" text="Undo" />
-                  <Button layoutX="340.0" layoutY="13.0" mnemonicParsing="false" text="Redo" />
-                  <Button layoutX="350.0" layoutY="23.0" mnemonicParsing="false" text="Zoom In" />
-                  <Button layoutX="360.0" layoutY="33.0" mnemonicParsing="false" text="Zoom Out" />
-                  <Button layoutX="370.0" layoutY="43.0" mnemonicParsing="false" text="Zoom Reset" />
-                  <Button layoutX="380.0" layoutY="53.0" mnemonicParsing="false" text="Show Full Graph" />
-                  <Button layoutX="390.0" layoutY="63.0" mnemonicParsing="false" text="Add Node" />
-                  <Button layoutX="400.0" layoutY="73.0" mnemonicParsing="false" text="Add Vertex" />
-                  <ChoiceBox prefWidth="150.0" />
-                  <ChoiceBox prefWidth="150.0" />
-                  <ColorPicker />
+                <Button mnemonicParsing="false" text="Nowy projekt" onAction="#newProject" />
+                  <Button layoutX="10.0" layoutY="13.0" mnemonicParsing="false" text="Otwórz" onAction="#openProject" />
+                  <Button layoutX="54.0" layoutY="13.0" mnemonicParsing="false" text="Zapisz" onAction="#saveProject" />
+                  <Button layoutX="104.0" layoutY="13.0" mnemonicParsing="false" text="Wytnij" onAction="#cutSelected" />
+                  <Button layoutX="149.0" layoutY="13.0" mnemonicParsing="false" text="Kopiuj" onAction="#copySelected" />
+                  <Button layoutX="188.0" layoutY="13.0" mnemonicParsing="false" text="Wklej" onAction="#paste" />
+                  <Button layoutX="236.0" layoutY="13.0" mnemonicParsing="false" text="Usuń" onAction="#deleteSelected" />
+                  <Button layoutX="285.0" layoutY="13.0" mnemonicParsing="false" text="Cofnij" onAction="#undo" />
+                  <Button layoutX="340.0" layoutY="13.0" mnemonicParsing="false" text="Powtórz" onAction="#redo" />
+                  <Button layoutX="350.0" layoutY="23.0" mnemonicParsing="false" text="Przybliż" onAction="#zoomIn" />
+                  <Button layoutX="360.0" layoutY="33.0" mnemonicParsing="false" text="Oddal" onAction="#zoomOut" />
+                  <Button layoutX="370.0" layoutY="43.0" mnemonicParsing="false" text="Zresetuj przybliżenie" onAction="zoomReset" />
+                  <Button layoutX="390.0" layoutY="63.0" mnemonicParsing="false" text="Dodaj węzeł" onAction="#addNodeToolbar" />
+                  <Button layoutX="400.0" layoutY="73.0" mnemonicParsing="false" text="Dodaj krawędź" onAction="#addVertex" />
+                  <ChoiceBox prefWidth="150.0" onAction="#changeLineType" />
+                  <ChoiceBox prefWidth="150.0" onAction="#changeArrowType" />
+                  <ColorPicker onAction="#changeVertexColor" />
               </items>
             </ToolBar>
             <MenuBar GridPane.columnSpan="2147483647">
               <menus>
                 <Menu mnemonicParsing="false" text="Plik">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Nowy projekt" />
-                        <MenuItem mnemonicParsing="false" text="Otwórz" />
-                        <MenuItem mnemonicParsing="false" text="Zapisz" />
-                        <MenuItem mnemonicParsing="false" text="Zapisz jako" />
-                        <MenuItem mnemonicParsing="false" text="Eksportuj" />
-                        <MenuItem mnemonicParsing="false" text="Zamknij projekt" />
+                    <MenuItem mnemonicParsing="false" text="Nowy projekt" onAction="#newProject" />
+                        <MenuItem mnemonicParsing="false" text="Otwórz" onAction="#openProject" />
+                        <MenuItem mnemonicParsing="false" text="Zapisz" onAction="#saveProject" />
+                        <MenuItem mnemonicParsing="false" text="Zapisz jako" onAction="#saveProjectAs" />
+                        <MenuItem mnemonicParsing="false" text="Eksportuj" onAction="#exportGraph" />
+                        <MenuItem mnemonicParsing="false" text="Zamknij projekt" onAction="#closeProject" />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Zamknij program" />
+                        <MenuItem mnemonicParsing="false" text="Zamknij program" onAction="#closeProgram" />
                   </items>
                 </Menu>
                   <Menu mnemonicParsing="false" text="Edycja">
                     <items>
-                      <MenuItem mnemonicParsing="false" text="Cofnij" />
-                        <MenuItem mnemonicParsing="false" text="Ponów" />
+                      <MenuItem mnemonicParsing="false" text="Cofnij" onAction="#undo" />
+                        <MenuItem mnemonicParsing="false" text="Ponów" onAction="#redo" />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Wytnij" />
-                        <MenuItem mnemonicParsing="false" text="Kopiuj" />
-                        <MenuItem mnemonicParsing="false" text="Wklej" />
+                        <MenuItem mnemonicParsing="false" text="Wytnij" onAction="#cutSelected" />
+                        <MenuItem mnemonicParsing="false" text="Kopiuj" onAction="#copySelected" />
+                        <MenuItem mnemonicParsing="false" text="Wklej" onAction="#paste" />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Duplikuj" />
-                        <MenuItem mnemonicParsing="false" text="Usuń" />
+                        <MenuItem mnemonicParsing="false" text="Duplikuj" onAction="#duplicateSelected" />
+                        <MenuItem mnemonicParsing="false" text="Usuń" onAction="#deleteSelected" />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Na wierzch" />
-                        <MenuItem mnemonicParsing="false" text="Pod spód" />
+                        <MenuItem mnemonicParsing="false" text="Na wierzch" onAction="#moveUp" />
+                        <MenuItem mnemonicParsing="false" text="Pod spód" onAction="#moveDown" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <Menu mnemonicParsing="false" text="Grupowanie">
                           <items>
-                            <MenuItem mnemonicParsing="false" text="Grupuj" />
-                              <MenuItem mnemonicParsing="false" text="Oddziel" />
+                            <MenuItem mnemonicParsing="false" text="Grupuj" onAction="#group" />
+                              <MenuItem mnemonicParsing="false" text="Oddziel" onAction="#ungroup" />
                           </items>
                         </Menu>
                     </items>

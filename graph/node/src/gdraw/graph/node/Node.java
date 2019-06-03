@@ -7,6 +7,8 @@ import gdraw.graph.vertex.VertexPoint;
 import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.geometry.Point2D;
 import java.util.ArrayList;
@@ -38,7 +40,9 @@ public class Node implements Selectable {
     private Circle[] circles = new Circle[8];
     private boolean hidden;
 
-    public Node(Point2D center, Image image, Group group){
+    private TreeItem<Node> treeItem;
+
+    public Node(Point2D center, Image image, Group group, TreeItem<Node> parent){
         this.center = center;
         this.image = image;
         hidden = true;
@@ -53,7 +57,7 @@ public class Node implements Selectable {
         imageView = new ImageView(image);
         imageView.setOnMouseClicked(e -> setSelected(true));
         imageView.setOnContextMenuRequested(e -> {
-//TODO
+            contextMenu();
         });
         ImageView view = new ImageView(image);
         view.setOnMousePressed(e -> {
@@ -69,6 +73,10 @@ public class Node implements Selectable {
             int finalI = i;
             circles[i].setOnMouseDragged(e -> CircleHelper.move(this, finalI, e.getX() - circles[finalI].getCenterX(), e.getY() - circles[finalI].getCenterY()));
         }
+
+        treeItem = new TreeItem<>(this);
+        parent.getChildren().add(treeItem);
+
 
     }
 
@@ -232,5 +240,9 @@ public class Node implements Selectable {
         double w = getWidth()/2, h = getHeight()/2;
         setSelected(rectangle.contains(center.getX() - w, center.getY() - h)
                 && rectangle.contains(center.getX() + w, center.getY() + h));
+    }
+
+    public void contextMenu() {
+        //TODO odwołaj się do selected z projektu
     }
 }
