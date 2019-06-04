@@ -109,8 +109,11 @@
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <Menu mnemonicParsing="false" text="Grupowanie">
                           <items>
-                            <MenuItem mnemonicParsing="false" text="Grupuj" onAction="#group" />
-                              <MenuItem mnemonicParsing="false" text="Oddziel" onAction="#ungroup" />
+                              <MenuItem mnemonicParsing="false" text="Grupuj zaznaczone" onAction="#groupSelected" />
+                              <MenuItem mnemonicParsing="false" text="Oddziel zaznaczone" onAction="#ungroupSelected" />
+                              <MenuItem mnemonicParsing="false" text="Zamień zaznaczone w puste grupy" onAction="#nodesToGroups" />
+                              <MenuItem mnemonicParsing="false" text="Zamień zaznaczone w zwykłe węzły (oddziel zawartość)" onAction="#groupsToNodes" />
+                              <MenuItem mnemonicParsing="false" text="Dodaj do grupy" onAction="#moveToGroup" />
                           </items>
                         </Menu>
                     </items>

@@ -67,11 +67,15 @@ public class Vertex implements Selectable {
         toNode.addVertex(this);
 
         ListIterator<VertexPoint> it = copy.getPoints().listIterator(copy.getPoints().size() - 1);
-        points.addLast(new VertexPoint(this, it.next()));
+        VertexPoint stopVP = new VertexPoint(this, it.next());
+        stopVP.setPointBounded(stopVP.getPoint(), toNode);
+        points.addLast(stopVP);
         it.previous();
         while(it.hasPrevious()){
             points.addFirst(new VertexPoint(this, it.previous()));
         }
+        VertexPoint startVP = points.getFirst();
+        startVP.setPointBounded(startVP.getPoint(), fromNode);
     }
 
     private LinkedList<VertexPoint> getPoints() {

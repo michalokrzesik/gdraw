@@ -5,10 +5,7 @@ import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.VertexPoint;
 import javafx.scene.Group;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.geometry.Point2D;
 import java.util.ArrayList;
@@ -40,7 +37,7 @@ public class Node implements Selectable {
     private Circle[] circles = new Circle[8];
     private boolean hidden;
 
-    private TreeItem<Node> treeItem;
+    protected TreeItem<Node> treeItem;
 
     public Node(Point2D center, Image image, Group group, TreeItem<Node> parent){
         this.center = center;
@@ -74,9 +71,10 @@ public class Node implements Selectable {
             circles[i].setOnMouseDragged(e -> CircleHelper.move(this, finalI, e.getX() - circles[finalI].getCenterX(), e.getY() - circles[finalI].getCenterY()));
         }
 
-        treeItem = new TreeItem<>(this);
-        parent.getChildren().add(treeItem);
-
+        if(parent != null) {
+            treeItem = new TreeItem<>(this);
+            parent.getChildren().add(treeItem);
+        }
 
     }
 
@@ -93,8 +91,8 @@ public class Node implements Selectable {
         circles[7].setCenterX(x + w/2); circles[7].setCenterY(y);
     }
 
-    public Node(Point2D center, Image image, Group group, boolean isGroupNodes){
-        this(center, image, group);
+    public Node(Point2D center, Image image, Group group, boolean isGroupNodes, TreeItem<Node> parent){
+        this(center, image, group, parent);
         this.isGroupNodes = isGroupNodes;
         if(isGroupNodes) subNodes = new ArrayList<>();
     }
@@ -114,16 +112,16 @@ public class Node implements Selectable {
         else label.setLabel(newLabel);
     }
 
-    public Node copyWithVertices(boolean copyWithToNodes, Vertex... vertices){
-        Node ret = new Node(new Point2D(center.getX() + 5, center.getY() + 5), image, group);
-        for(Vertex vertex : vertices){
-            if(this.vertices.contains(vertex)){
-                Node toNode = (copyWithToNodes ? vertex.getToNode().copyWithVertices(false) : vertex.getToNode());
-                ret.addVertex(new Vertex(ret, toNode, vertex));
-            }
-
-        }
+    public Node copy(TreeItem<Node> parent){
+        Node ret = new Node(new Point2D(center.getX() + 5, center.getY() + 5), image, group, isGroupNodes, parent);
+        if(this.isGroupNodes)
+            for(Node node : subNodes)
+                node.copy(ret.getTreeItem());
         return ret;
+    }
+
+    private TreeItem<Node> getTreeItem() {
+        return treeItem;
     }
 
     public void addVertex(Vertex vertex){
@@ -150,28 +148,63 @@ public class Node implements Selectable {
 
     public void groupNodes(ArrayList<Node> nodes){
         groupNodes();
-        subNodes.addAll(nodes);
+        for(Node node : nodes)
+            groupNodes(node);
     }
 
     public void groupNodes(Node node){
-        groupNodes();
+        TreeItem<Node> nodeTI = node.getTreeItem();
+        nodeTI.getParent().getChildren().remove(nodeTI);
+        treeItem.getChildren().add(nodeTI);
         subNodes.add(node);
+        expandIfNeeded();
+        node.fitInGroup();
     }
 
-    public ArrayList<Node> changeGroupToNode(){
-        if(!isGroupNodes) return null;
-        ArrayList<Node> ret = subNodes;
-        subNodes = null;
-        isGroupNodes = false;
-        return ret;
+    private void expandIfNeeded() {
+        double neededW = 5, neededH = 5;
+        for (Node node : subNodes){
+            neededH += node.getHeight();
+            neededW += node.getWidth();
+        }
+        if(getWidth() < neededW) setWidth(neededW);
+        if(getHeight() < neededH) setHeight(neededH);
+        fitInGroup();
     }
 
-    public void unGroup(ArrayList<Node> nodes){
-        if(isGroupNodes) subNodes.removeAll(nodes);
+    private void fitInGroup() {
+        Node parent = treeItem.getParent().getValue();
+        double px = parent.getCenter().getX(), py = parent.getCenter().getY(), pw = parent.getWidth(), ph = parent.getHeight();
+        double x = center.getX(), y = center.getY();
+
+        if(getWidth() > parent.getWidth()) setWidth(parent.getWidth());
+        if(getHeight() > parent.getHeight()) setHeight(parent.getHeight());
+        double w = getWidth(), h = getHeight();
+
+        double dx = (x - w/2) - (px - pw/2), dy = (y - h/2) - (py - ph/2);
+        dx = (dx > 0 ? dx : (x + w/2) - (px + pw/2));
+        dy = (dy > 0 ? dy : (y + h/2) - (py + ph/2));
+
+        translate(dx, dy);
     }
 
-    public void unGroup(Node node){
-        if(isGroupNodes) subNodes.remove(node);
+    public void changeGroupToNode() {
+        unGroup(subNodes);
+    }
+
+    public void unGroup(ArrayList<Node> nodes) {
+        for (Node node : nodes)
+            unGroup(node);
+        if (subNodes.isEmpty()) {
+            subNodes = null;
+            isGroupNodes = false;
+        }
+    }
+
+    public void unGroup(Node node) {
+        TreeItem<Node> nodeTI = node.getTreeItem();
+        treeItem.getChildren().remove(nodeTI);
+        treeItem.getParent().getChildren().add(nodeTI);
     }
 
 
@@ -231,6 +264,7 @@ public class Node implements Selectable {
     public void translate(double dx, double dy){
         double x = center.getX() + dx, y = center.getY() + dy;
         center = new Point2D(x, y);
+        fitInGroup();
         vertices.forEach((Vertex v) -> v.translateNode(this, dx, dy));
         if(isGroupNodes) subNodes.forEach((Node n) -> n.translate(dx, dy));
     }

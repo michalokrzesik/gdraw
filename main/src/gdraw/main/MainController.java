@@ -98,7 +98,7 @@ public class MainController {
         tabPane.getTabs().add(tab);
 
         //Stworzenie nowego projektu i dodanie go do listy obiektów
-        Project project = new Project(projectName, tab, canvas);
+        Project project = new Project(this, projectName, tab, canvas);
         projects.add(project);
     }
 
@@ -108,13 +108,12 @@ public class MainController {
      */
     private void newProject(Project project)
     {
-        Canvas canvas = new Canvas(project.getCanvas_width(), project.getCanvas_height());
-        clear(canvas);
+        Canvas canvas = project.getBackgorund().getCanvas();
 
         //żeby canvas był na środku
         BorderPane borderPane = new BorderPane();
-        borderPane.setPrefHeight(TAB_PANE_H);
-        borderPane.setPrefWidth(TAB_PANE_W);
+//        borderPane.setPrefHeight(TAB_PANE_H);
+//        borderPane.setPrefWidth(TAB_PANE_W);
         borderPane.setCenter(canvas);
 
         ScrollPane scrollPane = new ScrollPane();
@@ -124,9 +123,7 @@ public class MainController {
         Tab tab = new Tab(project.getName());
         tab.setContent(scrollPane);
 
-        project.setSlider(slider, sliderLabel);
         project.setTab(tab);//zmiana zakładki
-        project.setCanvas(canvas);
         projects.add(project);
         tabPane.getTabs().add(projects.get(projects.size() - 1).getTab());
         for(DrawObject drawObject : projects.get(projects.size() - 1).getDrawObjects())
@@ -199,34 +196,25 @@ public class MainController {
      * Funkcja otwiera zapisany wcześniej projekt.
      * @param event
      */
-    public void openProject(ActionEvent event)
-    {
+    public void openProject(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Otwórz projekt");
-        //fileChooser.setInitialDirectory(new File(""));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("JB087 FILES","*.jb087"));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("graphDRAW format","*.gdf"));
         File selectedFile = fileChooser.showOpenDialog(null);
 
         //odczyt
-        if(selectedFile != null)
-        {
-            try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(selectedFile)))
-            {
+        if(selectedFile != null) {
+            try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(selectedFile))) {
                 Project project = (Project) inputStream.readObject();
-
-                //dodanie zakładki
                 newProject(project);
             }
-            catch (FileNotFoundException e)
-            {
+            catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-            catch (IOException e)
-            {
+            catch (IOException e) {
                 e.printStackTrace();
             }
-            catch (ClassNotFoundException e)
-            {
+            catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
@@ -236,62 +224,41 @@ public class MainController {
      * Funkcja zapisuje projekt.
      * @param event
      */
-    public void saveProject(ActionEvent event)
-    {
-        String name = "*";
-        for(Project a : projects)
-        {
-            if(a.getTab().isSelected() == true)
-            {
-                name = a.getName();
-                break;
-            }
-        }
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Zapisz projekt");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JB087 FILES","*.jb087"));
-        fileChooser.setInitialFileName(name + ".jb087");
-        File file = fileChooser.showSaveDialog(null);
+    public void saveProject(ActionEvent event) {
+        File file = activeProject.getFile();
 
         //zapis
-        if(file != null)
-        {
-            try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file)))
-            {
-                //wśród wszystkich projektów szuka aktywnego i go zapisuje
-                for(Project a : projects)
-                {
-                    if(a.getTab().isSelected() == true)
-                    {
-                        outputStream.writeObject(a);
-                        break;
-                    }
-                }
-            } catch (FileNotFoundException e)
-            {
+        if(file != null) {
+            try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file))) {
+                outputStream.writeObject(activeProject);
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
-            } catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
+        else saveProjectAs(event);
     }
 
     /**
      * Funkcja zamyka projekt.
      * @param event
      */
-    public void closeProject(ActionEvent event)
-    {
-        for(Project project : projects)
-        {
-            if(project.getTab().isSelected() == true)
-            {
-                tabPane.getTabs().remove(project.getTab()); //usuwa z panelu
-                projects.remove(project.getTab()); //usuwa z listy
-                break;
-            }
-        }
+    public void closeProject(ActionEvent event) {
+        tabPane.getTabs().remove(activeProject.getTab()); //usuwa z panelu
+        projects.remove(activeProject); //usuwa z listy
+    }
+
+    public void saveProjectAs(ActionEvent actionEvent) {
+        String name = activeProject.getName();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Zapisz projekt");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("graphDRAW format","*.gdf"));
+        fileChooser.setInitialFileName(name + ".gdf");
+        activeProject.setFile(fileChooser.showSaveDialog(null));
+    }
+
+    public void setProject(Project project) {
+        activeProject = project;
     }
 }

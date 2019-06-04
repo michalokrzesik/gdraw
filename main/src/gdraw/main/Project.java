@@ -3,8 +3,6 @@ package gdraw.main;
 import gdraw.graph.node.Node;
 import gdraw.graph.util.Background;
 import gdraw.graph.util.Selectable;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
@@ -14,10 +12,13 @@ import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Rectangle;
 
+import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Project {
+public class Project implements Serializable {
 
+    private File file;
     private TreeView<Node> nodes;
     private ArrayList<Selectable> graphObjects;
     private ArrayList<Selectable> selected;
@@ -28,6 +29,10 @@ public class Project {
 
     public Project(MainController mainController, String projectName, Tab tab, Canvas canvas) {
         name = projectName;
+        tab.setOnSelectionChanged(e -> {
+            if(tab.isSelected()) controller.setProject(this);
+        });
+        file = null;
         this.tab = tab;
         controller = mainController;
         nodes = new TreeView<>();
@@ -54,5 +59,29 @@ public class Project {
     public void clearSelected() {
         selected.forEach(s -> s.setSelected(false));
         selected.clear();
+    }
+
+    public Tab getTab() {
+        return tab;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setTab(Tab tab) {
+        this.tab = tab;
+    }
+
+    public Background getBackgorund() {
+        return (Background) nodes.getRoot().getValue();
     }
 }

@@ -6,6 +6,7 @@ import gdraw.main.MainController;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
@@ -15,7 +16,7 @@ public class Background extends Node {
     private MainController controller;
     private double x, y;
 
-    public Background(MainController mainController, Canvas canvas, Image image, Group group, double w, double h){
+    public Background(MainController mainController, Canvas canvas, Image image, Group group, double w, double h, TreeItem<Node> treeItem){
         this(new Point2D(w/2, h/2), image, group);
         controller = mainController;
         canvas.setWidth(w);
@@ -39,12 +40,15 @@ public class Background extends Node {
             draw();
             mainController.select(x, y, e.getX(), e.getY());
         });
+        setWidth(w);
+        setHeight(h);
 
         this.canvas = canvas;
+        this.treeItem = treeItem;
     }
 
     public Background(Point2D center, Image image, Group group) {
-        super(center, image, group);
+        super(center, image, group, null);
     }
 
     @Override
@@ -56,4 +60,12 @@ public class Background extends Node {
     }
 
     public void setImage(Image newImage){ image = newImage; }
+
+    public Canvas getCanvas() {
+        if(canvas == null) {
+            canvas = new Canvas(getWidth(), getHeight());
+            draw();
+        }
+        return canvas;
+    }
 }
