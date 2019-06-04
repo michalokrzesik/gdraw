@@ -106,8 +106,7 @@ public class MainController {
      * Funkcja odpowiedzialna za utworzenie nowego projektu (wykorzystywana przy odczycie).
      * @param project projekt z którego ma być utworzona nowa zakładka
      */
-    private void newProject(Project project)
-    {
+    private void newProject(Project project) {
         Canvas canvas = project.getBackgorund().getCanvas();
 
         //żeby canvas był na środku
@@ -126,14 +125,12 @@ public class MainController {
         project.setTab(tab);//zmiana zakładki
         projects.add(project);
         tabPane.getTabs().add(projects.get(projects.size() - 1).getTab());
-        for(DrawObject drawObject : projects.get(projects.size() - 1).getDrawObjects())
-            drawObject.refresh();
         tabPane.getSelectionModel().select(projects.get(projects.size() - 1).getTab());
-        projects.get(projects.size()-1).redraw();
+        activeProject = project;
+        project.draw();
     }
 
-    private String[] newProjectAlert()
-    {
+    private String[] newProjectAlert() {
         String[] tab = new String[3];
 
         //nowe okno

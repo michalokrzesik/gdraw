@@ -39,7 +39,7 @@ public class Project implements Serializable {
         group = new Group();
         Background background = new Background(controller, canvas, new Image("/white.png"), group, canvas.getWidth(), canvas.getHeight());
         nodes.setEditable(true);
-        nodes.setRoot(new TreeItem<>(background));
+        nodes.setRoot(background.getTreeItem());
         nodes.getSelectionModel().selectedItemProperty().addListener((observableValue, oldTreeItem, newTreeItem) -> {
             oldTreeItem.getValue().setSelected(false);
             newTreeItem.getValue().setSelected(true);
@@ -83,5 +83,11 @@ public class Project implements Serializable {
 
     public Background getBackgorund() {
         return (Background) nodes.getRoot().getValue();
+    }
+
+    public void draw() {
+        TreeItem<Node> root = nodes.getRoot();
+        root.getValue().draw();
+        root.getChildren().forEach(treeItem -> treeItem.getValue().draw());
     }
 }

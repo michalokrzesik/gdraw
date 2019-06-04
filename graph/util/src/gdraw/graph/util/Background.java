@@ -16,7 +16,7 @@ public class Background extends Node {
     private MainController controller;
     private double x, y;
 
-    public Background(MainController mainController, Canvas canvas, Image image, Group group, double w, double h, TreeItem<Node> treeItem){
+    public Background(MainController mainController, Canvas canvas, Image image, Group group, double w, double h){
         this(new Point2D(w/2, h/2), image, group);
         controller = mainController;
         canvas.setWidth(w);
@@ -44,7 +44,7 @@ public class Background extends Node {
         setHeight(h);
 
         this.canvas = canvas;
-        this.treeItem = treeItem;
+        this.treeItem = new TreeItem<>(this);
     }
 
     public Background(Point2D center, Image image, Group group) {

@@ -120,7 +120,7 @@ public class Node implements Selectable {
         return ret;
     }
 
-    private TreeItem<Node> getTreeItem() {
+    public TreeItem<Node> getTreeItem() {
         return treeItem;
     }
 
