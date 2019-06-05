@@ -2,6 +2,7 @@ package gdraw.graph.vertex;
 
 import gdraw.graph.node.Node;
 import gdraw.graph.util.Selectable;
+import gdraw.main.MainController;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -19,7 +20,7 @@ import java.util.ListIterator;
 
 import gdraw.graph.util.Label;
 
-public class Vertex implements Selectable {
+public class Vertex extends Selectable {
 
     private ArrowType arrowType;
     private LineType lineType;
@@ -36,7 +37,8 @@ public class Vertex implements Selectable {
 
     private double value;
 
-    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, Group group, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w, Paint c){
+    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, Group group, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w, Paint c, MainController mainController){
+        controller = mainController;
         fromNode = from;
         toNode = to;
         this.group = group;
@@ -52,10 +54,9 @@ public class Vertex implements Selectable {
         path.setStroke(c);
         path.setStrokeWidth(w);
         path.setStrokeDashOffset(w);
-        path.setOnMouseClicked(e -> {
-            setSelected(true);
-            draw();
-        });
+        path.setOnMouseClicked(e -> setSelected(e));
+        path.setOnMousePressed(e -> onMousePressed(e));
+        path.setOnMouseDragged(e -> onMouseDragged(e));
         arrows = new ArrayList<>();
         value = 1.0;
         draw();
@@ -106,6 +107,14 @@ public class Vertex implements Selectable {
     public void setSelected(boolean selected){
         this.selected = selected;
         if(!selected) points.forEach(point -> group.getChildren().remove(point.getCircle()));
+    }
+
+    @Override
+    public void translate(double dx, double dy) {
+        points.forEach(point -> point.setPoint(new Point2D(point.getX() + dx, point.getY() + dy)));
+        VertexPoint startVP = points.getFirst(), stopVP = points.getLast();
+        startVP.setPointBounded(startVP.getPoint(), fromNode);
+        stopVP.setPointBounded(stopVP.getPoint(), toNode);
     }
 
     private void drawSelect(VertexPoint point){

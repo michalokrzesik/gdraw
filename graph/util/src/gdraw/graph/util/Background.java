@@ -13,12 +13,10 @@ import javafx.scene.paint.Color;
 public class Background extends Node {
 
     private Canvas canvas;
-    private MainController controller;
     private double x, y;
 
     public Background(MainController mainController, Canvas canvas, Image image, Group group, double w, double h){
-        this(new Point2D(w/2, h/2), image, group);
-        controller = mainController;
+        this(new Point2D(w/2, h/2), image, group, mainController);
         canvas.setWidth(w);
         canvas.setHeight(h);
         canvas.getGraphicsContext2D().setStroke(Color.BLANCHEDALMOND);
@@ -45,10 +43,11 @@ public class Background extends Node {
 
         this.canvas = canvas;
         this.treeItem = new TreeItem<>(this);
+        this.treeItem.setGraphic(canvas);
     }
 
-    public Background(Point2D center, Image image, Group group) {
-        super(center, image, group, null);
+    public Background(Point2D center, Image image, Group group, MainController mainController) {
+        super(center, image, group, null, mainController);
     }
 
     @Override

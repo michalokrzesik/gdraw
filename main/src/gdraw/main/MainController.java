@@ -1,5 +1,8 @@
 package gdraw.main;
 
+import gdraw.graph.util.Selectable;
+import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -8,10 +11,13 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 
+import java.awt.image.RenderedImage;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -21,6 +27,8 @@ import java.util.zip.ZipFile;
 import gdraw.graph.node.NodeLibrary;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import javax.imageio.ImageIO;
 
 public class MainController {
 
@@ -73,6 +81,8 @@ public class MainController {
         activeProject.checkSelect(x1, y1, x2, y2);
     }
 
+    public void select(Selectable item, boolean ctrlPressed){ activeProject.select(item, ctrlPressed); }
+
     public void newProject(ActionEvent event) {
         String array[] = newProjectAlert(); //zebranie informacji od użytkownika
         String projectName = array[0];
@@ -107,7 +117,7 @@ public class MainController {
      * @param project projekt z którego ma być utworzona nowa zakładka
      */
     private void newProject(Project project) {
-        Canvas canvas = project.getBackgorund().getCanvas();
+        Canvas canvas = project.getBackground().getCanvas();
 
         //żeby canvas był na środku
         BorderPane borderPane = new BorderPane();
@@ -141,7 +151,7 @@ public class MainController {
         //layout
         Label nameLabel = new Label("Nazwa: ");
         Label widthLabel = new Label("Szerokość[px]: ");
-        Label heightLable = new Label("Wysokość[px]: ");
+        Label heightLabel = new Label("Wysokość[px]: ");
 
         TextField nameText = new TextField();
         TextField widthText = new TextField();
@@ -171,13 +181,13 @@ public class MainController {
         gridPane.setHgap(10);
         gridPane.setPadding(new Insets(10));
 
-        gridPane.getChildren().addAll(nameLabel, nameText, widthLabel, widthText, heightLable, heightText, button);
+        gridPane.getChildren().addAll(nameLabel, nameText, widthLabel, widthText, heightLabel, heightText, button);
 
         GridPane.setConstraints(nameLabel, 0, 0);
         GridPane.setConstraints(nameText, 0, 1);
         GridPane.setConstraints(widthLabel, 1, 0);
         GridPane.setConstraints(widthText, 1, 1);
-        GridPane.setConstraints(heightLable, 2, 0);
+        GridPane.setConstraints(heightLabel, 2, 0);
         GridPane.setConstraints(heightText, 2, 1);
         GridPane.setConstraints(button, 3, 1);
 
@@ -222,19 +232,7 @@ public class MainController {
      * @param event
      */
     public void saveProject(ActionEvent event) {
-        File file = activeProject.getFile();
-
-        //zapis
-        if(file != null) {
-            try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file))) {
-                outputStream.writeObject(activeProject);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else saveProjectAs(event);
+        saveProject(activeProject);
     }
 
     /**
@@ -242,20 +240,122 @@ public class MainController {
      * @param event
      */
     public void closeProject(ActionEvent event) {
-        tabPane.getTabs().remove(activeProject.getTab()); //usuwa z panelu
-        projects.remove(activeProject); //usuwa z listy
+        closeProjectAlert(activeProject);
     }
 
-    public void saveProjectAs(ActionEvent actionEvent) {
-        String name = activeProject.getName();
+    private void closeProjectAlert(Project project) {
+        Stage window = new Stage();
+        window.initModality(Modality.APPLICATION_MODAL);
+        window.setTitle("Zamknij projekt");
+
+        //layout
+        Label label = new Label(String.format("Czy chcesz zapisać projekt %s przed zamknięciem?", project.getName()));
+
+        Button cancel = new Button("Cofnij");
+        Button close = new Button("Nie");
+        Button saveAndClose = new Button("Tak");
+
+        cancel.setOnAction(e -> window.close());
+        close.setOnAction(e -> {
+            closeProject(project);
+            window.close();
+        });
+        saveAndClose.setOnAction(e -> {
+            saveProject(project);
+            closeProject(project);
+            window.close();
+        });
+
+        //layout
+        GridPane gridPane = new GridPane();
+        gridPane.setVgap(10);
+        gridPane.setHgap(10);
+        gridPane.setPadding(new Insets(10));
+
+        gridPane.getChildren().addAll(label, cancel, close, saveAndClose);
+
+        GridPane.setConstraints(label, 0, 0, 3, 1);
+        GridPane.setConstraints(cancel, 0, 1);
+        GridPane.setConstraints(close, 1, 1);
+        GridPane.setConstraints(saveAndClose, 2, 1);
+
+        gridPane.setAlignment(Pos.CENTER);
+
+        Scene scene = new Scene(gridPane);
+        window.setScene(scene);
+        window.showAndWait();
+    }
+
+    private void saveProject(Project project) {
+        File file = project.getFile();
+
+        //zapis
+        if(file != null) {
+            try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file))) {
+                outputStream.writeObject(project);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else saveProjectAs(project);
+    }
+
+    private void saveProjectAs(Project project) {
+        String name = project.getName();
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Zapisz projekt");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("graphDRAW format","*.gdf"));
         fileChooser.setInitialFileName(name + ".gdf");
-        activeProject.setFile(fileChooser.showSaveDialog(null));
+        project.setFile(fileChooser.showSaveDialog(null));
+    }
+
+    private void closeProject(Project project) {
+        tabPane.getTabs().remove(project); //usuwa z panelu
+        projects.remove(project); //usuwa z listy
+    }
+
+    public void saveProjectAs(ActionEvent actionEvent) {
+        saveProjectAs(activeProject);
     }
 
     public void setProject(Project project) {
         activeProject = project;
+    }
+
+    public void closeProgram(ActionEvent actionEvent) {
+        Platform.exit();
+        System.exit(0);
+    }
+
+    public void exportGraph(ActionEvent actionEvent) {
+        String name = activeProject.getName();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Eksportuj graf");
+        String[] formatNames = ImageIO.getWriterFormatNames();
+        for(String formatName : formatNames)
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(formatName + " format","*." + formatName));
+        fileChooser.setSelectedExtensionFilter(fileChooser.getExtensionFilters().get(0));
+        fileChooser.setInitialFileName(name + fileChooser.getSelectedExtensionFilter().getExtensions().get(0));
+        File file = fileChooser.showSaveDialog(null);
+        if(file != null) {
+            String extension = file.getName().split(".")[1];
+            WritableImage snapshot = activeProject.snapshot();
+            try {
+                RenderedImage renderedImage = SwingFXUtils.fromFXImage(snapshot,null);
+                ImageIO.write(renderedImage, extension, file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void onMousePressed(MouseEvent e, Selectable item) {
+        activeProject.onMousePressed(e, item);
+    }
+
+    public void onMouseDragged(MouseEvent e, Selectable item) {
+        activeProject.onMouseDragged(e, item);
     }
 }

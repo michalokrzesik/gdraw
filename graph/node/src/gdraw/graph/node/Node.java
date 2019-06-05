@@ -4,6 +4,7 @@ import gdraw.graph.util.Selectable;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.VertexPoint;
+import gdraw.main.MainController;
 import javafx.scene.Group;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
@@ -11,6 +12,7 @@ import javafx.geometry.Point2D;
 import java.util.ArrayList;
 
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
@@ -19,7 +21,7 @@ import gdraw.graph.util.Label;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
-public class Node implements Selectable {
+public class Node extends Selectable {
     private ImageView imageView;
     protected Point2D center;
     protected double width;
@@ -39,7 +41,8 @@ public class Node implements Selectable {
 
     protected TreeItem<Node> treeItem;
 
-    public Node(Point2D center, Image image, Group group, TreeItem<Node> parent){
+    public Node(Point2D center, Image image, Group group, TreeItem<Node> parent, MainController mainController){
+        controller = mainController;
         this.center = center;
         this.image = image;
         hidden = true;
@@ -52,15 +55,13 @@ public class Node implements Selectable {
         vertices = new ArrayList<>();
         this.group = group;
         imageView = new ImageView(image);
-        imageView.setOnMouseClicked(e -> setSelected(true));
+        imageView.setOnMouseClicked(e -> setSelected(e));
         imageView.setOnContextMenuRequested(e -> {
             contextMenu();
         });
-        ImageView view = new ImageView(image);
-        view.setOnMousePressed(e -> {
-//TODO
-        });
-        setSelected(true);
+        imageView.setOnMousePressed(e -> onMousePressed(e));
+        imageView.setOnMouseDragged(e -> onMouseDragged(e));
+        setSelected();
 
         setCircles();
         for(int i = 0; i < circles.length; i++){
@@ -74,6 +75,7 @@ public class Node implements Selectable {
         if(parent != null) {
             treeItem = new TreeItem<>(this);
             parent.getChildren().add(treeItem);
+            treeItem.setGraphic(imageView);
         }
 
     }
@@ -91,8 +93,8 @@ public class Node implements Selectable {
         circles[7].setCenterX(x + w/2); circles[7].setCenterY(y);
     }
 
-    public Node(Point2D center, Image image, Group group, boolean isGroupNodes, TreeItem<Node> parent){
-        this(center, image, group, parent);
+    public Node(Point2D center, Image image, Group group, boolean isGroupNodes, TreeItem<Node> parent, MainController mainController){
+        this(center, image, group, parent, mainController);
         this.isGroupNodes = isGroupNodes;
         if(isGroupNodes) subNodes = new ArrayList<>();
     }
@@ -113,7 +115,7 @@ public class Node implements Selectable {
     }
 
     public Node copy(TreeItem<Node> parent){
-        Node ret = new Node(new Point2D(center.getX() + 5, center.getY() + 5), image, group, isGroupNodes, parent);
+        Node ret = new Node(new Point2D(center.getX() + 5, center.getY() + 5), image, group, isGroupNodes, parent, controller);
         if(this.isGroupNodes)
             for(Node node : subNodes)
                 node.copy(ret.getTreeItem());
@@ -137,7 +139,7 @@ public class Node implements Selectable {
         startVP.setPointBounded(start, this);
         stopVP.setPointBounded(stop, toNode);
         vertices.add(
-                new Vertex(this, toNode, startVP.getPoint(), stopVP.getPoint(), group, arrow, line, isDuplex, isCurved, width, color)
+                new Vertex(this, toNode, startVP.getPoint(), stopVP.getPoint(), group, arrow, line, isDuplex, isCurved, width, color, controller)
         );
     }
 
@@ -278,5 +280,13 @@ public class Node implements Selectable {
 
     public void contextMenu() {
         //TODO odwołaj się do selected z projektu
+        //Jeżeli nie ma w selected, to clear i dodaj
+        //dla multiSelect
+            // grupuj tworzące nowy node o center pośrodku wszystkich, width i height obejmującymi wszystkie +5 i biorącym wszystkie jako childreny w treeView
+                //Przy różnych parentach wyszukaj nabliższego wspólnego i zrób grupę pod nim.
+            // rozgrupuj, jeżeli mają wspólnego parenta
+        //dla pojedynczego selecta (node'a)
+            // zmień tryb pomiędzy node a group
+            // zwiń/rozwiń, działające dla grupy (można zapisać ten MenuItem i zmieniać jego dostępność przy zmianie pomiędzy trybami)
     }
 }
