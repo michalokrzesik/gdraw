@@ -7,6 +7,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
@@ -33,10 +34,16 @@ import javax.imageio.ImageIO;
 public class MainController {
 
     @FXML
-    private Accordion nodeLibraryAccordion;
+    Accordion nodeLibraryAccordion;
 
     @FXML
-    private TabPane tabPane;
+    TabPane tabPane;
+
+    @FXML
+    ScrollPane hierarchy;
+
+    @FXML
+    ScrollPane properties;
 
     private ArrayList<Project> projects;
     private Project activeProject;
@@ -90,13 +97,14 @@ public class MainController {
         double projectHeight = Double.parseDouble(array[2]);
 
         Canvas canvas = new Canvas(projectWidth, projectHeight);
+        Group group = new Group();
 
 
         //żeby canvas był na środku
         BorderPane borderPane = new BorderPane();
 //        borderPane.setPrefHeight(TAB_PANE_H);
 //        borderPane.setPrefWidth(TAB_PANE_W);
-        borderPane.setCenter(canvas);
+        borderPane.setCenter(group);
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(borderPane);
@@ -108,8 +116,9 @@ public class MainController {
         tabPane.getTabs().add(tab);
 
         //Stworzenie nowego projektu i dodanie go do listy obiektów
-        Project project = new Project(this, projectName, tab, canvas);
+        Project project = new Project(this, projectName, tab, group, canvas, properties);
         projects.add(project);
+        setProject(project);
     }
 
     /**
@@ -118,12 +127,14 @@ public class MainController {
      */
     private void newProject(Project project) {
         Canvas canvas = project.getBackground().getCanvas();
+        Group group = new Group();
+
 
         //żeby canvas był na środku
         BorderPane borderPane = new BorderPane();
 //        borderPane.setPrefHeight(TAB_PANE_H);
 //        borderPane.setPrefWidth(TAB_PANE_W);
-        borderPane.setCenter(canvas);
+        borderPane.setCenter(group);
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(borderPane);
@@ -131,6 +142,7 @@ public class MainController {
 
         Tab tab = new Tab(project.getName());
         tab.setContent(scrollPane);
+        project.refresh(this, tab, group, canvas, properties);
 
         project.setTab(tab);//zmiana zakładki
         projects.add(project);
@@ -322,6 +334,8 @@ public class MainController {
 
     public void setProject(Project project) {
         activeProject = project;
+        hierarchy.setContent(project.getTreeView());
+        project.setProperties();
     }
 
     public void closeProgram(ActionEvent actionEvent) {

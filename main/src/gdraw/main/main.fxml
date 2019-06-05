@@ -34,12 +34,12 @@
             </TitledPane>
             <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Hierarchia" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                <content>
-                  <ScrollPane fitToHeight="true" fitToWidth="true" />
+                  <ScrollPane fitToHeight="true" fitToWidth="true" fx:id="hierarchy"/>
                </content>
             </TitledPane>
             <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Właściwości" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                <content>
-                  <ScrollPane />
+                  <ScrollPane fitToHeight="true" fitToWidth="true" fx:id="properties"/>
                </content>
             </TitledPane>
             <TabPane tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowSpan="2147483647" />

@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -29,10 +30,12 @@ public class Project implements Serializable {
     private String name;
     private MainController controller;
     private Group group;
+    private ScrollPane properties;
     private double x, y;
 
-    public Project(MainController mainController, String projectName, Tab tab, Canvas canvas) {
+    public Project(MainController mainController, String projectName, Tab tab, Group group, Canvas canvas, ScrollPane scrollPane) {
         name = projectName;
+        properties = scrollPane;
         tab.setOnSelectionChanged(e -> {
             if(tab.isSelected()) controller.setProject(this);
         });
@@ -40,9 +43,9 @@ public class Project implements Serializable {
         this.tab = tab;
         controller = mainController;
         nodes = new TreeView<>();
-        group = new Group();
-        Background background = new Background(controller, canvas, new Image("/white.png"), group, canvas.getWidth(), canvas.getHeight());
-        group.getChildren().add(canvas);
+        this.group = new Group();
+        Background background = new Background(controller, canvas, new Image("/white.png"), this.group, canvas.getWidth(), canvas.getHeight());
+        this.group.getChildren().add(canvas);
         nodes.setEditable(true);
         nodes.setRoot(background.getTreeItem());
         nodes.getSelectionModel().selectedItemProperty().addListener((observableValue, oldTreeItem, newTreeItem) -> {
@@ -64,6 +67,7 @@ public class Project implements Serializable {
     public void clearSelected() {
         selected.forEach(s -> s.setSelected(false));
         selected.clear();
+        setProperties();
     }
 
     public Tab getTab() {
@@ -109,6 +113,7 @@ public class Project implements Serializable {
             selected.remove(item);
             item.setSelected(false);
         }
+        setProperties();
     }
 
     public void onMousePressed(MouseEvent e, Selectable item) {
@@ -127,5 +132,20 @@ public class Project implements Serializable {
             x = nx;
             y = ny;
         }
+    }
+
+    public TreeView<Node> getTreeView() {
+        return nodes;
+    }
+
+    public void setProperties() {
+        if(selected.isEmpty()) properties.setContent(null);
+    }
+
+    public void refresh(MainController mainController, Tab tab, Group group, Canvas canvas, ScrollPane scrollPane) {
+        //TODO
+        this.controller = mainController;
+        this.tab = tab;
+        tab.setOnSelectionChanged(e -> );
     }
 }
