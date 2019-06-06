@@ -1,6 +1,7 @@
 package gdraw.graph.util;
 
 import gdraw.main.MainController;
+import gdraw.main.Project;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 
@@ -28,4 +29,12 @@ public abstract class Selectable {
     protected void onMouseDragged(MouseEvent e){
         controller.onMouseDragged(e, this);
     }
+
+    public abstract Selectable copy();
+
+    public abstract void delete();
+
+    public abstract boolean isNode();
+
+    public abstract void refresh(Project project);
 }

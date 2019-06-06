@@ -3,6 +3,7 @@ package gdraw.graph.vertex;
 import gdraw.graph.node.Node;
 import gdraw.graph.util.Selectable;
 import gdraw.main.MainController;
+import gdraw.main.Project;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -42,14 +43,15 @@ public class Vertex extends Selectable {
         fromNode = from;
         toNode = to;
         this.group = group;
-        arrowType = arrow;
-        lineType = line;
-        selected = true;
-        points = new LinkedList<>();
+        init(arrow, line, isDuplex, isCurved);
         points.addLast(new VertexPoint(toPoint, this));
         points.addFirst(new VertexPoint(fromPoint, this));
-        duplex = isDuplex;
-        vertexType = (isCurved ? VertexType.Curved : VertexType.Straight);
+        makePath(c, w);
+        value = 1.0;
+        draw();
+    }
+
+    private void makePath(Paint c, double w){
         path = new Path();
         path.setStroke(c);
         path.setStrokeWidth(w);
@@ -57,26 +59,48 @@ public class Vertex extends Selectable {
         path.setOnMouseClicked(e -> setSelected(e));
         path.setOnMousePressed(e -> onMousePressed(e));
         path.setOnMouseDragged(e -> onMouseDragged(e));
+    }
+
+    private void init(ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved){
+        arrowType = arrow;
+        lineType = line;
+        selected = true;
+        points = new LinkedList<>();
+        duplex = isDuplex;
+        vertexType = (isCurved ? VertexType.Curved : VertexType.Straight);
         arrows = new ArrayList<>();
-        value = 1.0;
-        draw();
     }
 
     public Vertex(Node from, Node to, Vertex copy){
+        this(copy);
         fromNode = from;
         toNode = to;
         toNode.addVertex(this);
+        group = copy.group;
+        draw();
 
-        ListIterator<VertexPoint> it = copy.getPoints().listIterator(copy.getPoints().size() - 1);
-        VertexPoint stopVP = new VertexPoint(this, it.next());
+        VertexPoint startVP = points.getFirst();
+        startVP.setPointBounded(startVP.getPoint(), fromNode);
+        VertexPoint stopVP = points.getLast();
         stopVP.setPointBounded(stopVP.getPoint(), toNode);
-        points.addLast(stopVP);
+    }
+
+    private void copyPoints(Vertex copy) {
+        ListIterator<VertexPoint> it = copy.getPoints().listIterator(copy.getPoints().size() - 1);
+        points.addLast(it.next());
         it.previous();
         while(it.hasPrevious()){
             points.addFirst(new VertexPoint(this, it.previous()));
         }
-        VertexPoint startVP = points.getFirst();
-        startVP.setPointBounded(startVP.getPoint(), fromNode);
+    }
+
+    public Vertex(Vertex vertex) {
+        controller = vertex.controller;
+        init(vertex.arrowType, vertex.lineType, vertex.duplex, vertex.vertexType == VertexType.Curved);
+        value = vertex.value;
+        makePath(vertex.path.getStroke(), vertex.path.getStrokeWidth());
+
+        copyPoints(vertex);
     }
 
     private LinkedList<VertexPoint> getPoints() {
@@ -190,6 +214,7 @@ public class Vertex extends Selectable {
         int centerPointI = points.size()/2, pointI = points.indexOf(point);
         if(pointI == centerPointI || pointI == centerPointI + 1)
             label.setUpperLeft(getCenterForLabel());
+        draw();
     }
 
     public void setLabel(String newLabel){
@@ -237,5 +262,51 @@ public class Vertex extends Selectable {
         while(it.hasNext())
             all = all && rectangle.contains(it.next().getPoint());
         setSelected(all);
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public Node getFromNode() {
+        return fromNode;
+    }
+
+
+    public Vertex copy(){
+        Vertex ret = new Vertex(this);
+        controller.request(true, fromNode, ret, this);
+        controller.request(false, toNode, ret, this);
+        return ret;
+    }
+
+    @Override
+    public void delete() {
+        fromNode.deleteVertex(this);
+        fromNode = null;
+        toNode.deleteVertex(this);
+        toNode = null;
+        group.getChildren().remove(path);
+        controller.getProject().removeObject(this);
+        setSelected(false);
+    }
+
+    @Override
+    public boolean isNode() {
+        return false;
+    }
+
+    @Override
+    public void refresh(Project project) {
+        group = project.getGroup();
+        draw();
+    }
+
+    public void setFrom(Node node) {
+        fromNode = node;
+    }
+
+    public void setTo(Node node) {
+        toNode = node;
     }
 }

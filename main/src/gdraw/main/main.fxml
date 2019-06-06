@@ -66,8 +66,8 @@
                   <Button layoutX="149.0" layoutY="13.0" mnemonicParsing="false" text="Kopiuj" onAction="#copySelected" />
                   <Button layoutX="188.0" layoutY="13.0" mnemonicParsing="false" text="Wklej" onAction="#paste" />
                   <Button layoutX="236.0" layoutY="13.0" mnemonicParsing="false" text="Usuń" onAction="#deleteSelected" />
-                  <Button layoutX="285.0" layoutY="13.0" mnemonicParsing="false" text="Cofnij" onAction="#undo" />
-                  <Button layoutX="340.0" layoutY="13.0" mnemonicParsing="false" text="Powtórz" onAction="#redo" />
+                  <Button layoutX="285.0" layoutY="13.0" mnemonicParsing="false" text="Cofnij" onAction="#undo" fx:id="undoB" />
+                  <Button layoutX="340.0" layoutY="13.0" mnemonicParsing="false" text="Powtórz" onAction="#redo" fx:id="redoB" />
                   <Button layoutX="350.0" layoutY="23.0" mnemonicParsing="false" text="Przybliż" onAction="#zoomIn" />
                   <Button layoutX="360.0" layoutY="33.0" mnemonicParsing="false" text="Oddal" onAction="#zoomOut" />
                   <Button layoutX="370.0" layoutY="43.0" mnemonicParsing="false" text="Zresetuj przybliżenie" onAction="zoomReset" />
@@ -94,8 +94,8 @@
                 </Menu>
                   <Menu mnemonicParsing="false" text="Edycja">
                     <items>
-                      <MenuItem mnemonicParsing="false" text="Cofnij" onAction="#undo" />
-                        <MenuItem mnemonicParsing="false" text="Ponów" onAction="#redo" />
+                      <MenuItem mnemonicParsing="false" text="Cofnij" onAction="#undo" fx:id="undoMI" />
+                        <MenuItem mnemonicParsing="false" text="Ponów" onAction="#redo" fx:id="redoMI" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem mnemonicParsing="false" text="Wytnij" onAction="#cutSelected" />
                         <MenuItem mnemonicParsing="false" text="Kopiuj" onAction="#copySelected" />

@@ -2,15 +2,14 @@ package gdraw.main;
 
 import gdraw.graph.node.Node;
 import gdraw.graph.util.Background;
+import gdraw.graph.util.MIandButtonPair;
 import gdraw.graph.util.Selectable;
+import gdraw.graph.util.action.ActionHelper;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
@@ -33,12 +32,18 @@ public class Project implements Serializable {
     private ScrollPane properties;
     private double x, y;
 
-    public Project(MainController mainController, String projectName, Tab tab, Group group, Canvas canvas, ScrollPane scrollPane) {
+    private ActionHelper undo;
+    private ActionHelper redo;
+
+    public Project(MainController mainController, String projectName, Group group, Canvas canvas, ScrollPane scrollPane, MIandButtonPair undoFXML, MIandButtonPair redoFXML) {
         name = projectName;
         properties = scrollPane;
-        tab.setOnSelectionChanged(e -> {
-            if(tab.isSelected()) controller.setProject(this);
-        });
+        graphObjects = new ArrayList<>();
+        selected = new ArrayList<>();
+
+        undo = new ActionHelper(undoFXML);
+        redo = new ActionHelper(redoFXML);
+
         file = null;
         this.tab = tab;
         controller = mainController;
@@ -143,9 +148,47 @@ public class Project implements Serializable {
     }
 
     public void refresh(MainController mainController, Tab tab, Group group, Canvas canvas, ScrollPane scrollPane) {
-        //TODO
-        this.controller = mainController;
+        controller = mainController;
         this.tab = tab;
-        tab.setOnSelectionChanged(e -> );
+
+
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void newObject(Selectable object){
+        graphObjects.add(object);
+    }
+
+    public void removeObject(Selectable object){
+        graphObjects.remove(object);
+    }
+
+    public void undo(){
+        undo.pop();
+    }
+
+    public void redo(){
+        redo.pop();
+    }
+
+    public ArrayList<Selectable> getSelected() {
+        return selected;
+    }
+
+    public void deleteSelected() {
+        selected.forEach(s -> s.delete());
+    }
+
+    public void paste(ArrayList<Selectable> clipboard) {
+        clipboard.forEach(s -> {
+            graphObjects.add(s);
+            if(s.isNode()){
+                nodes.getRoot().getChildren().add(((Node)s).getTreeItem());
+            }
+            s.refresh(this);
+        });
     }
 }

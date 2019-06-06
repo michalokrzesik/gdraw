@@ -1,6 +1,10 @@
 package gdraw.main;
 
+import gdraw.graph.node.Node;
+import gdraw.graph.util.MIandButtonPair;
 import gdraw.graph.util.Selectable;
+import gdraw.graph.vertex.Vertex;
+import gdraw.graph.util.Request;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -45,13 +49,32 @@ public class MainController {
     @FXML
     ScrollPane properties;
 
+    @FXML
+    MenuItem undoMI;
+
+    @FXML
+    Button undoB;
+
+    @FXML
+    MenuItem redoMI;
+
+    @FXML
+    Button redoB;
+
+    private MIandButtonPair undo = new MIandButtonPair(undoMI, undoB), redo = new MIandButtonPair(redoMI, redoB);
+
     private ArrayList<Project> projects;
     private Project activeProject;
+
+    private ArrayList<Selectable> clipboard;
+    private ArrayList<Request> requestedNodes;
+    private ArrayList<Request> requestedVertices;
 
     public void initialize() throws URISyntaxException {
         nodeLibraryAccordion.getPanes().addAll(
                 new NodeLibrary("./libraries/Ostatnie.zip", nodeLibraryAccordion, this)
         );
+        clipboard = new ArrayList<>();
         //TODO
     }
 
@@ -90,6 +113,28 @@ public class MainController {
 
     public void select(Selectable item, boolean ctrlPressed){ activeProject.select(item, ctrlPressed); }
 
+    public Tab tabForProject(Project project){
+        //żeby canvas był na środku
+        BorderPane borderPane = new BorderPane();
+//        borderPane.setPrefHeight(TAB_PANE_H);
+//        borderPane.setPrefWidth(TAB_PANE_W);
+        borderPane.setCenter(project.getGroup());
+
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(borderPane);
+
+
+        Tab tab = new Tab(project.getName());
+        tab.setContent(scrollPane);
+
+        tabPane.getTabs().add(tab);
+        tab.setOnSelectionChanged(e -> {
+            if(tab.isSelected()) setProject(project);
+        });
+
+        return tab;
+    }
+
     public void newProject(ActionEvent event) {
         String array[] = newProjectAlert(); //zebranie informacji od użytkownika
         String projectName = array[0];
@@ -98,25 +143,8 @@ public class MainController {
 
         Canvas canvas = new Canvas(projectWidth, projectHeight);
         Group group = new Group();
+        Project project = new Project(this, projectName, group, canvas, properties, undo, redo);
 
-
-        //żeby canvas był na środku
-        BorderPane borderPane = new BorderPane();
-//        borderPane.setPrefHeight(TAB_PANE_H);
-//        borderPane.setPrefWidth(TAB_PANE_W);
-        borderPane.setCenter(group);
-
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(borderPane);
-
-
-        Tab tab = new Tab(projectName);
-        tab.setContent(scrollPane);
-
-        tabPane.getTabs().add(tab);
-
-        //Stworzenie nowego projektu i dodanie go do listy obiektów
-        Project project = new Project(this, projectName, tab, group, canvas, properties);
         projects.add(project);
         setProject(project);
     }
@@ -126,23 +154,10 @@ public class MainController {
      * @param project projekt z którego ma być utworzona nowa zakładka
      */
     private void newProject(Project project) {
-        Canvas canvas = project.getBackground().getCanvas();
-        Group group = new Group();
 
+        Tab tab = tabForProject(project);
 
-        //żeby canvas był na środku
-        BorderPane borderPane = new BorderPane();
-//        borderPane.setPrefHeight(TAB_PANE_H);
-//        borderPane.setPrefWidth(TAB_PANE_W);
-        borderPane.setCenter(group);
-
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(borderPane);
-
-
-        Tab tab = new Tab(project.getName());
-        tab.setContent(scrollPane);
-        project.refresh(this, tab, group, canvas, properties);
+        project.refresh(this, tab, group, canvas, properties, undo, redo);
 
         project.setTab(tab);//zmiana zakładki
         projects.add(project);
@@ -371,5 +386,83 @@ public class MainController {
 
     public void onMouseDragged(MouseEvent e, Selectable item) {
         activeProject.onMouseDragged(e, item);
+    }
+
+    public void addObject(Selectable object) {
+        activeProject.newObject(object);
+    }
+
+    public void removeObject(Selectable object){
+        activeProject.removeObject(object);
+    }
+
+    public void undo(ActionEvent actionEvent) {
+        activeProject.undo();
+    }
+
+
+    public void redo(ActionEvent actionEvent) {
+        activeProject.redo();
+    }
+
+    public void copySelected(ActionEvent actionEvent) {
+        clipboard.clear();
+        activeProject.getSelected().forEach(object -> clipboard.add(object.copy()));
+    }
+
+    public void request(boolean isFrom, Node node, Vertex vertex, Node oldNode) {
+        Request request = null;
+        for( Request r : requestedNodes)
+            if(r.checkNode(oldNode)) {
+                request = r;
+                break;
+            }
+        if(request == null) requestedVertices.add(new Request(activeProject, isFrom, node, vertex));
+        else {
+            request.request(node);
+            requestedNodes.remove(request);
+        }
+    }
+
+    public void request(boolean isFrom, Node node, Vertex vertex, Vertex oldVertex){
+        Request request = null;
+        for( Request r : requestedVertices)
+            if(request.checkVertex(oldVertex)) {
+                request = r;
+                break;
+            }
+        if(request == null) requestedNodes.add(new Request(activeProject, isFrom, node, vertex));
+        else {
+            request.request(vertex);
+            requestedVertices.remove(request);
+        }
+    }
+
+    public void deleteSelected(ActionEvent actionEvent) {
+        activeProject.deleteSelected();
+    }
+
+    public Project getProject() {
+        return activeProject;
+    }
+
+    public void cutSelected(ActionEvent actionEvent) {
+        copySelected(actionEvent);
+        deleteSelected(actionEvent);
+    }
+
+    public void paste(ActionEvent actionEvent) {
+        requestedVertices.clear();
+        requestedNodes.forEach(request -> {
+            if(request.checkProject(activeProject))
+                request.request();
+        });
+        requestedNodes.clear();
+        activeProject.paste(clipboard);
+    }
+
+    public void duplicateSelected(ActionEvent actionEvent) {
+        copySelected(actionEvent);
+        paste(actionEvent);
     }
 }

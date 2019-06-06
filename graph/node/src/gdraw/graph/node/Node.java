@@ -5,6 +5,7 @@ import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.VertexPoint;
 import gdraw.main.MainController;
+import gdraw.main.Project;
 import javafx.scene.Group;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
@@ -42,6 +43,7 @@ public class Node extends Selectable {
     protected TreeItem<Node> treeItem;
 
     public Node(Point2D center, Image image, Group group, TreeItem<Node> parent, MainController mainController){
+        mainController.addObject(this);
         controller = mainController;
         this.center = center;
         this.image = image;
@@ -54,23 +56,9 @@ public class Node extends Selectable {
         isGroupNodes = false;
         vertices = new ArrayList<>();
         this.group = group;
-        imageView = new ImageView(image);
-        imageView.setOnMouseClicked(e -> setSelected(e));
-        imageView.setOnContextMenuRequested(e -> {
-            contextMenu();
-        });
-        imageView.setOnMousePressed(e -> onMousePressed(e));
-        imageView.setOnMouseDragged(e -> onMouseDragged(e));
+        makeImageView();
         setSelected();
-
         setCircles();
-        for(int i = 0; i < circles.length; i++){
-            circles[i].setFill(Color.BLUE);
-            circles[i].setStroke(Color.BLUE);
-            circles[i].setRadius(3);
-            int finalI = i;
-            circles[i].setOnMouseDragged(e -> CircleHelper.move(this, finalI, e.getX() - circles[finalI].getCenterX(), e.getY() - circles[finalI].getCenterY()));
-        }
 
         if(parent != null) {
             treeItem = new TreeItem<>(this);
@@ -78,6 +66,30 @@ public class Node extends Selectable {
             treeItem.setGraphic(imageView);
         }
 
+    }
+
+    private void makeImageView() {
+        imageView = new ImageView(image);
+        imageView.setOnMouseClicked(e -> setSelected(e));
+        imageView.setOnContextMenuRequested(e -> contextMenu());
+        imageView.setOnMousePressed(e -> onMousePressed(e));
+        imageView.setOnMouseDragged(e -> onMouseDragged(e));
+    }
+
+    public Node(Node node) {
+        controller = node.controller;
+        center = node.center;
+        image = node.image;
+        makeImageView();
+        hidden = node.hidden;
+        width = node.width;
+        widthCollapsed = node.widthCollapsed;
+        height = node.height;
+        heightCollapsed = node.heightCollapsed;
+        isGroupNodes = node.isGroupNodes;
+        isCollapsed = node.isCollapsed;
+
+        setCircles();
     }
 
     private void setCircles() {
@@ -91,6 +103,14 @@ public class Node extends Selectable {
         circles[5].setCenterX(x + w); circles[5].setCenterY(y + h/2);
         circles[6].setCenterX(x + w); circles[6].setCenterY(y);
         circles[7].setCenterX(x + w/2); circles[7].setCenterY(y);
+
+        for(int i = 0; i < circles.length; i++){
+            circles[i].setFill(Color.BLUE);
+            circles[i].setStroke(Color.BLUE);
+            circles[i].setRadius(3);
+            int finalI = i;
+            circles[i].setOnMouseDragged(e -> CircleHelper.move(this, finalI, e.getX() - circles[finalI].getCenterX(), e.getY() - circles[finalI].getCenterY()));
+        }
     }
 
     public Node(Point2D center, Image image, Group group, boolean isGroupNodes, TreeItem<Node> parent, MainController mainController){
@@ -119,6 +139,10 @@ public class Node extends Selectable {
         if(this.isGroupNodes)
             for(Node node : subNodes)
                 node.copy(ret.getTreeItem());
+        vertices.forEach(vertex -> {
+            vertex.copy();
+            controller.request(vertex.getFromNode() == this, ret, vertex, this);
+        });
         return ret;
     }
 
@@ -219,8 +243,16 @@ public class Node extends Selectable {
     }
 
     public void setHeight(double h){
-        if(isCollapsed) heightCollapsed = h;
-        else height = h;
+        double dh;
+        if(isCollapsed) {
+            dh = h - heightCollapsed;
+            heightCollapsed = h;
+        }
+        else {
+            dh = h - height;
+            height = h;
+        }
+        translate(0, dh);
     }
 
     public double getWidth() {
@@ -228,8 +260,16 @@ public class Node extends Selectable {
     }
 
     public void setWidth(double w){
-        if(isCollapsed) widthCollapsed = w;
-        else width = w;
+        double dw;
+        if(isCollapsed) {
+            dw = w - widthCollapsed;
+            widthCollapsed = w;
+        }
+        else {
+            dw = w - width;
+            width = w;
+        }
+        translate(dw,0);
     }
 
     public void draw(){
@@ -272,6 +312,45 @@ public class Node extends Selectable {
     }
 
     @Override
+    public Selectable copy() {
+        Node ret = new Node(this);
+        ret.treeItem = new TreeItem<>(ret);
+        vertices.forEach(vertex -> {
+            if(vertex.isSelected()) {
+                controller.request(vertex.getFromNode() == this, ret, vertex, this);
+            }
+        });
+        subNodes.forEach(node -> node.copy(ret.treeItem));
+        return ret;
+    }
+
+    @Override
+    public void delete() {
+        vertices.forEach(v -> v.delete());
+        controller.getProject().removeObject(this);
+        TreeItem<Node> parent = treeItem.getParent();
+        parent.getValue().removeSubNode(this);
+        parent.getChildren().remove(treeItem);
+        setSelected(false);
+        group.getChildren().remove(imageView);
+    }
+
+    @Override
+    public boolean isNode() {
+        return true;
+    }
+
+    @Override
+    public void refresh(Project project) {
+        group = project.getGroup();
+        draw();
+    }
+
+    private void removeSubNode(Node node) {
+        subNodes.remove(node);
+    }
+
+    @Override
     public void checkSelect(Rectangle rectangle) {
         double w = getWidth()/2, h = getHeight()/2;
         setSelected(rectangle.contains(center.getX() - w, center.getY() - h)
@@ -288,5 +367,9 @@ public class Node extends Selectable {
         //dla pojedynczego selecta (node'a)
             // zmień tryb pomiędzy node a group
             // zwiń/rozwiń, działające dla grupy (można zapisać ten MenuItem i zmieniać jego dostępność przy zmianie pomiędzy trybami)
+    }
+
+    public void deleteVertex(Vertex vertex) {
+        vertices.remove(vertex);
     }
 }
