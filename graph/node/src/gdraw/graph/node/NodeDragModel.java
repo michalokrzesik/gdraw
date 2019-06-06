@@ -1,0 +1,138 @@
+package gdraw.graph.node;
+
+import gdraw.graph.util.Selectable;
+import gdraw.graph.vertex.ArrowType;
+import gdraw.graph.vertex.LineType;
+import gdraw.graph.vertex.VertexPoint;
+import gdraw.main.Project;
+import javafx.geometry.Point2D;
+import javafx.scene.Group;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
+import javafx.scene.shape.Shape;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public enum NodeDragModel {
+    Standard{
+        private double x, y;
+
+        @Override
+        public void pressed(Project project, MouseEvent e, Selectable item) {
+            if(project.getSelected().contains(item)){
+                x = e.getX();
+                y = e.getY();
+            }
+        }
+
+        @Override
+        public void dragged(Project project, MouseEvent e, Selectable item) {
+            List<Selectable> selected = project.getSelected();
+            if(selected.contains(item)){
+                double nx = e.getX(), ny = e.getY();
+                for (Selectable selectedItem : selected) {
+                    selectedItem.translate(nx - x, ny - y);
+                }
+                x = nx;
+                y = ny;
+            }
+        }
+
+        @Override
+        public void released(Project project, MouseEvent e, Selectable item) {}
+
+
+    },
+    Vertex{
+
+        @Override
+        public void pressed(Project project, MouseEvent e, Selectable item) {
+            from = (Node) item;
+            start = new VertexPoint(e.getX(), e.getY());
+            start.setPointBounded(start.getPoint(), from);
+            stop = new VertexPoint(e.getX(), e.getY());
+            to = from;
+            group = project.getGroup();
+            refresh();
+            group.getChildren().add(path);
+        }
+
+        private void refresh() {
+            path.setStroke(color);
+            lineType.set(path);
+            path.getElements().clear();
+            path.getElements().addAll(new MoveTo(start.getX(), start.getY()), new LineTo(stop.getX(), stop.getY()));
+            group.getChildren().removeAll(arrows);
+            arrowType.draw(arrows, color, start, stop);
+            if(duplex) arrowType.draw(arrows, color, stop, start);
+            group.getChildren().addAll(arrows);
+        }
+
+        @Override
+        public void dragged(Project project, MouseEvent e, Selectable item) {
+            if(item.isNode()) stop.setPointBounded(new Point2D(e.getX(), e.getY()), (Node) item);
+            else stop.setPoint(new Point2D(e.getX(), e.getY()));
+            refresh();
+        }
+
+        @Override
+        public void released(Project project, MouseEvent e, Selectable item) {
+            if(item.isNode()){
+                to = (Node) item;
+                from.newVertex(start.getPoint(), stop.getPoint(), to, arrowType, lineType, duplex, curved, width, color);
+            }
+            arrows.add(path);
+            group.getChildren().removeAll(arrows);
+        }
+    },
+    Grouping{
+        @Override
+        public void pressed(Project project, MouseEvent e, Selectable item) {
+            NodeDragModel.Vertex.pressed(project, e, item);
+        }
+
+        @Override
+        public void dragged(Project project, MouseEvent e, Selectable item) {
+            NodeDragModel.Vertex.dragged(project, e, item);
+        }
+
+        @Override
+        public void released(Project project, MouseEvent e, Selectable item) {
+            if(item.isNode())
+                ((Node) item).groupNodes(from);
+            arrows.add(path);
+            group.getChildren().removeAll(arrows);
+        }
+    };
+
+    Path path = new Path();
+    ArrowType arrowType = ArrowType.None;
+    LineType lineType = LineType.Straight;
+    Color color = Color.BLACK;
+    boolean duplex = false, curved = false;
+    double width = 1;
+
+
+    VertexPoint start, stop;
+    Node from, to;
+    ArrayList<Shape> arrows = new ArrayList<>();
+    Group group;
+
+    public abstract void pressed(Project project, MouseEvent e, Selectable item);
+    public abstract void dragged(Project project, MouseEvent e, Selectable item);
+    public abstract void released(Project project, MouseEvent e, Selectable item);
+
+
+    public void set(LineType lineType, ArrowType arrowType, Color color, boolean duplex, boolean curved, String width) {
+        this.lineType = lineType; this.arrowType = arrowType; this.color = color; this.duplex = duplex; this.curved = curved;
+        try {
+            this.width = Double.parseDouble(width);
+        } catch (Exception e) {
+            this.width = 1;
+        }
+    }
+}

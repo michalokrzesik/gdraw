@@ -1,7 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckMenuItem?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ColorPicker?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
 <BorderPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gdraw.main.MainController">
    <center>
       <GridPane alignment="center" hgap="1.0" vgap="1.0">
@@ -34,12 +54,12 @@
             </TitledPane>
             <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Hierarchia" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                <content>
-                  <ScrollPane fitToHeight="true" fitToWidth="true" fx:id="hierarchy"/>
+                  <ScrollPane fx:id="hierarchy" fitToHeight="true" fitToWidth="true" />
                </content>
             </TitledPane>
             <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Właściwości" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                <content>
-                  <ScrollPane fitToHeight="true" fitToWidth="true" fx:id="properties"/>
+                  <ScrollPane fx:id="properties" fitToHeight="true" fitToWidth="true" />
                </content>
             </TitledPane>
             <TabPane tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowSpan="2147483647" />
@@ -59,61 +79,82 @@
          <children>
             <ToolBar prefHeight="40.0" prefWidth="200.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
               <items>
-                <Button mnemonicParsing="false" text="Nowy projekt" onAction="#newProject" />
-                  <Button layoutX="10.0" layoutY="13.0" mnemonicParsing="false" text="Otwórz" onAction="#openProject" />
-                  <Button layoutX="54.0" layoutY="13.0" mnemonicParsing="false" text="Zapisz" onAction="#saveProject" />
-                  <Button layoutX="104.0" layoutY="13.0" mnemonicParsing="false" text="Wytnij" onAction="#cutSelected" />
-                  <Button layoutX="149.0" layoutY="13.0" mnemonicParsing="false" text="Kopiuj" onAction="#copySelected" />
-                  <Button layoutX="188.0" layoutY="13.0" mnemonicParsing="false" text="Wklej" onAction="#paste" />
-                  <Button layoutX="236.0" layoutY="13.0" mnemonicParsing="false" text="Usuń" onAction="#deleteSelected" />
-                  <Button layoutX="285.0" layoutY="13.0" mnemonicParsing="false" text="Cofnij" onAction="#undo" fx:id="undoB" />
-                  <Button layoutX="340.0" layoutY="13.0" mnemonicParsing="false" text="Powtórz" onAction="#redo" fx:id="redoB" />
-                  <Button layoutX="350.0" layoutY="23.0" mnemonicParsing="false" text="Przybliż" onAction="#zoomIn" />
-                  <Button layoutX="360.0" layoutY="33.0" mnemonicParsing="false" text="Oddal" onAction="#zoomOut" />
-                  <Button layoutX="370.0" layoutY="43.0" mnemonicParsing="false" text="Zresetuj przybliżenie" onAction="zoomReset" />
-                  <Button layoutX="390.0" layoutY="63.0" mnemonicParsing="false" text="Dodaj węzeł" onAction="#addNodeToolbar" />
-                  <Button layoutX="400.0" layoutY="73.0" mnemonicParsing="false" text="Dodaj krawędź" onAction="#addVertex" />
-                  <ChoiceBox prefWidth="150.0" onAction="#changeLineType" />
-                  <ChoiceBox prefWidth="150.0" onAction="#changeArrowType" />
-                  <ColorPicker onAction="#changeVertexColor" />
+                <Button mnemonicParsing="false" onAction="#newProject" text="Nowy projekt" />
+                  <Button layoutX="10.0" layoutY="13.0" mnemonicParsing="false" onAction="#openProject" text="Otwórz" />
+                  <Button layoutX="54.0" layoutY="13.0" mnemonicParsing="false" onAction="#saveProject" text="Zapisz" />
+                  <Button layoutX="104.0" layoutY="13.0" mnemonicParsing="false" onAction="#cutSelected" text="Wytnij" />
+                  <Button layoutX="149.0" layoutY="13.0" mnemonicParsing="false" onAction="#copySelected" text="Kopiuj" />
+                  <Button layoutX="188.0" layoutY="13.0" mnemonicParsing="false" onAction="#paste" text="Wklej" />
+                  <Button layoutX="236.0" layoutY="13.0" mnemonicParsing="false" onAction="#deleteSelected" text="Usuń" />
+                  <Button fx:id="undoB" layoutX="285.0" layoutY="13.0" mnemonicParsing="false" onAction="#undo" text="Cofnij" />
+                  <Button fx:id="redoB" layoutX="340.0" layoutY="13.0" mnemonicParsing="false" onAction="#redo" text="Powtórz" />
+                 <Button layoutX="390.0" layoutY="63.0" mnemonicParsing="false" onAction="#addNode" text="Dodaj węzeł" />
+                  <MenuButton mnemonicParsing="false" text="Krawędź">
+                     <items>
+                        <CheckMenuItem fx:id="duplex" mnemonicParsing="false" text="Dwustronna" />
+                        <CheckMenuItem fx:id="curved" mnemonicParsing="false" text="Zaokrąglona" />
+                        <MenuItem mnemonicParsing="false">
+                           <graphic>
+                              <GridPane>
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <ChoiceBox fx:id="lineType" prefWidth="150.0" GridPane.columnSpan="2" />
+                                    <ChoiceBox fx:id="arrowType" prefWidth="150.0" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+                                    <ColorPicker fx:id="vertexColor" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                                    <Label text="Szerokość (px)" GridPane.rowIndex="3" />
+                                    <TextField fx:id="width" text="1" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    <Button mnemonicParsing="false" onAction="#addVertex" text="Dodaj krawędź" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+                                 </children>
+                              </GridPane>
+                           </graphic>
+                        </MenuItem>
+                     </items>
+                  </MenuButton>
               </items>
             </ToolBar>
             <MenuBar GridPane.columnSpan="2147483647">
               <menus>
                 <Menu mnemonicParsing="false" text="Plik">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="Nowy projekt" onAction="#newProject" />
-                        <MenuItem mnemonicParsing="false" text="Otwórz" onAction="#openProject" />
-                        <MenuItem mnemonicParsing="false" text="Zapisz" onAction="#saveProject" />
-                        <MenuItem mnemonicParsing="false" text="Zapisz jako" onAction="#saveProjectAs" />
-                        <MenuItem mnemonicParsing="false" text="Eksportuj" onAction="#exportGraph" />
-                        <MenuItem mnemonicParsing="false" text="Zamknij projekt" onAction="#closeProject" />
+                    <MenuItem mnemonicParsing="false" onAction="#newProject" text="Nowy projekt" />
+                        <MenuItem mnemonicParsing="false" onAction="#openProject" text="Otwórz" />
+                        <MenuItem mnemonicParsing="false" onAction="#saveProject" text="Zapisz" />
+                        <MenuItem mnemonicParsing="false" onAction="#saveProjectAs" text="Zapisz jako" />
+                        <MenuItem mnemonicParsing="false" onAction="#exportGraph" text="Eksportuj" />
+                        <MenuItem mnemonicParsing="false" onAction="#closeProject" text="Zamknij projekt" />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Zamknij program" onAction="#closeProgram" />
+                        <MenuItem mnemonicParsing="false" onAction="#closeProgram" text="Zamknij program" />
                   </items>
                 </Menu>
                   <Menu mnemonicParsing="false" text="Edycja">
                     <items>
-                      <MenuItem mnemonicParsing="false" text="Cofnij" onAction="#undo" fx:id="undoMI" />
-                        <MenuItem mnemonicParsing="false" text="Ponów" onAction="#redo" fx:id="redoMI" />
+                      <MenuItem fx:id="undoMI" mnemonicParsing="false" onAction="#undo" text="Cofnij" />
+                        <MenuItem fx:id="redoMI" mnemonicParsing="false" onAction="#redo" text="Ponów" />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Wytnij" onAction="#cutSelected" />
-                        <MenuItem mnemonicParsing="false" text="Kopiuj" onAction="#copySelected" />
-                        <MenuItem mnemonicParsing="false" text="Wklej" onAction="#paste" />
+                        <MenuItem mnemonicParsing="false" onAction="#cutSelected" text="Wytnij" />
+                        <MenuItem mnemonicParsing="false" onAction="#copySelected" text="Kopiuj" />
+                        <MenuItem mnemonicParsing="false" onAction="#paste" text="Wklej" />
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Duplikuj" onAction="#duplicateSelected" />
-                        <MenuItem mnemonicParsing="false" text="Usuń" onAction="#deleteSelected" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" text="Na wierzch" onAction="#moveUp" />
-                        <MenuItem mnemonicParsing="false" text="Pod spód" onAction="#moveDown" />
+                        <MenuItem mnemonicParsing="false" onAction="#duplicateSelected" text="Duplikuj" />
+                        <MenuItem mnemonicParsing="false" onAction="#deleteSelected" text="Usuń" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <Menu mnemonicParsing="false" text="Grupowanie">
                           <items>
-                              <MenuItem mnemonicParsing="false" text="Grupuj zaznaczone" onAction="#groupSelected" />
-                              <MenuItem mnemonicParsing="false" text="Oddziel zaznaczone" onAction="#ungroupSelected" />
-                              <MenuItem mnemonicParsing="false" text="Zamień zaznaczone w puste grupy" onAction="#nodesToGroups" />
-                              <MenuItem mnemonicParsing="false" text="Zamień zaznaczone w zwykłe węzły (oddziel zawartość)" onAction="#groupsToNodes" />
-                              <MenuItem mnemonicParsing="false" text="Dodaj do grupy" onAction="#moveToGroup" />
+                              <MenuItem mnemonicParsing="false" onAction="#groupSelected" text="Grupuj zaznaczone" />
+                              <MenuItem mnemonicParsing="false" onAction="#ungroupSelected" text="Oddziel zaznaczone" />
+                              <MenuItem mnemonicParsing="false" onAction="#nodesToGroups" text="Zamień zaznaczone w puste grupy" />
+                              <MenuItem mnemonicParsing="false" onAction="#groupsToNodes" text="Zamień zaznaczone w zwykłe węzły (oddziel zawartość)" />
+                              <MenuItem mnemonicParsing="false" onAction="#moveToGroup" text="Dodaj do grupy" />
                           </items>
                         </Menu>
                     </items>

@@ -3,6 +3,8 @@ package gdraw.main;
 import gdraw.graph.node.Node;
 import gdraw.graph.util.MIandButtonPair;
 import gdraw.graph.util.Selectable;
+import gdraw.graph.vertex.ArrowType;
+import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.Vertex;
 import gdraw.graph.util.Request;
 import javafx.application.Platform;
@@ -25,9 +27,7 @@ import javafx.stage.FileChooser;
 import java.awt.image.RenderedImage;
 import java.io.*;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.zip.ZipFile;
 
 import gdraw.graph.node.NodeLibrary;
 import javafx.stage.Modality;
@@ -39,27 +39,34 @@ public class MainController {
 
     @FXML
     Accordion nodeLibraryAccordion;
-
     @FXML
     TabPane tabPane;
-
     @FXML
     ScrollPane hierarchy;
-
     @FXML
     ScrollPane properties;
 
     @FXML
     MenuItem undoMI;
-
     @FXML
     Button undoB;
-
     @FXML
     MenuItem redoMI;
-
     @FXML
     Button redoB;
+
+    @FXML
+    ChoiceBox<LineType> lineType;
+    @FXML
+    ChoiceBox<ArrowType> arrowType;
+    @FXML
+    ColorPicker vertexColor;
+    @FXML
+    CheckMenuItem duplex;
+    @FXML
+    CheckMenuItem curved;
+    @FXML
+    TextField width;
 
     private MIandButtonPair undo = new MIandButtonPair(undoMI, undoB), redo = new MIandButtonPair(redoMI, redoB);
 
@@ -75,20 +82,20 @@ public class MainController {
                 new NodeLibrary("./libraries/Ostatnie.zip", nodeLibraryAccordion, this)
         );
         clipboard = new ArrayList<>();
+        projects = new ArrayList<>();
+        requestedNodes = new ArrayList<>();
+        requestedVertices = new ArrayList<>();
+        undo.setDisable(true);
+        redo.setDisable(true);
+
         //TODO
     }
 
-    public void addNodeToActiveLibrary(ActionEvent actionEvent) {
-        //TODO
+    public void addNodeToActiveLibrary(ActionEvent actionEvent) throws IOException, URISyntaxException {
+        String path = (new FileChooser().showOpenDialog(null).getAbsolutePath());
+        ((NodeLibrary) nodeLibraryAccordion.getExpandedPane()).addNode(path);
     }
 
-    public void addNodeLibrary(String path) throws IOException, URISyntaxException {
-        URL zipUrl = Main.class.getResource(path);
-        File zipFile = new File(zipUrl.toURI());
-        ZipFile zip = new ZipFile(zipFile);
-        InputStream is = zip.getInputStream(zip.getEntry("test.txt"));
-        //TODO
-    }
 
     public void addNodeLibrary(ActionEvent actionEvent) throws URISyntaxException {
         String path = (new FileChooser().showOpenDialog(null).getAbsolutePath());
@@ -99,8 +106,14 @@ public class MainController {
 
     }
 
-    public void addImageToCanvas(Image image) {
-        //TODO
+    public void addNode(ActionEvent actionEvent){
+        ((NodeLibrary)nodeLibraryAccordion.getExpandedPane()).toGraph();
+    }
+
+
+
+    public void addNode(Image image) {
+        activeProject.addNode(image);
     }
 
     public void clearSelected() {
@@ -464,5 +477,39 @@ public class MainController {
     public void duplicateSelected(ActionEvent actionEvent) {
         copySelected(actionEvent);
         paste(actionEvent);
+    }
+
+    public void addVertex(ActionEvent actionEvent) {
+        activeProject.addVertex(
+                lineType.getSelectionModel().getSelectedItem(),
+                arrowType.getSelectionModel().getSelectedItem(),
+                vertexColor.getValue(),
+                duplex.isSelected(),
+                curved.isSelected(),
+                width.getText());
+    }
+
+    public void onMouseReleased(MouseEvent e, Selectable item) {
+        activeProject.onMouseReleased(e, item);
+    }
+
+    public void groupSelected(ActionEvent actionEvent) {
+        activeProject.groupSelected();
+    }
+
+    public void ungroupSelected(ActionEvent actionEvent) {
+        activeProject.ungroupSelected();
+    }
+
+    public void nodesToGroups(ActionEvent actionEvent) {
+        activeProject.nodesToGroups();
+    }
+
+    public void groupsToNodes(ActionEvent actionEvent) {
+        activeProject.groupsToNodes();
+    }
+
+    public void moveToGroup(ActionEvent actionEvent) {
+        activeProject.moveToGroup();
     }
 }

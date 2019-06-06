@@ -10,49 +10,34 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class ImageViewWithName extends ImageView {
     private String name;
+    private NodeLibrary parent;
 
     public ImageViewWithName(NodeLibrary parent, String name, Image image) {
         super(image);
         this.name = name;
-        this.setOnMouseClicked((e) -> {
-            parent.unselect();
-            parent.setSelected(name);
-            select();
-        });
+        this.parent = parent;
+
+        this.setOnMouseClicked((e) -> select());
 
         this.setOnContextMenuRequested(event -> {
-            parent.unselect();
-            parent.setSelected(name);
             select();
             ContextMenu contextMenu = new ContextMenu();
 
             MenuItem toGraph = new MenuItem("Dodaj do grafu");
-            toGraph.setOnAction(e -> {
-                parent.toGraph(getImage());
-                for(TitledPane titledPane : parent.getLibraryList()){
-                    NodeLibrary library = (NodeLibrary) titledPane;
-                    try {
-                        if(library.getName() == "Ostatnie.zip")
-                            library.addNode(parent.getPath(name));
-                    } catch (URISyntaxException ex) {
-                        ex.printStackTrace();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            });
+            toGraph.setOnAction(e -> addToGraph());
 
             MenuItem addParent = new MenuItem("Dodaj do kategorii");
-            addParent.setOnAction(e -> selectParentAndAdd(parent));
+            addParent.setOnAction(e -> selectParentAndAdd());
 
             MenuItem toParent = new MenuItem("Przenieś do kategorii");
             toParent.setOnAction(e -> {
-                selectParentAndAdd(parent);
+                selectParentAndAdd();
                 try {
                     parent.remove(name);
                 } catch (IOException ex) {
@@ -107,11 +92,25 @@ public class ImageViewWithName extends ImageView {
 
     }
 
+    public void addToGraph() {
+        parent.toGraph(getImage());
+        for(TitledPane titledPane : parent.getLibraryList()){
+            NodeLibrary library = (NodeLibrary) titledPane;
+            try {
+                if(library.getName() == "Ostatnie.zip")
+                    library.addNode(parent.getPath(name));
+            } catch (URISyntaxException ex) {
+                ex.printStackTrace();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
     /**
      * Wybór nowej kategorii
-     * @param parent Obecna kategoria
      */
-    private void selectParentAndAdd(NodeLibrary parent){
+    private void selectParentAndAdd(){
         Stage window = new Stage();
         window.initModality(Modality.APPLICATION_MODAL);
         window.setTitle("Wybierz kategorie");
@@ -144,6 +143,8 @@ public class ImageViewWithName extends ImageView {
     }
 
     private void select() {
+        parent.unselect();
+        parent.setSelected(this);
         this.setEffect(new Bloom());
     }
 

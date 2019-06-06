@@ -26,6 +26,10 @@ public abstract class Selectable {
         controller.onMousePressed(e, this);
     }
 
+    protected void onMouseReleased(MouseEvent e){
+        controller.onMouseReleased(e, this);
+    }
+
     protected void onMouseDragged(MouseEvent e){
         controller.onMouseDragged(e, this);
     }

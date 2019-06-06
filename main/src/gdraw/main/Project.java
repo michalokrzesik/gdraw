@@ -1,11 +1,15 @@
 package gdraw.main;
 
 import gdraw.graph.node.Node;
+import gdraw.graph.node.NodeDragModel;
 import gdraw.graph.util.Background;
 import gdraw.graph.util.MIandButtonPair;
 import gdraw.graph.util.Selectable;
 import gdraw.graph.util.action.ActionHelper;
+import gdraw.graph.vertex.ArrowType;
+import gdraw.graph.vertex.LineType;
 import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
@@ -13,11 +17,15 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Pair;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.ListIterator;
 
 public class Project implements Serializable {
 
@@ -31,6 +39,7 @@ public class Project implements Serializable {
     private Group group;
     private ScrollPane properties;
     private double x, y;
+    private NodeDragModel dragModel;
 
     private ActionHelper undo;
     private ActionHelper redo;
@@ -40,6 +49,7 @@ public class Project implements Serializable {
         properties = scrollPane;
         graphObjects = new ArrayList<>();
         selected = new ArrayList<>();
+        dragModel = NodeDragModel.Standard;
 
         undo = new ActionHelper(undoFXML);
         redo = new ActionHelper(redoFXML);
@@ -63,6 +73,9 @@ public class Project implements Serializable {
         });
     }
 
+    public NodeDragModel getDragModel() { return dragModel; }
+
+    public void setDragModel(NodeDragModel model) { dragModel = model; }
 
     public void checkSelect(double x1, double y1, double x2, double y2) {
         Rectangle rectangle = new Rectangle(x1, y1, x2 - x1, y2 - y1);
@@ -122,21 +135,12 @@ public class Project implements Serializable {
     }
 
     public void onMousePressed(MouseEvent e, Selectable item) {
-        if(selected.contains(item)){
-            x = e.getX();
-            y = e.getY();
-        }
+        if(!item.isNode()) dragModel = NodeDragModel.Standard;
+        dragModel.pressed(this, e, item);
     }
 
     public void onMouseDragged(MouseEvent e, Selectable item) {
-        if(selected.contains(item)){
-            double nx = e.getX(), ny = e.getY();
-            for (Selectable selectedItem : selected) {
-                selectedItem.translate(nx - x, ny - y);
-            }
-            x = nx;
-            y = ny;
-        }
+        dragModel.dragged(this, e, item);
     }
 
     public TreeView<Node> getTreeView() {
@@ -190,5 +194,84 @@ public class Project implements Serializable {
             }
             s.refresh(this);
         });
+    }
+
+    public void addVertex(LineType lineType, ArrowType arrowType, Color color, boolean duplex, boolean curved, String width) {
+            dragModel = NodeDragModel.Vertex;
+            dragModel.set(lineType, arrowType, color, duplex, curved, width);
+    }
+
+    public void onMouseReleased(MouseEvent e, Selectable item) {
+        dragModel.released(this, e, item);
+        dragModel = NodeDragModel.Standard;
+    }
+
+    public void groupSelected() {
+        if(selected.isEmpty()) return;;
+        TreeItem<Node> parent = nodes.getRoot();
+        ArrayList<Double> minMaxs = new ArrayList<>();
+        ArrayList<Node> nodes = new ArrayList<>();
+        minMaxs.add(Double.MAX_VALUE); minMaxs.add(0.0); minMaxs.add(Double.MAX_VALUE); minMaxs.add(0.0);
+        selected.forEach(s -> {
+            if(s.isNode()){
+                Node node = (Node) s;
+                nodes.add(node);
+                double x = node.getCenter().getX(), y = node.getCenter().getY();
+                ListIterator<Double> it = minMaxs.listIterator();
+                double xmin = it.next(); double xmax = it.next();
+                double ymin = it.next(); double ymax = it.next();
+                minMaxs.clear();
+
+                xmin = x < xmin ? x : xmin;
+                xmax = x > xmax ? x : xmax;
+                ymin = y < ymin ? y : ymin;
+                ymax = y > ymax ? y : ymax;
+
+                minMaxs.add(xmin); minMaxs.add(xmax); minMaxs.add(ymin); minMaxs.add(ymax);
+            }
+        });
+
+
+        Node groupNode = new Node(
+                new Point2D((minMaxs.get(0) + minMaxs.get(1))/2, (minMaxs.get(2) + minMaxs.get(3))/2),
+                new Image("standardGroup.png"),
+                group, true, parent, controller);
+
+        groupNode.groupNodes(nodes);
+
+    }
+
+    public void ungroupSelected() {
+        boolean isGroup = true;
+        Node parent = null;
+        ArrayList<Node> sNodes = new ArrayList<>();
+        for(Selectable item : selected){
+            if(item.isNode()){
+                Node node = (Node) item;
+                sNodes.add(node);
+                if(parent == null) parent = node.getTreeItem().getParent().getValue();
+                else isGroup = node.getTreeItem().getParent().getValue() == parent;
+            }
+            if(!isGroup) break;
+        }
+        if(parent != null && isGroup)
+            parent.unGroup(sNodes);
+    }
+
+    public void nodesToGroups() {
+        selected.forEach(s -> {
+            if(s.isNode()) ((Node) s).groupNodes();
+        });
+    }
+
+    public void groupsToNodes() {
+        selected.forEach(s -> {
+            if(s.isNode()) ((Node) s).changeGroupToNode();
+        });
+    }
+
+    public void moveToGroup() {
+        dragModel = NodeDragModel.Grouping;
+        dragModel.set(LineType.Straight, ArrowType.Opened, Color.BLACK, false, false, "1");
     }
 }

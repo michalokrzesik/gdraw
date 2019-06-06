@@ -23,13 +23,14 @@ public class NodeLibrary extends TitledPane {
     private String path;
     private Accordion parent;
     private FlowPane pane;
-    private String selected;
+    private ImageViewWithName selected;
 
     public NodeLibrary(String path, Accordion parent, MainController controller) throws URISyntaxException {
         super(new File(Main.class.getResource(path).toURI()).getName(), null);
         this.controller = controller;
         this.parent = parent;
         this.path = path;
+        pane = new FlowPane();
         this.getChildren().add(pane);
         try {
             show();
@@ -48,8 +49,8 @@ public class NodeLibrary extends TitledPane {
                 (e) -> pane.getChildren().add(
                         new ImageViewWithName(
                                 this,
-                                ((ZipEntry) e).getName(),
-                                new Image(getClass().getResource(((ZipEntry) e).getName()).toExternalForm())))
+                                e.getName(),
+                                new Image(getClass().getResource(e.getName()).toExternalForm())))
         );
     }
 
@@ -73,9 +74,9 @@ public class NodeLibrary extends TitledPane {
         ZipOutputStream out = new ZipOutputStream(new FileOutputStream(newFile));
 
         in.stream().forEach((e) -> {
-            if(add || ((ZipEntry) e).getName() != nodePathOrName) {
+            if(add || e.getName() != nodePathOrName) {
                 try {
-                    addEntry(((ZipEntry) e).getName(), in.getInputStream(e), out);
+                    addEntry(e.getName(), in.getInputStream(e), out);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -108,16 +109,14 @@ public class NodeLibrary extends TitledPane {
         inputStream.close();
     }
 
-    public void setSelected(String name) {
-        selected = name;
+    public void setSelected(ImageViewWithName selected) {
+        this.selected = selected;
     }
 
     public void unselect() {
-        for (Node childn : pane.getChildren()) {
-            ImageViewWithName child = (ImageViewWithName) childn;
-            if (selected == child.getName()) child.unselect();
-        }
+        selected.unselect();
     }
+
 
     public ObservableList<TitledPane> getLibraryList() {
         return parent.getPanes();
@@ -161,8 +160,10 @@ public class NodeLibrary extends TitledPane {
         return new NodeLibrary(path, parent, controller);
     }
 
+    public void toGraph(){ selected.addToGraph(); }
+
     public void toGraph(Image image) {
-        controller.addImageToCanvas(image);
+        controller.addNode(image);
     }
 
     public String getName() throws URISyntaxException {

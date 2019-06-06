@@ -74,6 +74,7 @@ public class Node extends Selectable {
         imageView.setOnContextMenuRequested(e -> contextMenu());
         imageView.setOnMousePressed(e -> onMousePressed(e));
         imageView.setOnMouseDragged(e -> onMouseDragged(e));
+
     }
 
     public Node(Node node) {
@@ -120,6 +121,7 @@ public class Node extends Selectable {
     }
 
     public void setSelected(boolean selected) {
+        controller.getProject().setDragModel(NodeDragModel.Standard);
         this.selected = selected;
         draw();
     }
@@ -189,10 +191,20 @@ public class Node extends Selectable {
 
     private void expandIfNeeded() {
         double neededW = 5, neededH = 5;
+        double xmin = Double.MAX_VALUE, xmax = 0, ymin = xmin, ymax = 0;
+
         for (Node node : subNodes){
-            neededH += node.getHeight();
-            neededW += node.getWidth();
+            double x = node.getCenter().getX() - node.getWidth()/2, y = node.getCenter().getY() - node.getHeight()/2;
+
+            xmin = x < xmin ? x : xmin;
+            xmax = x > xmax ? x : xmax;
+            ymin = y < ymin ? y : ymin;
+            ymax = y > ymax ? y : ymax;
         }
+
+        neededW += xmax - xmin;
+        neededH += ymax - ymin;
+
         if(getWidth() < neededW) setWidth(neededW);
         if(getHeight() < neededH) setHeight(neededH);
         fitInGroup();
@@ -358,6 +370,8 @@ public class Node extends Selectable {
     }
 
     public void contextMenu() {
+        Project project = controller.getProject();
+        project.setDragModel(NodeDragModel.Standard);
         //TODO odwołaj się do selected z projektu
         //Jeżeli nie ma w selected, to clear i dodaj
         //dla multiSelect

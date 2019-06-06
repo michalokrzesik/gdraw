@@ -67,4 +67,7 @@ public class Background extends Node {
         }
         return canvas;
     }
+
+    @Override
+    public boolean isNode(){ return false; }
 }
