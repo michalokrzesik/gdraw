@@ -6,6 +6,8 @@ import gdraw.graph.util.Background;
 import gdraw.graph.util.MIandButtonPair;
 import gdraw.graph.util.Selectable;
 import gdraw.graph.util.action.ActionHelper;
+import gdraw.graph.util.action.MultiAction;
+import gdraw.graph.util.action.NodeCreation;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import javafx.collections.ObservableList;
@@ -182,17 +184,19 @@ public class Project implements Serializable {
     }
 
     public void deleteSelected() {
-        selected.forEach(s -> s.delete());  //TODO MULTIACTION
+        MultiAction.applyDelete(undo, selected, redo);
     }
 
     public void paste(ArrayList<Selectable> clipboard) {
+        MultiAction.applyCreate(undo, clipboard, redo);
+        /*
         clipboard.forEach(s -> {
             graphObjects.add(s);
             if(s.isNode()){
                 nodes.getRoot().getChildren().add(((Node)s).getTreeItem());
             }
             s.refresh(this);    //TODO MULTIACTION
-        });
+        });*/
     }
 
     public void addVertex(LineType lineType, ArrowType arrowType, Color color, boolean duplex, boolean curved, String width) {
@@ -236,7 +240,9 @@ public class Project implements Serializable {
                 new Image("standardGroup.png"),
                 group, true, parent, controller);
 
-        groupNode.groupNodes(nodes);
+        GroupManagement.applyGroup(undo, groupNode, selected, redo);
+
+//        groupNode.groupNodes(nodes);
 
     }
 
@@ -254,20 +260,24 @@ public class Project implements Serializable {
             if(!isGroup) break;
         }
         if(parent != null && isGroup)
-            parent.unGroup(sNodes);
+            GroupManagement.applyUngroup(undo, parent, selected, redo);
+
+        //parent.unGroup(sNodes);
     }
 
     public void nodesToGroups() {       //TODO MULTIACTION
-        selected.forEach(s -> {
+        GroupManagement.applyToGroup(undo, selected, redo);
+/*        selected.forEach(s -> {
             if(s.isNode()) ((Node) s).groupNodes();
         });
-    }
+  */  }
 
     public void groupsToNodes() {       //TODO MULTIACTION
-        selected.forEach(s -> {
+        GroupManagement.applyToNode(undo, selected, redo);
+    /*    selected.forEach(s -> {
             if(s.isNode()) ((Node) s).changeGroupToNode();
         });
-    }
+   */ }
 
     public void moveToGroup() {
         dragModel = NodeDragModel.Grouping;
@@ -283,6 +293,6 @@ public class Project implements Serializable {
     }
 
     public void addNode(Image image) {
-        //TODO ACTION
+        NodeCreation.applyCreate(undo, this, image, redo);
     }
 }

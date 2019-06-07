@@ -109,7 +109,7 @@ public class Node extends Selectable {
             circles[i].setStroke(Color.BLUE);
             circles[i].setRadius(3);
             int finalI = i;
-            circles[i].setOnMouseDragged(e -> CircleHelper.move(this, finalI, e.getX() - circles[finalI].getCenterX(), e.getY() - circles[finalI].getCenterY()));
+            circles[i].setOnMouseDragged(e -> CircleHelper.move(controller.getProject(),this, finalI, e.getX() - circles[finalI].getCenterX(), e.getY() - circles[finalI].getCenterY()));
         }
     }
 
