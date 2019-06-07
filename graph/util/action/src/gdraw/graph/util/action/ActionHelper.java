@@ -8,6 +8,10 @@ public class ActionHelper {
     private MIandButtonPair FXML;
     private Stack<Action> stack;
 
+    public interface Helper {
+        void apply(Action e);
+    }
+
     public ActionHelper(MIandButtonPair item){
         FXML = item;
         stack = new Stack<>();
@@ -23,5 +27,13 @@ public class ActionHelper {
     public void push(Action action){
         stack.push(action);
         FXML.setDisable(false);
+    }
+
+    public boolean isEmpty() {
+        return stack.isEmpty();
+    }
+
+    public void forEach(Helper h){
+        stack.forEach(e -> h.apply(e));
     }
 }

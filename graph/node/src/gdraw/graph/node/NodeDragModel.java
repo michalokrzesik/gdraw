@@ -1,6 +1,8 @@
 package gdraw.graph.node;
 
 import gdraw.graph.util.Selectable;
+import gdraw.graph.util.action.MultiAction;
+import gdraw.graph.util.action.VertexCreation;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.VertexPoint;
@@ -20,12 +22,15 @@ import java.util.List;
 public enum NodeDragModel {
     Standard{
         private double x, y;
+        private double dx, dy;
 
         @Override
         public void pressed(Project project, MouseEvent e, Selectable item) {
             if(project.getSelected().contains(item)){
                 x = e.getX();
                 y = e.getY();
+                dx = 0;
+                dy = 0;
             }
         }
 
@@ -34,8 +39,11 @@ public enum NodeDragModel {
             List<Selectable> selected = project.getSelected();
             if(selected.contains(item)){
                 double nx = e.getX(), ny = e.getY();
+                double ndx = nx - x, ndy = ny - y;
+                dx += ndx;
+                dy += ndy;
                 for (Selectable selectedItem : selected) {
-                    selectedItem.translate(nx - x, ny - y);
+                    selectedItem.translate(ndx, ndy);
                 }
                 x = nx;
                 y = ny;
@@ -43,7 +51,9 @@ public enum NodeDragModel {
         }
 
         @Override
-        public void released(Project project, MouseEvent e, Selectable item) {}
+        public void released(Project project, MouseEvent e, Selectable item) {
+            MultiAction.applyTranslate(project, dx, dy);
+        }
 
 
     },
@@ -83,7 +93,10 @@ public enum NodeDragModel {
         public void released(Project project, MouseEvent e, Selectable item) {
             if(item.isNode()){
                 to = (Node) item;
-                from.newVertex(start.getPoint(), stop.getPoint(), to, arrowType, lineType, duplex, curved, width, color);
+                VertexCreation.applyCreate(
+                        project.getUndo(),
+                        from, start.getPoint(), stop.getPoint(), to, arrowType, lineType, duplex, curved, width, 1, color,
+                        project.getRedo());
             }
             arrows.add(path);
             group.getChildren().removeAll(arrows);
@@ -103,7 +116,7 @@ public enum NodeDragModel {
         @Override
         public void released(Project project, MouseEvent e, Selectable item) {
             if(item.isNode())
-                ((Node) item).groupNodes(from);
+                ((Node) item).groupNodes(from); //TODO ACTION
             arrows.add(path);
             group.getChildren().removeAll(arrows);
         }

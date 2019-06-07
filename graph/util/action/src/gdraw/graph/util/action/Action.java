@@ -1,5 +1,8 @@
 package gdraw.graph.util.action;
 
+import gdraw.graph.node.Node;
+import gdraw.graph.vertex.Vertex;
+
 import java.util.Stack;
 
 public abstract class Action {
@@ -14,4 +17,7 @@ public abstract class Action {
         from = to;
         to = tmp;
     }
+
+    public abstract void refresh(Node oldNode, Node newNode);
+    public abstract void refresh(Vertex oldVertex, Vertex newVertex);
 }

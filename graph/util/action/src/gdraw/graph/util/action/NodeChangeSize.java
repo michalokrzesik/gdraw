@@ -1,6 +1,7 @@
 package gdraw.graph.util.action;
 
 import gdraw.graph.node.Node;
+import gdraw.graph.vertex.Vertex;
 
 public class NodeChangeSize extends Action {
     private Node node;
@@ -27,4 +28,12 @@ public class NodeChangeSize extends Action {
         node.setHeight(h);
         changeStacks();
     }
+
+    @Override
+    public void refresh(Node oldNode, Node newNode) {
+        if(node == oldNode) node = newNode;
+    }
+
+    @Override
+    public void refresh(Vertex oldVertex, Vertex newVertex) { }
 }

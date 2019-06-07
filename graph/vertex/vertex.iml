@@ -19,5 +19,6 @@
     </orderEntry>
     <orderEntry type="module" module-name="util" />
     <orderEntry type="module" module-name="main" />
+    <orderEntry type="module" module-name="action" />
   </component>
 </module>

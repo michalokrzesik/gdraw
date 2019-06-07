@@ -13,7 +13,6 @@ import javafx.geometry.Point2D;
 import java.util.ArrayList;
 
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
@@ -160,13 +159,14 @@ public class Node extends Selectable {
         vertices.remove(vertex);
     }
 
-    public void newVertex(Point2D start, Point2D stop, Node toNode, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double width, Paint color){
+    public Vertex newVertex(Point2D start, Point2D stop, Node toNode, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double width, double value, Paint color){
         VertexPoint startVP = new VertexPoint(start), stopVP = new VertexPoint(stop);
         startVP.setPointBounded(start, this);
         stopVP.setPointBounded(stop, toNode);
-        vertices.add(
-                new Vertex(this, toNode, startVP.getPoint(), stopVP.getPoint(), group, arrow, line, isDuplex, isCurved, width, color, controller)
-        );
+        Vertex vertex = new Vertex(this, toNode, startVP.getPoint(), stopVP.getPoint(), group, arrow, line, isDuplex, isCurved, width, color, controller);
+        vertex.setValue(value);
+        vertices.add(vertex);
+        return vertex;
     }
 
     public void groupNodes(){

@@ -55,7 +55,6 @@ public class Project implements Serializable {
         redo = new ActionHelper(redoFXML);
 
         file = null;
-        this.tab = tab;
         controller = mainController;
         nodes = new TreeView<>();
         this.group = new Group();
@@ -154,7 +153,7 @@ public class Project implements Serializable {
     public void refresh(MainController mainController, Tab tab, Group group, Canvas canvas, ScrollPane scrollPane) {
         controller = mainController;
         this.tab = tab;
-
+        //TODO
 
     }
 
@@ -183,7 +182,7 @@ public class Project implements Serializable {
     }
 
     public void deleteSelected() {
-        selected.forEach(s -> s.delete());
+        selected.forEach(s -> s.delete());  //TODO MULTIACTION
     }
 
     public void paste(ArrayList<Selectable> clipboard) {
@@ -192,7 +191,7 @@ public class Project implements Serializable {
             if(s.isNode()){
                 nodes.getRoot().getChildren().add(((Node)s).getTreeItem());
             }
-            s.refresh(this);
+            s.refresh(this);    //TODO MULTIACTION
         });
     }
 
@@ -206,7 +205,7 @@ public class Project implements Serializable {
         dragModel = NodeDragModel.Standard;
     }
 
-    public void groupSelected() {
+    public void groupSelected() {   //TODO MULTIACTION
         if(selected.isEmpty()) return;;
         TreeItem<Node> parent = nodes.getRoot();
         ArrayList<Double> minMaxs = new ArrayList<>();
@@ -241,7 +240,7 @@ public class Project implements Serializable {
 
     }
 
-    public void ungroupSelected() {
+    public void ungroupSelected() {     //TODO MULTIACTION
         boolean isGroup = true;
         Node parent = null;
         ArrayList<Node> sNodes = new ArrayList<>();
@@ -258,13 +257,13 @@ public class Project implements Serializable {
             parent.unGroup(sNodes);
     }
 
-    public void nodesToGroups() {
+    public void nodesToGroups() {       //TODO MULTIACTION
         selected.forEach(s -> {
             if(s.isNode()) ((Node) s).groupNodes();
         });
     }
 
-    public void groupsToNodes() {
+    public void groupsToNodes() {       //TODO MULTIACTION
         selected.forEach(s -> {
             if(s.isNode()) ((Node) s).changeGroupToNode();
         });
@@ -273,5 +272,17 @@ public class Project implements Serializable {
     public void moveToGroup() {
         dragModel = NodeDragModel.Grouping;
         dragModel.set(LineType.Straight, ArrowType.Opened, Color.BLACK, false, false, "1");
+    }
+
+    public ActionHelper getUndo() {
+        return undo;
+    }
+
+    public ActionHelper getRedo(){
+        return redo;
+    }
+
+    public void addNode(Image image) {
+        //TODO ACTION
     }
 }

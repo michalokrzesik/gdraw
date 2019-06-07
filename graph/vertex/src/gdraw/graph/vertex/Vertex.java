@@ -2,6 +2,7 @@ package gdraw.graph.vertex;
 
 import gdraw.graph.node.Node;
 import gdraw.graph.util.Selectable;
+import gdraw.graph.util.action.VertexCreation;
 import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.geometry.Point2D;
@@ -282,6 +283,11 @@ public class Vertex extends Selectable {
 
     @Override
     public void delete() {
+        Project project = controller.getProject();
+        VertexCreation.applyDelete(project.getUndo(), this, project.getRedo());
+    }
+
+    public void finishDelete(){
         fromNode.deleteVertex(this);
         fromNode = null;
         toNode.deleteVertex(this);
@@ -308,5 +314,29 @@ public class Vertex extends Selectable {
 
     public void setTo(Node node) {
         toNode = node;
+    }
+
+    public Point2D getFromPoint() {
+        return points.getFirst().getPoint();
+    }
+
+    public Point2D getToPoint() {
+        return points.getLast().getPoint();
+    }
+
+    public ArrowType getArrowType() {
+        return arrowType;
+    }
+
+    public LineType getLineType() {
+        return lineType;
+    }
+
+    public VertexType getVertexType() {
+        return vertexType;
+    }
+
+    public boolean isDuplex() {
+        return duplex;
     }
 }
