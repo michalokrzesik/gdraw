@@ -18,6 +18,4 @@ public abstract class Action {
         to = tmp;
     }
 
-    public abstract void refresh(Node oldNode, Node newNode);
-    public abstract void refresh(Vertex oldVertex, Vertex newVertex);
 }

@@ -15,9 +15,6 @@ public class MultiAction extends Action {
     private ActionHelper multiFrom;
     private ActionHelper multiTo;
 
-
-
-
     @Override
     public void action() {
         while(!from.isEmpty()) from.pop();
@@ -25,23 +22,13 @@ public class MultiAction extends Action {
         changeStacks();
     }
 
-    @Override
-    public void refresh(Node oldNode, Node newNode) {
-        multiFrom.forEach(a -> a.refresh(oldNode, newNode));
-    }
-
-    @Override
-    public void refresh(Vertex oldVertex, Vertex newVertex) {
-        multiFrom.forEach(a -> a.refresh(oldVertex, newVertex));
-    }
-
-    private void changeMultiStacks() {
+    protected void changeMultiStacks() {
         ActionHelper tmp = multiFrom;
         multiFrom = multiTo;
         multiTo = tmp;
     }
 
-    private MultiAction(ActionHelper from, ActionHelper to){
+    protected MultiAction(ActionHelper from, ActionHelper to){
         this.from = from;
         this.to = to;
         multiFrom = new ActionHelper(new MIandButtonPair(new MenuItem(), new Button()));

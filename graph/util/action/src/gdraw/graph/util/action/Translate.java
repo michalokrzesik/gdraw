@@ -5,12 +5,12 @@ import gdraw.graph.util.Selectable;
 import gdraw.graph.vertex.Vertex;
 
 public class Translate extends Action {
-    Selectable object;
+    SelectableCreationListener listener;
     double dx, dy;
     private Translate(ActionHelper from, Selectable object, double dx, double dy, ActionHelper to) {
         this.from = to;
         this.to = from;
-        this.object = object;
+        listener = object.getCreationListener();
         this.dx = -dx;
         this.dy = -dy;
         to.push(this);
@@ -22,19 +22,10 @@ public class Translate extends Action {
 
     @Override
     public void action() {
-        object.translate(dx, dy);
+        listener.getObject().translate(dx, dy);
         dx = -dx;
         dy = -dy;
         changeStacks();
     }
 
-    @Override
-    public void refresh(Node oldNode, Node newNode) {
-        if(object.isNode() && object == oldNode) object = newNode;
-    }
-
-    @Override
-    public void refresh(Vertex oldVertex, Vertex newVertex) {
-        if(!object.isNode() && object == oldVertex) object = newVertex;
-    }
 }

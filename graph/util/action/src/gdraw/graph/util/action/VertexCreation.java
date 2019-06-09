@@ -11,21 +11,18 @@ import javafx.scene.paint.Paint;
 
 public class VertexCreation extends Action {
 
-
-
     private enum ActionType{
         Create,
         Delete
     }
 
-    private Node fromNode, toNode;
     private Point2D fromPoint, toPoint;
     private ArrowType arrowType;
     private LineType lineType;
     private boolean duplex, curved;
     private double width, value;
     private Paint color;
-    private Vertex vertex;
+    private SelectableCreationListener vertex, fromNode, toNode;
 
     private ActionType type;
 
@@ -34,20 +31,21 @@ public class VertexCreation extends Action {
                      ArrowType arrowType, LineType lineType, boolean duplex, boolean curved, double width, double value, Color color,
                      ActionHelper to) {
         this.from = from; this.to = to;
-        this.fromNode = fromNode; this.fromPoint = fromPoint;
-        this.toNode = toNode; this.toPoint = toPoint;
+        this.fromNode = fromNode.getCreationListener(); this.fromPoint = fromPoint;
+        this.toNode = toNode.getCreationListener(); this.toPoint = toPoint;
         this.arrowType = arrowType; this.lineType = lineType; this.duplex = duplex; this.curved = curved;
         this.width = width; this.value = value; this.color = color;
         this.type = ActionType.Create;
+        vertex = null;
     }
 
     private VertexCreation(ActionHelper from, Vertex vertex, ActionHelper to){
         this.from = from; this.to = to;
-        this.vertex = vertex;
-        fromNode = vertex.getFromNode();
+        this.vertex = vertex.getCreationListener();
+        fromNode = vertex.getFromNode().getCreationListener();
         fromPoint = vertex.getFromPoint();
         toPoint = vertex.getToPoint();
-        toNode = vertex.getToNode();
+        toNode = vertex.getToNode().getCreationListener();
         arrowType = vertex.getArrowType();
         lineType = vertex.getLineType();
         duplex = vertex.isDuplex();
@@ -79,27 +77,18 @@ public class VertexCreation extends Action {
     public void action() {
         switch (type){
             case Create:
-                vertex = fromNode.newVertex(fromPoint, toPoint, toNode, arrowType, lineType, duplex, curved, width, value, color);
+                Vertex object = ((Node) fromNode.getObject()).newVertex(fromPoint, toPoint, (Node) toNode.getObject(), arrowType, lineType, duplex, curved, width, value, color);
+                if(vertex == null) vertex = new SelectableCreationListener(object);
+                else vertex.setObject(object);
                 type = ActionType.Delete;
                 break;
             case Delete:
-                vertex.finishDelete();
-                vertex = null;
+                ((Vertex) vertex.getObject()).finishDelete();
+                vertex.setObject(null);
                 type = ActionType.Create;
                 break;
         }
         changeStacks();
-    }
-
-    @Override
-    public void refresh(Node oldNode, Node newNode) {
-        if(oldNode == fromNode) fromNode = newNode;
-        if(oldNode == toNode) toNode = newNode;
-    }
-
-    @Override
-    public void refresh(Vertex oldVertex, Vertex newVertex) {
-        if(oldVertex == vertex) vertex = newVertex;
     }
 
 

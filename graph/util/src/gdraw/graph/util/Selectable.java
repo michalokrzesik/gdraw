@@ -1,5 +1,6 @@
 package gdraw.graph.util;
 
+import gdraw.graph.util.action.SelectableCreationListener;
 import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.scene.input.MouseEvent;
@@ -7,6 +8,7 @@ import javafx.scene.shape.Rectangle;
 
 public abstract class Selectable {
     protected MainController controller;
+    protected SelectableCreationListener creationListener;
 
     public abstract void checkSelect(Rectangle rectangle);
 
@@ -41,4 +43,12 @@ public abstract class Selectable {
     public abstract boolean isNode();
 
     public abstract void refresh(Project project);
+
+    public void setCreationListener(SelectableCreationListener listener){
+        creationListener = listener;
+    }
+
+    public SelectableCreationListener getCreationListener(){
+        return creationListener;
+    }
 }

@@ -6,6 +6,7 @@ import gdraw.graph.util.Background;
 import gdraw.graph.util.MIandButtonPair;
 import gdraw.graph.util.Selectable;
 import gdraw.graph.util.action.ActionHelper;
+import gdraw.graph.util.action.GroupManagement;
 import gdraw.graph.util.action.MultiAction;
 import gdraw.graph.util.action.NodeCreation;
 import gdraw.graph.vertex.ArrowType;
