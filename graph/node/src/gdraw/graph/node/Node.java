@@ -1,6 +1,7 @@
 package gdraw.graph.node;
 
 import gdraw.graph.util.Selectable;
+import gdraw.graph.util.action.MultiAction;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.VertexPoint;
@@ -11,6 +12,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.geometry.Point2D;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
@@ -30,7 +32,6 @@ public class Node extends Selectable {
     protected boolean isGroupNodes;
     protected ArrayList<Node> subNodes;
     protected ArrayList<Vertex> vertices;
-    protected Label label;
     protected Group group;
     protected boolean isCollapsed;
     protected double widthCollapsed;
@@ -338,7 +339,6 @@ public class Node extends Selectable {
 
     @Override
     public void delete() {
-        vertices.forEach(v -> v.delete());
         controller.getProject().removeObject(this);
         TreeItem<Node> parent = treeItem.getParent();
         parent.getValue().removeSubNode(this);
@@ -385,5 +385,42 @@ public class Node extends Selectable {
 
     public void deleteVertex(Vertex vertex) {
         vertices.remove(vertex);
+    }
+
+    public void setWH(double width, double height, double widthCollapsed, double heightCollapsed) {
+        this.width = width; this.widthCollapsed = widthCollapsed;
+        this.height = height; this.heightCollapsed = heightCollapsed;
+    }
+
+    public void setCollapsed(boolean isCollapsed) {
+        this.isCollapsed = isCollapsed;
+    }
+
+    public Image getImage() {
+        return image;
+    }
+
+    public Group getProjectGroup() {
+        return group;
+    }
+
+    public boolean isGroupNodes() {
+        return isGroupNodes;
+    }
+
+    public boolean isCollapsed() {
+        return isCollapsed;
+    }
+
+    public MainController getController() {
+        return controller;
+    }
+
+    public Collection<Vertex> getVertices() {
+        return vertices;
+    }
+
+    public ArrayList<Node> getSubNodes() {
+        return subNodes;
     }
 }

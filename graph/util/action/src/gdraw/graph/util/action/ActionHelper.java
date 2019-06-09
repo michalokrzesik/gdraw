@@ -8,6 +8,10 @@ public class ActionHelper {
     private MIandButtonPair FXML;
     private Stack<Action> stack;
 
+    public void clear() {
+        stack.clear();
+    }
+
     public interface Helper {
         void apply(Action e);
     }

@@ -13,7 +13,6 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -196,7 +195,7 @@ public class Vertex extends Selectable {
         }
     }
 
-    public void move(@NotNull VertexPoint point, Point2D newPoint){
+    public void move(VertexPoint point, Point2D newPoint){
         ListIterator it = points.listIterator(points.indexOf(point));
         if(!it.hasPrevious()) point.setPointBounded(newPoint, fromNode);
         else{

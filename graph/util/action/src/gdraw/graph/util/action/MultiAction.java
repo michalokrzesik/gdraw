@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MultiAction extends Action {
-    private ActionHelper multiFrom;
-    private ActionHelper multiTo;
+    protected ActionHelper multiFrom;
+    protected ActionHelper multiTo;
 
     @Override
     public void action() {

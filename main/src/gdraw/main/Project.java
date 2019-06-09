@@ -296,4 +296,8 @@ public class Project implements Serializable {
     public void addNode(Image image) {
         NodeCreation.applyCreate(undo, this, image, redo);
     }
+
+    public MainController getController() {
+        return controller;
+    }
 }

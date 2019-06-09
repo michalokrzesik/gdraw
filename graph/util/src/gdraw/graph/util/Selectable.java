@@ -9,6 +9,7 @@ import javafx.scene.shape.Rectangle;
 public abstract class Selectable {
     protected MainController controller;
     protected SelectableCreationListener creationListener;
+    protected Label label;
 
     public abstract void checkSelect(Rectangle rectangle);
 
@@ -50,5 +51,10 @@ public abstract class Selectable {
 
     public SelectableCreationListener getCreationListener(){
         return creationListener;
+    }
+
+    public String getLabel(){
+        if(label != null) return label.getLabel();
+        else return "";
     }
 }
