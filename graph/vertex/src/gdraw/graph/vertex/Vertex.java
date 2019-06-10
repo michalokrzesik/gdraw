@@ -56,9 +56,9 @@ public class Vertex extends Selectable {
         path.setStroke(c);
         path.setStrokeWidth(w);
         path.setStrokeDashOffset(w);
-        path.setOnMouseClicked(e -> setSelected(e));
-        path.setOnMousePressed(e -> onMousePressed(e));
-        path.setOnMouseDragged(e -> onMouseDragged(e));
+        path.setOnMouseClicked(this::setSelected);
+        path.setOnMousePressed(this::onMousePressed);
+        path.setOnMouseDragged(this::onMouseDragged);
     }
 
     private void init(ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved){
@@ -195,7 +195,7 @@ public class Vertex extends Selectable {
         }
     }
 
-    public void move(VertexPoint point, Point2D newPoint){  //TODO ACTION
+    public void move(VertexPoint point, Point2D newPoint){
         ListIterator it = points.listIterator(points.indexOf(point));
         if(!it.hasPrevious()) point.setPointBounded(newPoint, fromNode);
         else{
@@ -217,7 +217,7 @@ public class Vertex extends Selectable {
         draw();
     }
 
-    public void setLabel(String newLabel){      //TODO ACTION
+    public void setLabel(String newLabel){
         newLabel += " (" + value + ")";
         if(label == null){
             label = new Label(
