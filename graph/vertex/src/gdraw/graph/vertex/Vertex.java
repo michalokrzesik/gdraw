@@ -195,7 +195,7 @@ public class Vertex extends Selectable {
         }
     }
 
-    public void move(VertexPoint point, Point2D newPoint){
+    public void move(VertexPoint point, Point2D newPoint){  //TODO ACTION
         ListIterator it = points.listIterator(points.indexOf(point));
         if(!it.hasPrevious()) point.setPointBounded(newPoint, fromNode);
         else{
@@ -217,7 +217,7 @@ public class Vertex extends Selectable {
         draw();
     }
 
-    public void setLabel(String newLabel){
+    public void setLabel(String newLabel){      //TODO ACTION
         newLabel += " (" + value + ")";
         if(label == null){
             label = new Label(
