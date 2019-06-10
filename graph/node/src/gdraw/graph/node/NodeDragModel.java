@@ -1,6 +1,7 @@
 package gdraw.graph.node;
 
 import gdraw.graph.util.Selectable;
+import gdraw.graph.util.action.GroupManagement;
 import gdraw.graph.util.action.MultiAction;
 import gdraw.graph.util.action.VertexCreation;
 import gdraw.graph.vertex.ArrowType;
@@ -116,7 +117,7 @@ public enum NodeDragModel {
         @Override
         public void released(Project project, MouseEvent e, Selectable item) {
             if(item.isNode())
-                ((Node) item).groupNodes(from); //TODO ACTION
+                GroupManagement.applyGroup(project.getUndo(), from, (Node) item, project.getRedo());
             arrows.add(path);
             group.getChildren().removeAll(arrows);
         }

@@ -2,26 +2,30 @@ package gdraw.graph.util.action;
 
 import gdraw.graph.node.Node;
 import gdraw.graph.util.Selectable;
-import gdraw.graph.vertex.Vertex;
 import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 
 import java.util.ArrayList;
 
-//TODO
 public class NodeCreation extends MultiAction {
 
 
-    public NodeCreation(ActionHelper from, Node object, ActionHelper to) {
+    private NodeCreation(ActionHelper from, Node object, ActionHelper to) {
         super(from, to);
         node = object.getCreationListener();
+        type = ActionType.Delete;
     }
 
-    public NodeCreation(ActionHelper from, Project project, Image image, ActionHelper to) {
+    private NodeCreation(ActionHelper from, Node object, MultiAction requestManager, ActionHelper to) {
+        super(from, to);
+        getInfoFromNode(object);
+        type = ActionType.Create;
+    }
+
+    private NodeCreation(ActionHelper from, Project project, Image image, ActionHelper to) {
         super(from, to);
         width = image.getWidth(); widthCollapsed = width;
         height = image.getHeight(); heightCollapsed = height;
@@ -53,11 +57,27 @@ public class NodeCreation extends MultiAction {
     private ActionType type;
 
     public static void applyDelete(ActionHelper undo, Node o, ActionHelper redo) {
-        new NodeCreation(undo, o, redo).action();
+        new NodeCreation(redo, o, undo).action();
     }
 
     public static void applyCreate(ActionHelper undo, Project project, Image image, ActionHelper redo) {
-        new NodeCreation(undo, project, image, redo).action();
+        new NodeCreation(redo, project, image, undo).action();
+    }
+
+    public static void applyCreate(ActionHelper undo, Node node, ActionHelper redo) {
+        NodeCreation creator = new NodeCreation(undo, node, redo);
+        creator.action();
+        creator.action();
+    }
+
+    public static void applyCopy(ActionHelper undo, Node node, MultiAction requestManager, ActionHelper redo){
+        NodeCreation creator = new NodeCreation(redo, node, requestManager, undo);
+        creator.action();
+        node.getVertices().forEach(vertex -> requestManager.request(vertex.getFromNode() == node, creator.getNode(), vertex, node));
+    }
+
+    private Node getNode() {
+        return (Node) node.getObject();
     }
 
     @Override
@@ -90,16 +110,7 @@ public class NodeCreation extends MultiAction {
 
                 applyDelete(multiFrom, toDelete, multiTo);
 
-                center = objectToDelete.getCenter();
-                image = objectToDelete.getImage();
-                group = objectToDelete.getProjectGroup();
-                isGroupNodes = objectToDelete.isGroupNodes(); isCollapsed = objectToDelete.isCollapsed();
-                objectToDelete.setCollapsed(false); width = objectToDelete.getWidth(); height = objectToDelete.getHeight();
-                objectToDelete.setCollapsed(true); widthCollapsed = objectToDelete.getWidth(); heightCollapsed = objectToDelete.getHeight();
-                objectToDelete.setCollapsed(isCollapsed);
-                label = objectToDelete.getLabel();
-                parent = objectToDelete.getTreeItem().getParent().getValue().getCreationListener();
-                controller = objectToDelete.getController();
+                getInfoFromNode(objectToDelete);
 
                 node.getObject().delete();
                 node.setObject(null);
@@ -108,6 +119,19 @@ public class NodeCreation extends MultiAction {
                 break;
         }
         changeStacks();
+    }
+
+    private void getInfoFromNode(Node object) {
+        center = object.getCenter();
+        image = object.getImage();
+        group = object.getProjectGroup();
+        isGroupNodes = object.isGroupNodes(); isCollapsed = object.isCollapsed();
+        object.setCollapsed(false); width = object.getWidth(); height = object.getHeight();
+        object.setCollapsed(true); widthCollapsed = object.getWidth(); heightCollapsed = object.getHeight();
+        object.setCollapsed(isCollapsed);
+        label = object.getLabel();
+        parent = object.getTreeItem().getParent().getValue().getCreationListener();
+        controller = object.getController();
     }
 
 }

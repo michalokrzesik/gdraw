@@ -425,8 +425,8 @@ public class MainController {
 
     public void request(boolean isFrom, Node node, Vertex vertex, Node oldNode) {
         Request request = null;
-        for( Request r : requestedNodes)
-            if(r.checkNode(oldNode)) {
+        for(Request r : requestedNodes)
+            if(r.checkNode(oldNode) && r.checkIsFrom(isFrom)) {
                 request = r;
                 break;
             }
@@ -439,8 +439,8 @@ public class MainController {
 
     public void request(boolean isFrom, Node node, Vertex vertex, Vertex oldVertex){
         Request request = null;
-        for( Request r : requestedVertices)
-            if(request.checkVertex(oldVertex)) {
+        for(Request r : requestedVertices)
+            if(r.checkVertex(oldVertex) && r.checkIsFrom(isFrom)) {
                 request = r;
                 break;
             }
@@ -466,10 +466,10 @@ public class MainController {
 
     public void paste(ActionEvent actionEvent) {
         requestedVertices.clear();
-        requestedNodes.forEach(request -> {
+/*        requestedNodes.forEach(request -> {
             if(request.checkProject(activeProject))
                 request.request();
-        });
+        }); */
         requestedNodes.clear();
         activeProject.paste(clipboard);
     }

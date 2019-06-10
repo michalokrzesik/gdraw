@@ -70,10 +70,10 @@ public class Node extends Selectable {
 
     private void makeImageView() {
         imageView = new ImageView(image);
-        imageView.setOnMouseClicked(e -> setSelected(e));
+        imageView.setOnMouseClicked(this::setSelected);
         imageView.setOnContextMenuRequested(e -> contextMenu());
-        imageView.setOnMousePressed(e -> onMousePressed(e));
-        imageView.setOnMouseDragged(e -> onMouseDragged(e));
+        imageView.setOnMousePressed(this::onMousePressed);
+        imageView.setOnMouseDragged(this::onMouseDragged);
 
     }
 
@@ -184,6 +184,7 @@ public class Node extends Selectable {
     public void groupNodes(Node node){
         TreeItem<Node> nodeTI = node.getTreeItem();
         nodeTI.getParent().getChildren().remove(nodeTI);
+        nodeTI.getParent().getValue().removeSubNode(node);
         treeItem.getChildren().add(nodeTI);
         subNodes.add(node);
         expandIfNeeded();
@@ -241,9 +242,7 @@ public class Node extends Selectable {
     }
 
     public void unGroup(Node node) {
-        TreeItem<Node> nodeTI = node.getTreeItem();
-        treeItem.getChildren().remove(nodeTI);
-        treeItem.getParent().getChildren().add(nodeTI);
+        treeItem.getParent().getValue().groupNodes(node);
     }
 
 
@@ -416,7 +415,7 @@ public class Node extends Selectable {
         return controller;
     }
 
-    public Collection<Vertex> getVertices() {
+    public ArrayList<Vertex> getVertices() {
         return vertices;
     }
 

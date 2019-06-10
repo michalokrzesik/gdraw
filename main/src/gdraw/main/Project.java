@@ -5,10 +5,7 @@ import gdraw.graph.node.NodeDragModel;
 import gdraw.graph.util.Background;
 import gdraw.graph.util.MIandButtonPair;
 import gdraw.graph.util.Selectable;
-import gdraw.graph.util.action.ActionHelper;
-import gdraw.graph.util.action.GroupManagement;
-import gdraw.graph.util.action.MultiAction;
-import gdraw.graph.util.action.NodeCreation;
+import gdraw.graph.util.action.*;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import javafx.collections.ObservableList;
@@ -22,12 +19,10 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.util.Pair;
 
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.ListIterator;
 
 public class Project implements Serializable {
@@ -196,7 +191,7 @@ public class Project implements Serializable {
             if(s.isNode()){
                 nodes.getRoot().getChildren().add(((Node)s).getTreeItem());
             }
-            s.refresh(this);    //TODO MULTIACTION
+            s.refresh(this);
         });*/
     }
 
@@ -210,8 +205,8 @@ public class Project implements Serializable {
         dragModel = NodeDragModel.Standard;
     }
 
-    public void groupSelected() {   //TODO MULTIACTION
-        if(selected.isEmpty()) return;;
+    public void groupSelected() {
+        if(selected.isEmpty()) return;
         TreeItem<Node> parent = nodes.getRoot();
         ArrayList<Double> minMaxs = new ArrayList<>();
         ArrayList<Node> nodes = new ArrayList<>();
@@ -240,15 +235,16 @@ public class Project implements Serializable {
                 new Point2D((minMaxs.get(0) + minMaxs.get(1))/2, (minMaxs.get(2) + minMaxs.get(3))/2),
                 new Image("standardGroup.png"),
                 group, true, parent, controller);
+        new SelectableCreationListener(groupNode);
 
-        GroupManagement.applyGroup(undo, groupNode, selected, redo);
+        GroupManagement.applyGroup(undo, groupNode, parent, nodes, redo);
 
 //        groupNode.groupNodes(nodes);
 
     }
 
-    public void ungroupSelected() {     //TODO MULTIACTION
-        boolean isGroup = true;
+    public void ungroupSelected() {
+/*        boolean isGroup = true;
         Node parent = null;
         ArrayList<Node> sNodes = new ArrayList<>();
         for(Selectable item : selected){
@@ -261,19 +257,19 @@ public class Project implements Serializable {
             if(!isGroup) break;
         }
         if(parent != null && isGroup)
-            GroupManagement.applyUngroup(undo, parent, selected, redo);
-
-        //parent.unGroup(sNodes);
+            parent.unGroup(sNodes);
+ */
+        GroupManagement.applyUngroup(undo, selected, redo);
     }
 
-    public void nodesToGroups() {       //TODO MULTIACTION
+    public void nodesToGroups() {
         GroupManagement.applyToGroup(undo, selected, redo);
 /*        selected.forEach(s -> {
             if(s.isNode()) ((Node) s).groupNodes();
         });
   */  }
 
-    public void groupsToNodes() {       //TODO MULTIACTION
+    public void groupsToNodes() {
         GroupManagement.applyToNode(undo, selected, redo);
     /*    selected.forEach(s -> {
             if(s.isNode()) ((Node) s).changeGroupToNode();

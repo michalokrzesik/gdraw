@@ -2,6 +2,7 @@ package gdraw.graph.util.action;
 
 import gdraw.graph.node.Node;
 import gdraw.graph.util.MIandButtonPair;
+import gdraw.graph.util.Request;
 import gdraw.graph.util.Selectable;
 import gdraw.graph.vertex.Vertex;
 import gdraw.main.Project;
@@ -14,6 +15,7 @@ import java.util.List;
 public class MultiAction extends Action {
     protected ActionHelper multiFrom;
     protected ActionHelper multiTo;
+    protected ArrayList<Request> requestedVertices;
 
     @Override
     public void action() {
@@ -87,5 +89,38 @@ public class MultiAction extends Action {
         });
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
         //Jeśli w objects nie było node'ów, nic się nie dzieje
+    }
+
+    public static void applyCreate(ActionHelper undo, ArrayList<Selectable> clipboard, ActionHelper redo) {
+        MultiAction ma = new MultiAction(redo, undo);
+        ma.setRequests();
+        ActionHelper multiFrom = ma.multiFrom;
+        ActionHelper multiTo = ma.multiTo;
+        ArrayList<Vertex> vertices = new ArrayList<>();
+        clipboard.forEach(o -> {
+            if(o.isNode()) NodeCreation.applyCopy(multiFrom, (Node) o, ma, multiTo);
+            else vertices.add((Vertex) o);
+        });
+        vertices.forEach(o -> VertexCreation.applyCopy(multiFrom, o, ma, multiTo));
+
+        if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
+        //Jeśli w objects nie było node'ów, nic się nie dzieje
+    }
+
+    protected void setRequests() {
+        requestedVertices = new ArrayList<>();
+    }
+
+    public void request(boolean isFrom, Node node, Vertex vertex, Node oldNode) {
+       requestedVertices.add(new Request(null, isFrom, node, vertex));
+    }
+
+    public Node request(boolean isFrom, Vertex vertex){
+        for(Request r : requestedVertices)
+            if(r.checkVertex(vertex) && r.checkIsFrom(isFrom)) {
+                requestedVertices.remove(r);
+                return r.getNode();
+            }
+        return null;
     }
 }

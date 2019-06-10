@@ -17,9 +17,9 @@ public class Request {
         this.vertex = vertex;
     }
 
-    public void request(){
-        request(node, vertex);
-    }
+//    public void request(){
+//        request(node, vertex);
+//    }
 
     public void request(Node node){
         request(node, vertex);
@@ -36,6 +36,8 @@ public class Request {
         node.addVertex(vertex);
     }
 
+    public boolean checkIsFrom(boolean requested) { return isFrom == requested; }
+
     public boolean checkNode(Node oldNode) {
         return node == oldNode;
     }
@@ -48,4 +50,7 @@ public class Request {
         return this.project == project;
     }
 
+    public Node getNode() {
+        return node;
+    }
 }

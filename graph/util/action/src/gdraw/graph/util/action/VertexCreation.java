@@ -43,9 +43,15 @@ public class VertexCreation extends Action {
         this.from = from; this.to = to;
         this.vertex = vertex.getCreationListener();
         fromNode = vertex.getFromNode().getCreationListener();
+        toNode = vertex.getToNode().getCreationListener();
+        getInfoFromVertex(vertex);
+        type = ActionType.Delete;
+
+    }
+
+    private void getInfoFromVertex(Vertex vertex) {
         fromPoint = vertex.getFromPoint();
         toPoint = vertex.getToPoint();
-        toNode = vertex.getToNode().getCreationListener();
         arrowType = vertex.getArrowType();
         lineType = vertex.getLineType();
         duplex = vertex.isDuplex();
@@ -53,8 +59,15 @@ public class VertexCreation extends Action {
         value = vertex.getValue();
         width = vertex.getLineWidth();
         color = vertex.getColor();
-        type = ActionType.Delete;
+    }
 
+
+    private VertexCreation(ActionHelper from, Vertex vertex, MultiAction requestManager, ActionHelper to) {
+        this.from = from; this.to = to;
+        getInfoFromVertex(vertex);
+        fromNode = requestManager.request(true, vertex).getCreationListener();
+        toNode = requestManager.request(false, vertex).getCreationListener();
+        type = ActionType.Create;
     }
 
     public static void applyCreate(ActionHelper undo,
@@ -71,6 +84,10 @@ public class VertexCreation extends Action {
 
     public static void applyDelete(ActionHelper undo, Vertex vertex, ActionHelper redo) {
         (new VertexCreation(redo, vertex, undo)).action();
+    }
+
+    public static void applyCopy(ActionHelper undo, Vertex vertex, MultiAction requestManager, ActionHelper redo){
+        new VertexCreation(redo, vertex, requestManager, undo).action();
     }
 
     @Override
