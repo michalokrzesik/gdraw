@@ -7,6 +7,10 @@ import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.MoveTo;
@@ -59,6 +63,7 @@ public class Vertex extends Selectable {
         path.setOnMouseClicked(this::setSelected);
         path.setOnMousePressed(this::onMousePressed);
         path.setOnMouseDragged(this::onMouseDragged);
+        path.setOnContextMenuRequested(controller::contextMenu);
     }
 
     private void init(ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved){
@@ -338,4 +343,5 @@ public class Vertex extends Selectable {
     public boolean isDuplex() {
         return duplex;
     }
+
 }

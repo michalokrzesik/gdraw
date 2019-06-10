@@ -155,8 +155,13 @@
                               <MenuItem mnemonicParsing="false" onAction="#nodesToGroups" text="Zamień zaznaczone w puste grupy" />
                               <MenuItem mnemonicParsing="false" onAction="#groupsToNodes" text="Zamień zaznaczone w zwykłe węzły (oddziel zawartość)" />
                               <MenuItem mnemonicParsing="false" onAction="#moveToGroup" text="Dodaj do grupy" />
+                              <SeparatorMenuItem mnemonicParsing="false" />
+                              <MenuItem mnemonicParsing="false" onAction="#collapse" text="Zwiń zaznaczone grupy" />
+                              <MenuItem mnemonicParsing="false" onAction="#extend" text="Rozwiń zaznaczone grupy" />
                           </items>
                         </Menu>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" onAction="#changeBackground" text="Zmień obraz w tle" />
                     </items>
                   </Menu>
                 <Menu mnemonicParsing="false" text="Węzły">

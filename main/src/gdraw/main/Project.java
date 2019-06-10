@@ -66,7 +66,11 @@ public class Project implements Serializable {
         });
         nodes.setOnContextMenuRequested(e -> {
             ObservableList<TreeItem<Node>> selectedTI = nodes.getSelectionModel().getSelectedItems();
-            if(selectedTI.size() > 0) selectedTI.get(0).getValue().contextMenu();
+            if(selectedTI.size() > 0) {
+                ContextMenu contextMenu = new ContextMenu();
+                selectedTI.get(0).getValue().contextMenu(contextMenu);
+                contextMenu.show(nodes, e.getScreenX(), e.getScreenY());
+            };
         });
     }
 
@@ -295,5 +299,11 @@ public class Project implements Serializable {
 
     public MainController getController() {
         return controller;
+    }
+
+    public void changeCollapsed(boolean collapsed) {
+        selected.forEach(o -> {
+            if(o.isNode() && ((Node) o).isGroupNodes()) ((Node) o).setCollapsed(collapsed);
+        });
     }
 }

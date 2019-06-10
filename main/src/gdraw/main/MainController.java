@@ -1,6 +1,7 @@
 package gdraw.main;
 
 import gdraw.graph.node.Node;
+import gdraw.graph.node.NodeDragModel;
 import gdraw.graph.util.MIandButtonPair;
 import gdraw.graph.util.Selectable;
 import gdraw.graph.vertex.ArrowType;
@@ -19,6 +20,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -92,8 +94,20 @@ public class MainController {
     }
 
     public void addNodeToActiveLibrary(ActionEvent actionEvent) throws IOException, URISyntaxException {
-        String path = (new FileChooser().showOpenDialog(null).getAbsolutePath());
+        String path = (ImageFileChooser("Wybierz obraz", null).showOpenDialog(null).getAbsolutePath());
         ((NodeLibrary) nodeLibraryAccordion.getExpandedPane()).addNode(path);
+    }
+
+    private FileChooser ImageFileChooser(String title, String name) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(title);
+        String[] formatNames = ImageIO.getWriterFormatNames();
+        for(String formatName : formatNames)
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(formatName + " format","*." + formatName));
+        fileChooser.setSelectedExtensionFilter(fileChooser.getExtensionFilters().get(0));
+        if(name != null)
+            fileChooser.setInitialFileName(name + fileChooser.getSelectedExtensionFilter().getExtensions().get(0));
+        return fileChooser;
     }
 
 
@@ -372,15 +386,7 @@ public class MainController {
     }
 
     public void exportGraph(ActionEvent actionEvent) {
-        String name = activeProject.getName();
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Eksportuj graf");
-        String[] formatNames = ImageIO.getWriterFormatNames();
-        for(String formatName : formatNames)
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(formatName + " format","*." + formatName));
-        fileChooser.setSelectedExtensionFilter(fileChooser.getExtensionFilters().get(0));
-        fileChooser.setInitialFileName(name + fileChooser.getSelectedExtensionFilter().getExtensions().get(0));
-        File file = fileChooser.showSaveDialog(null);
+        File file = ImageFileChooser("Eksportuj graf", activeProject.getName()).showSaveDialog(null);
         if(file != null) {
             String extension = file.getName().split(".")[1];
             WritableImage snapshot = activeProject.snapshot();
@@ -511,5 +517,50 @@ public class MainController {
 
     public void moveToGroup(ActionEvent actionEvent) {
         activeProject.moveToGroup();
+    }
+
+    public void changeBackground(ActionEvent actionEvent) {
+        File file = ImageFileChooser("Wybierz obraz", null).showSaveDialog(null);
+        if(file != null) {
+            try {
+                activeProject.getBackground().setImage(Image.impl_fromPlatformImage(ImageIO.read(file)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void contextMenu(ContextMenuEvent contextMenuEvent) {
+        activeProject.setDragModel(NodeDragModel.Standard);
+
+        ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem toGraph = new MenuItem("Dodaj węzeł do grafu");
+        toGraph.setOnAction(this::addNode);
+
+        SeparatorMenuItem s1 = new SeparatorMenuItem();
+
+        contextMenu.getItems().addAll(toGraph, s1);
+
+        if(!activeProject.getSelected().isEmpty()) {
+            activeProject.getSelected().get(0).contextMenu(contextMenu);
+            contextMenu.getItems().add(new SeparatorMenuItem());
+        }
+
+
+        MenuItem changeBackground = new MenuItem("Zmień obraz w tle");
+        changeBackground.setOnAction(this::changeBackground);
+
+        contextMenu.getItems().add(changeBackground);
+
+        contextMenu.show((javafx.scene.Node) contextMenuEvent.getTarget(), contextMenuEvent.getScreenX(), contextMenuEvent.getScreenY());
+    }
+
+    public void collapse(ActionEvent actionEvent) {
+        activeProject.changeCollapsed(true);
+    }
+
+    public void extend(ActionEvent actionEvent) {
+        activeProject.changeCollapsed(false);
     }
 }

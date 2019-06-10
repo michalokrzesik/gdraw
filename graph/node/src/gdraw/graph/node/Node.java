@@ -8,11 +8,10 @@ import gdraw.graph.vertex.VertexPoint;
 import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.scene.Group;
-import javafx.scene.control.TreeItem;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.geometry.Point2D;
 import java.util.ArrayList;
-import java.util.Collection;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
@@ -71,7 +70,7 @@ public class Node extends Selectable {
     private void makeImageView() {
         imageView = new ImageView(image);
         imageView.setOnMouseClicked(this::setSelected);
-        imageView.setOnContextMenuRequested(e -> contextMenu());
+        imageView.setOnContextMenuRequested(controller::contextMenu);
         imageView.setOnMousePressed(this::onMousePressed);
         imageView.setOnMouseDragged(this::onMouseDragged);
 
@@ -368,20 +367,6 @@ public class Node extends Selectable {
                 && rectangle.contains(center.getX() + w, center.getY() + h));
     }
 
-    public void contextMenu() {
-        Project project = controller.getProject();
-        project.setDragModel(NodeDragModel.Standard);
-        //TODO odwołaj się do selected z projektu
-        //Jeżeli nie ma w selected, to clear i dodaj
-        //dla multiSelect
-            // grupuj tworzące nowy node o center pośrodku wszystkich, width i height obejmującymi wszystkie +5 i biorącym wszystkie jako childreny w treeView
-                //Przy różnych parentach wyszukaj nabliższego wspólnego i zrób grupę pod nim.
-            // rozgrupuj, jeżeli mają wspólnego parenta
-        //dla pojedynczego selecta (node'a)
-            // zmień tryb pomiędzy node a group
-            // zwiń/rozwiń, działające dla grupy (można zapisać ten MenuItem i zmieniać jego dostępność przy zmianie pomiędzy trybami)
-    }
-
     public void deleteVertex(Vertex vertex) {
         vertices.remove(vertex);
     }
@@ -422,4 +407,37 @@ public class Node extends Selectable {
     public ArrayList<Node> getSubNodes() {
         return subNodes;
     }
+
+    @Override
+    public void contextMenu(ContextMenu contextMenu){
+        super.contextMenu(contextMenu);
+
+        SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
+
+        Menu grouping = new Menu();
+        contextMenu.getItems().addAll(separatorMenuItem, grouping);
+
+        MenuItem group = new MenuItem("Grupuj zaznaczone");
+        group.setOnAction(controller::groupSelected);
+
+        MenuItem ungroup = new MenuItem("Oddziel zaznaczone");
+        ungroup.setOnAction(controller::ungroupSelected);
+
+        MenuItem nodesToGroups = new MenuItem("Zamień zaznaczone w puste grupy");
+        nodesToGroups.setOnAction(controller::nodesToGroups);
+
+        MenuItem groupsToNodes = new MenuItem("Zamień zaznaczone w zwykłe węzły (oddziel zawartość)");
+        groupsToNodes.setOnAction(controller::groupsToNodes);
+
+        SeparatorMenuItem separatorMenuItem1 = new SeparatorMenuItem();
+
+        MenuItem collapse = new MenuItem("Zwiń");
+        collapse.setOnAction(controller::collapse);
+
+        MenuItem extend = new MenuItem("Rozwiń");
+        extend.setOnAction(controller::extend);
+
+        grouping.getItems().addAll(group, ungroup, nodesToGroups, groupsToNodes, separatorMenuItem1, collapse, extend);
+    }
+
 }

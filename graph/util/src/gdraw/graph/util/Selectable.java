@@ -3,6 +3,9 @@ package gdraw.graph.util;
 import gdraw.graph.util.action.SelectableCreationListener;
 import gdraw.main.MainController;
 import gdraw.main.Project;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 
@@ -56,5 +59,26 @@ public abstract class Selectable {
     public String getLabel(){
         if(label != null) return label.getLabel();
         else return "";
+    }
+
+    public void contextMenu(ContextMenu contextMenu){
+        MenuItem cut = new MenuItem("Wytnij zaznaczone");
+        cut.setOnAction(controller::cutSelected);
+
+        MenuItem copy = new MenuItem("Kopiuj zaznaczone");
+        copy.setOnAction(controller::copySelected);
+
+        MenuItem paste = new MenuItem("Wklej");
+        paste.setOnAction(controller::paste);
+
+        SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
+
+        MenuItem duplicate = new MenuItem("Duplikuj zaznaczone");
+        duplicate.setOnAction(controller::duplicateSelected);
+
+        MenuItem delete = new MenuItem("Usuń zaznaczone");
+        delete.setOnAction(controller::deleteSelected);
+
+        contextMenu.getItems().addAll(cut, copy, paste, separatorMenuItem, duplicate, delete);
     }
 }

@@ -6,6 +6,8 @@ import gdraw.main.MainController;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -21,10 +23,7 @@ public class Background extends Node {
         canvas.setHeight(h);
         canvas.getGraphicsContext2D().setStroke(Color.BLANCHEDALMOND);
         canvas.setOnMouseClicked(e -> setSelected(true));
-        canvas.setOnContextMenuRequested(e -> {
-            //TODO context menu
-            //TODO change background image
-        });
+        canvas.setOnContextMenuRequested(mainController::contextMenu);
         canvas.setOnMousePressed(e -> {
             setSelected(true);
             x = e.getX();
