@@ -3,7 +3,9 @@ package gdraw.graph.vertex;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Path;
 
-public enum LineType {
+import java.io.Serializable;
+
+public enum LineType implements Serializable {
     Straight {
         public void set(Path path){
             path.getStrokeDashArray().clear();

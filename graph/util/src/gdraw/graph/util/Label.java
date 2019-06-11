@@ -3,7 +3,9 @@ package gdraw.graph.util;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 
-public class Label {
+import java.io.Serializable;
+
+public class Label implements Serializable {
     private String label;
     private Point2D upperLeft;
 

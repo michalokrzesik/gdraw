@@ -8,9 +8,10 @@ import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Shape;
 import javafx.util.Pair;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public enum ArrowType {
+public enum ArrowType implements Serializable {
     None{
         public void draw(ArrayList<Shape> arrows, Paint color, VertexPoint source, VertexPoint destination){}
     },

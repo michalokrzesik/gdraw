@@ -10,10 +10,11 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public abstract class Selectable {
-    protected MainController controller;
+public abstract class Selectable implements Serializable {
+    protected transient MainController controller;
     protected SelectableCreationListener creationListener;
     protected Label label;
 

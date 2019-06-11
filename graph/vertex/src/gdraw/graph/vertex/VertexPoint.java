@@ -6,11 +6,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import org.jetbrains.annotations.NotNull;
 
-public class VertexPoint {
+import java.io.Serializable;
+
+public class VertexPoint implements Serializable {
     private Point2D point;
     private VertexPointOrientation orientation;
     private boolean hardPoint;
-    private Circle circle;
+    private transient Circle circle;
 
     public VertexPoint(@NotNull Point2D point, Vertex vertex){ this(point.getX(), point.getY(), vertex); }
 

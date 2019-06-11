@@ -17,10 +17,11 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Shape;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public enum NodeDragModel {
+public enum NodeDragModel implements Serializable {
     Standard{
         private double x, y;
         private double dx, dy;

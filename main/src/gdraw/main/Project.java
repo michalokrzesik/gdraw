@@ -28,19 +28,19 @@ import java.util.ListIterator;
 
 public class Project implements Serializable {
 
-    private File file;
-    private TreeView<Node> nodes;
+    private transient File file;
+    private transient TreeView<Node> nodes;
     private ArrayList<Selectable> graphObjects;
-    private ArrayList<Selectable> selected;
-    private Tab tab;
+    private transient ArrayList<Selectable> selected;
+    private transient Tab tab;
     private String name;
-    private MainController controller;
-    private Group group;
-    private ScrollPane properties;
+    private transient MainController controller;
+    private transient Group group;
+    private transient ScrollPane properties;
     private NodeDragModel dragModel;
 
-    private ActionHelper undo;
-    private ActionHelper redo;
+    private transient ActionHelper undo;
+    private transient ActionHelper redo;
 
     public Project(MainController mainController, String projectName, Group group, Canvas canvas, ScrollPane scrollPane, MIandButtonPair undoFXML, MIandButtonPair redoFXML) {
         name = projectName;

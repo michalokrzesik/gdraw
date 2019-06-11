@@ -1,14 +1,14 @@
 package gdraw.graph.vertex;
 
 import javafx.geometry.Point2D;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.PathElement;
 import javafx.scene.shape.QuadCurveTo;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
-public enum VertexType {
+public enum VertexType implements Serializable {
     Straight{
         @Override
         public PathElement newElement(VertexPoint a, VertexPoint b) {

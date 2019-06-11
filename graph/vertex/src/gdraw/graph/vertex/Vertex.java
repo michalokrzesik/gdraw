@@ -34,10 +34,10 @@ public class Vertex extends Selectable {
     private boolean duplex;
     private VertexType vertexType;
     private boolean selected;
-    private Group group;
-    private Path path;
+    private transient Group group;
+    private transient Path path;
     private Label label;
-    private ArrayList<Shape> arrows;
+    private transient ArrayList<Shape> arrows;
 
     private double value;
 

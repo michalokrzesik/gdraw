@@ -1,7 +1,6 @@
 package gdraw.graph.node;
 
 import gdraw.graph.util.Selectable;
-import gdraw.graph.util.action.GroupManagement;
 import gdraw.graph.util.action.MultiAction;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
@@ -25,7 +24,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
 public class Node extends Selectable {
-    private ImageView imageView;
+    private transient ImageView imageView;
     protected Point2D center;
     protected double width;
     protected double height;
@@ -33,15 +32,15 @@ public class Node extends Selectable {
     protected boolean isGroupNodes;
     protected ArrayList<Node> subNodes;
     protected ArrayList<Vertex> vertices;
-    protected Group group;
+    protected transient Group group;
     protected boolean isCollapsed;
     protected double widthCollapsed;
     protected double heightCollapsed;
-    protected boolean selected;
-    private Circle[] circles = new Circle[8];
-    private boolean hidden;
+    protected transient boolean selected;
+    private transient Circle[] circles = new Circle[8];
+    private transient boolean hidden;
 
-    protected TreeItem<Node> treeItem;
+    protected transient TreeItem<Node> treeItem;
 
     public Node(Point2D center, Image image, Group group, TreeItem<Node> parent, MainController mainController){
         mainController.addObject(this);

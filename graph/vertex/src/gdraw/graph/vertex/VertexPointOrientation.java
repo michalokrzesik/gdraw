@@ -1,7 +1,9 @@
 package gdraw.graph.vertex;
 
-public enum VertexPointOrientation {
+import java.io.Serializable;
+
+public enum VertexPointOrientation implements Serializable {
     NONE,
     HORIZONTAL,
-    VERTICAL;
+    VERTICAL
 }
