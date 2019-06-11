@@ -5,9 +5,12 @@ import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
+
+import java.util.ArrayList;
 
 public abstract class Selectable {
     protected MainController controller;
@@ -81,4 +84,14 @@ public abstract class Selectable {
 
         contextMenu.getItems().addAll(cut, copy, paste, separatorMenuItem, duplicate, delete);
     }
+
+    @Override
+    public String toString(){
+        if(label != null) return label.getLabel();
+        return "<bez_nazwy>";
+    }
+
+    public abstract void setLabel(String text);
+
+    public abstract void setProperties(ScrollPane properties, ArrayList<Selectable> selected);
 }

@@ -2,15 +2,14 @@ package gdraw.graph.vertex;
 
 import gdraw.graph.node.Node;
 import gdraw.graph.util.Selectable;
+import gdraw.graph.util.action.MultiAction;
 import gdraw.graph.util.action.VertexCreation;
 import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.MoveTo;
@@ -233,6 +232,67 @@ public class Vertex extends Selectable {
         else label.setLabel(newLabel);
     }
 
+    @Override
+    public void setProperties(ScrollPane properties, ArrayList<Selectable> selected) {
+        javafx.scene.control.Label labelName = new javafx.scene.control.Label("Etykieta:"),
+                lineName = new javafx.scene.control.Label("Typ linii:"),
+                arrowName = new javafx.scene.control.Label("Typ strzałek:"),
+                widthName = new javafx.scene.control.Label("Szerokość linii:"),
+                valueName = new javafx.scene.control.Label("Wartość krawędzi:"),
+                duplexName = new javafx.scene.control.Label("Dwustronny?");
+
+        double width = getLineWidth();
+        boolean isDuplex = duplex;
+        String v = String.valueOf(value);
+        String lt = lineType.toString(), at = arrowType.toString();
+
+        for(Selectable s : selected){
+            Vertex vertex = (Vertex) s;
+            if(v != String.valueOf(vertex.getValue())) v = "";
+            if(lt != vertex.lineType.toString()) lt = "";
+            if(at != vertex.arrowType.toString()) at = "";
+            isDuplex = isDuplex && vertex.isDuplex();
+            if(width != vertex.getLineWidth()) width = -1;
+        }
+
+        TextField labelField = new TextField(),
+                valueField = new TextField(v),
+                widthField = new TextField(width < 0 ? Double.toString(width) : "");
+
+        CheckBox duplexBox = new CheckBox(); duplexBox.selectedProperty().setValue(isDuplex);
+
+        ChoiceBox<LineType> lineTypeChoiceBox = new ChoiceBox<>(); lineTypeChoiceBox.getSelectionModel().select(LineType.valueOf(lt));
+        ChoiceBox<ArrowType> arrowTypeChoiceBox = new ChoiceBox<>(); arrowTypeChoiceBox.getSelectionModel().select(ArrowType.valueOf(at));
+
+        Button btn = new Button("Zatwierdź");
+
+        GridPane pane = new GridPane();
+        pane.getChildren().addAll(labelName, lineName, arrowName, widthName, valueName, duplexName,
+                labelField, lineTypeChoiceBox, arrowTypeChoiceBox, widthField, valueField, duplexBox, btn);
+
+        GridPane.setConstraints(labelName, 0, 0); GridPane.setConstraints(labelField, 1, 0);
+        GridPane.setConstraints(lineName, 0, 1); GridPane.setConstraints(lineTypeChoiceBox, 1, 1);
+        GridPane.setConstraints(arrowName, 0, 2); GridPane.setConstraints(arrowTypeChoiceBox, 1, 2);
+        GridPane.setConstraints(widthName, 0, 3); GridPane.setConstraints(widthField, 1, 3);
+        GridPane.setConstraints(valueName, 0, 4); GridPane.setConstraints(valueField, 1, 4);
+        GridPane.setConstraints(duplexName, 0, 5); GridPane.setConstraints(duplexBox, 1, 5);
+        GridPane.setConstraints(btn, 1, 7);
+
+        duplexBox.setOnAction(e -> selected.forEach(s -> ((Vertex) s).setDuplex(duplexBox.isSelected()) ));
+
+        btn.setOnAction(e -> {
+            selected.forEach(s -> s.setLabel(labelField.getText()));
+
+            MultiAction.applyVertexPropertiesChange(controller.getProject(), lineTypeChoiceBox, arrowTypeChoiceBox, widthField, valueField);
+            controller.getProject().draw();
+        });
+    }
+
+    private void setDuplex(boolean isDuplex) {
+        duplex = isDuplex;
+        draw();
+    }
+
     private Point2D getCenterForLabel() {
         int size = points.size();
         ListIterator it = points.listIterator(size/2);
@@ -344,4 +404,16 @@ public class Vertex extends Selectable {
         return duplex;
     }
 
+    @Override
+    public String toString(){
+        return super.toString() + " (" + value + ")";
+    }
+
+    public void setLineType(LineType lineType) {
+        this.lineType = lineType;
+    }
+
+    public void setArrowType(ArrowType arrowType) {
+        this.arrowType = arrowType;
+    }
 }

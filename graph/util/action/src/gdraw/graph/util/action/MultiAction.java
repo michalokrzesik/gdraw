@@ -4,10 +4,14 @@ import gdraw.graph.node.Node;
 import gdraw.graph.util.MIandButtonPair;
 import gdraw.graph.util.Request;
 import gdraw.graph.util.Selectable;
+import gdraw.graph.vertex.ArrowType;
+import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.Vertex;
 import gdraw.main.Project;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,5 +126,33 @@ public class MultiAction extends Action {
                 return r.getNode();
             }
         return null;
+    }
+
+    public static void applyNodePropertiesChange(Project project, double x, double y, double w, double h) {
+        MultiAction ma = new MultiAction(project.getRedo(), project.getUndo());
+        ActionHelper multiFrom = ma.multiFrom;
+        ActionHelper multiTo = ma.multiTo;
+        project.getSelected().forEach(o -> {
+            Translate.applyTranslate(multiFrom, o, x, y, multiTo);
+            double width = w > 0 ? w : ((Node) o).getWidth();
+            double height = h > 0 ? h : ((Node) o).getHeight();
+            NodeChangeSize.apply(multiFrom, (Node) o, width, height, multiTo);
+        });
+
+        if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
+        //Jeśli w objects nie było node'ów, nic się nie dzieje
+    }
+
+    public static void applyVertexPropertiesChange(Project project, ChoiceBox<LineType> lineTypeChoiceBox, ChoiceBox<ArrowType> arrowTypeChoiceBox, TextField widthField, TextField valueField) {
+        MultiAction ma = new MultiAction(project.getRedo(), project.getUndo());
+        ActionHelper multiFrom = ma.multiFrom;
+        ActionHelper multiTo = ma.multiTo;
+        project.getSelected().forEach(o -> {
+            Vertex v = (Vertex) o;
+            VertexEdit.apply(multiFrom, v, lineTypeChoiceBox, arrowTypeChoiceBox, widthField, valueField, multiTo);
+        });
+
+        if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
+        //Jeśli w objects nie było node'ów, nic się nie dzieje
     }
 }

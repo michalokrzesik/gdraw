@@ -190,7 +190,7 @@ public class MainController {
         projects.add(project);
         tabPane.getTabs().add(projects.get(projects.size() - 1).getTab());
         tabPane.getSelectionModel().select(projects.get(projects.size() - 1).getTab());
-        activeProject = project;
+        setProject(project);
         project.draw();
     }
 

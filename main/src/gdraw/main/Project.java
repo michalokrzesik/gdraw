@@ -17,6 +17,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -36,7 +37,6 @@ public class Project implements Serializable {
     private MainController controller;
     private Group group;
     private ScrollPane properties;
-    private double x, y;
     private NodeDragModel dragModel;
 
     private ActionHelper undo;
@@ -149,7 +149,32 @@ public class Project implements Serializable {
     }
 
     public void setProperties() {
-        if(selected.isEmpty()) properties.setContent(null);
+        if(selected.isEmpty())
+            properties.setContent(null);
+        else{
+            boolean allNodes = true, allVertices = true;
+            for(Selectable s : selected) {
+                allNodes = allNodes && s.isNode();
+                allVertices = allVertices && !s.isNode();
+            }
+            if(allNodes || allVertices)
+                selected.get(0).setProperties(properties, selected);
+            else{
+                Label labelName = new Label("Etykieta: ");
+                TextField labelField = new TextField();
+                Button btn = new Button("Zatwierdź");
+                btn.setOnAction(e -> selected.forEach(s -> s.setLabel(labelField.getText())));
+
+                GridPane pane = new GridPane();
+                pane.getChildren().addAll(labelName, labelField, btn);
+                GridPane.setConstraints(labelName, 0, 0);
+                GridPane.setConstraints(labelField, 1, 0);
+                GridPane.setConstraints(btn, 1, 2);
+
+                properties.setContent(pane);
+            }
+
+        }
     }
 
     public void refresh(MainController mainController, Tab tab, Group group, Canvas canvas, ScrollPane scrollPane) {

@@ -1,6 +1,7 @@
 package gdraw.graph.node;
 
 import gdraw.graph.util.Selectable;
+import gdraw.graph.util.action.GroupManagement;
 import gdraw.graph.util.action.MultiAction;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
@@ -14,6 +15,7 @@ import javafx.geometry.Point2D;
 import java.util.ArrayList;
 
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
@@ -133,6 +135,81 @@ public class Node extends Selectable {
             );
         }
         else label.setLabel(newLabel);
+    }
+
+    @Override
+    public void setProperties(ScrollPane properties, ArrayList<Selectable> selected) {
+
+        javafx.scene.control.Label labelName = new javafx.scene.control.Label("Etykieta:"),
+                centerName = new javafx.scene.control.Label("Środek:"),
+                xName = new javafx.scene.control.Label("x: "),
+                yName = new javafx.scene.control.Label("y: "),
+                widthName = new javafx.scene.control.Label("Szerokość:"),
+                heightName = new javafx.scene.control.Label("Wysokość:"),
+                groupName = new javafx.scene.control.Label("Jest grupą?");
+
+        double xmin = Double.MAX_VALUE, xmax = 0, ymin = Double.MAX_VALUE, ymax = 0, width = getWidth(), height = getHeight();
+        boolean isGroup = this.isGroupNodes;
+
+        for(Selectable s : selected){
+            Node node = (Node) s;
+            double x = node.getCenter().getX(), y = node.getCenter().getY();
+            xmin = x < xmin ? x : xmin; xmax = x > xmax ? x : xmax;
+            ymin = y < ymin ? y : ymin; ymax = y > ymax ? y : ymax;
+            isGroup = isGroup && node.isGroupNodes();
+            if(width != node.getWidth()) width = -1;
+            if(height != node.getHeight()) height = -1;
+        }
+
+        TextField labelField = new TextField(),
+                xField = new TextField(Double.toString((xmax + xmin)/2)), yField = new TextField(Double.toString((ymax + ymin)/2)),
+                widthField = new TextField(width < 0 ? Double.toString(width) : ""), heightField = new TextField(height < 0 ? Double.toString(height) : "");
+
+        CheckBox groupBox = new CheckBox(); groupBox.selectedProperty().setValue(isGroup);
+
+        Button btn = new Button("Zatwierdź");
+
+        GridPane pane = new GridPane();
+        pane.getChildren().addAll(labelName, centerName, xName, yName, widthName, heightName, groupName,
+                labelField, xField, yField, widthField, heightField, groupBox, btn);
+
+        GridPane.setConstraints(labelName, 0, 0); GridPane.setConstraints(labelField, 1, 0);
+        GridPane.setConstraints(centerName, 0, 1);
+        GridPane.setConstraints(xName, 0, 2); GridPane.setConstraints(xField, 1, 2);
+        GridPane.setConstraints(yName, 0, 3); GridPane.setConstraints(yField, 1, 3);
+        GridPane.setConstraints(widthName, 0, 4); GridPane.setConstraints(widthField, 1, 4);
+        GridPane.setConstraints(heightName, 0, 5); GridPane.setConstraints(heightField, 1, 5);
+        GridPane.setConstraints(groupName, 0, 6); GridPane.setConstraints(groupBox, 1, 6);
+        GridPane.setConstraints(btn, 1, 8);
+
+        groupBox.setOnAction(e -> {
+            if(groupBox.isSelected()) controller.nodesToGroups(e);
+            else controller.groupsToNodes(e);
+        });
+
+        double finalXmax = xmax;
+        double finalXmin = xmin;
+        double finalYmax = ymax;
+        double finalYmin = ymin;
+        btn.setOnAction(e -> {
+            selected.forEach(s -> s.setLabel(labelField.getText()));
+            double x = (finalXmax + finalXmin)/2, y = (finalYmax + finalYmin)/2, w, h;
+            try{
+                x = Double.parseDouble(xField.getText()) - x;
+            } catch(Exception e1) { x = (finalXmax + finalXmin)/2; }
+            try{
+                y = Double.parseDouble(yField.getText()) - y;
+            } catch(Exception e1) { y = (finalYmax + finalYmin)/2; }
+            try{
+                w = Double.parseDouble(widthField.getText());
+            } catch(Exception e1) { w = -1; }
+            try{
+                h = Double.parseDouble(heightField.getText());
+            } catch(Exception e1) { h = -1; }
+
+            MultiAction.applyNodePropertiesChange(controller.getProject(), x, y, w, h);
+            controller.getProject().draw();
+        });
     }
 
     public Node copy(TreeItem<Node> parent){

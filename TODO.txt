@@ -19,30 +19,29 @@
 
 3. W³aœciwoœci - selectedItem.showProperties()
 		- Node:
+		    -label : String
 			-isGroup : Boolean
-			-graphics : ImageView?
-			-label : String
 			-width : Double
 			-height : Double
 			-Coordinates: Pair(Double, Double)
-			----------------------------------
-			-widthCollapsed: Double
-			-heightCollapsed: Double
-			-Vertices: List<Vertex>
-			-toString = (label.isEmpty() ? "<bez nazwy>" : label)
+
+                    -widthCollapsed: Double
+                    -heightCollapsed: Double
+                    -Vertices: List<Vertex>
+                    -toString = (label.isEmpty() ? "<bez nazwy>" : label)
 
 		- Vertex:
 			-label: String
-			-fromNode : Node
-			-toNode : Node
-			-graphics : ImageView?
-			-isCurved : Boolean
-			-points : List<Point2D.Double>		//From JavaDRAW
-			-toString = (label.isEmpty() ? "<bez nazwy>" : label + (isValued ? " (" + value + ")" : "");
-			-type: DashType
-			-fromArrow : Boolean
-			-toArrow : Boolean
-			-isValued : Boolean
+                    -fromNode : Node
+                    -toNode : Node
+                    -graphics : ImageView?
+                    -isCurved : Boolean
+                    -points : List<Point2D.Double>		//From JavaDRAW
+                    -toString = (label.isEmpty() ? "<bez nazwy>" : label + (isValued ? " (" + value + ")" : "");
+			-type: lineType
+			-width: Double
+			-arrowtype: ArrowType
+			-duplex: Boolean
 			-value: Double			//For algorithms
 
 4. Canvas - jak w JavaDRAW
