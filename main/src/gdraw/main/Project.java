@@ -30,6 +30,7 @@ public class Project implements Serializable {
 
     private transient File file;
     private transient TreeView<Node> nodes;
+    private Background background;
     private ArrayList<Selectable> graphObjects;
     private transient ArrayList<Selectable> selected;
     private transient Tab tab;
@@ -42,7 +43,7 @@ public class Project implements Serializable {
     private transient ActionHelper undo;
     private transient ActionHelper redo;
 
-    public Project(MainController mainController, String projectName, Group group, Canvas canvas, ScrollPane scrollPane, MIandButtonPair undoFXML, MIandButtonPair redoFXML) {
+    public Project(MainController mainController, String projectName, Canvas canvas, ScrollPane scrollPane, MIandButtonPair undoFXML, MIandButtonPair redoFXML) {
         name = projectName;
         properties = scrollPane;
         graphObjects = new ArrayList<>();
@@ -54,11 +55,29 @@ public class Project implements Serializable {
 
         file = null;
         controller = mainController;
-        nodes = new TreeView<>();
         this.group = new Group();
-        Background background = new Background(controller, canvas, new Image("/white.png"), this.group, canvas.getWidth(), canvas.getHeight());
+        double width = canvas.getWidth(),
+        height = canvas.getHeight();
+        background = new Background(controller, canvas, new Image("/white.png"), this.group, width, height);
         this.group.getChildren().add(canvas);
-        nodes.setEditable(true);
+        setNodes();
+    }
+
+    public void refresh(File file, MainController mainController, Tab tab, ScrollPane scrollPane, MIandButtonPair undoFXML, MIandButtonPair redoFXML) {
+        controller = mainController;
+        undo = new ActionHelper(undoFXML);
+        redo = new ActionHelper(redoFXML);
+        this.tab = tab;
+        group = new Group();
+        properties = scrollPane;
+        selected = new ArrayList<>();
+        this.file = file;
+        background.refresh(this);
+        setNodes();
+    }
+
+    private void setNodes() {
+        nodes = new TreeView<>();
         nodes.setRoot(background.getTreeItem());
         nodes.getSelectionModel().selectedItemProperty().addListener((observableValue, oldTreeItem, newTreeItem) -> {
             oldTreeItem.getValue().setSelected(false);
@@ -70,7 +89,7 @@ public class Project implements Serializable {
                 ContextMenu contextMenu = new ContextMenu();
                 selectedTI.get(0).getValue().contextMenu(contextMenu);
                 contextMenu.show(nodes, e.getScreenX(), e.getScreenY());
-            };
+            }
         });
     }
 
@@ -110,7 +129,7 @@ public class Project implements Serializable {
     }
 
     public Background getBackground() {
-        return (Background) nodes.getRoot().getValue();
+        return background;
     }
 
     public void draw() {
@@ -175,13 +194,6 @@ public class Project implements Serializable {
             }
 
         }
-    }
-
-    public void refresh(MainController mainController, Tab tab, Group group, Canvas canvas, ScrollPane scrollPane) {
-        controller = mainController;
-        this.tab = tab;
-        //TODO
-
     }
 
     public Group getGroup() {
@@ -330,5 +342,9 @@ public class Project implements Serializable {
         selected.forEach(o -> {
             if(o.isNode() && ((Node) o).isGroupNodes()) ((Node) o).setCollapsed(collapsed);
         });
+    }
+
+    public void setParents() {
+        background.setParent();
     }
 }

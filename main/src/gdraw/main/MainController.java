@@ -163,14 +163,13 @@ public class MainController {
     }
 
     public void newProject(ActionEvent event) {
-        String array[] = newProjectAlert(); //zebranie informacji od użytkownika
+        String[] array = newProjectAlert(); //zebranie informacji od użytkownika
         String projectName = array[0];
         double projectWidth = Double.parseDouble(array[1]);
         double projectHeight = Double.parseDouble(array[2]);
 
         Canvas canvas = new Canvas(projectWidth, projectHeight);
-        Group group = new Group();
-        Project project = new Project(this, projectName, group, canvas, properties, undo, redo);
+        Project project = new Project(this, projectName, canvas, properties, undo, redo);
 
         projects.add(project);
         setProject(project);
@@ -180,11 +179,10 @@ public class MainController {
      * Funkcja odpowiedzialna za utworzenie nowego projektu (wykorzystywana przy odczycie).
      * @param project projekt z którego ma być utworzona nowa zakładka
      */
-    private void newProject(Project project) {
-
+    private void newProject(Project project, File file) {
         Tab tab = tabForProject(project);
 
-        project.refresh(this, tab, group, canvas, properties, undo, redo);
+        project.refresh(file, this, tab, properties, undo, redo);
 
         project.setTab(tab);//zmiana zakładki
         projects.add(project);
@@ -267,15 +265,8 @@ public class MainController {
         if(selectedFile != null) {
             try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(selectedFile))) {
                 Project project = (Project) inputStream.readObject();
-                newProject(project);
-            }
-            catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-            catch (ClassNotFoundException e) {
+                newProject(project, selectedFile);
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
@@ -342,13 +333,12 @@ public class MainController {
 
     private void saveProject(Project project) {
         File file = project.getFile();
+        project.setParents();
 
         //zapis
         if(file != null) {
             try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file))) {
                 outputStream.writeObject(project);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -366,7 +356,7 @@ public class MainController {
     }
 
     private void closeProject(Project project) {
-        tabPane.getTabs().remove(project); //usuwa z panelu
+        tabPane.getTabs().remove(project.getTab()); //usuwa z panelu
         projects.remove(project); //usuwa z listy
     }
 

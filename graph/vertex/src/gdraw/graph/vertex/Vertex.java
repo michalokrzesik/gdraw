@@ -11,7 +11,6 @@ import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
@@ -33,15 +32,15 @@ public class Vertex extends Selectable {
     private LinkedList<VertexPoint> points;
     private boolean duplex;
     private VertexType vertexType;
-    private boolean selected;
-    private transient Group group;
     private transient Path path;
     private Label label;
     private transient ArrayList<Shape> arrows;
+    private Color color;
+    private double width;
 
     private double value;
 
-    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, Group group, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w, Paint c, MainController mainController){
+    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, Group group, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w, Color c, MainController mainController){
         controller = mainController;
         fromNode = from;
         toNode = to;
@@ -49,16 +48,18 @@ public class Vertex extends Selectable {
         init(arrow, line, isDuplex, isCurved);
         points.addLast(new VertexPoint(toPoint, this));
         points.addFirst(new VertexPoint(fromPoint, this));
-        makePath(c, w);
+        color = c;
+        width = w;
+        makePath();
         value = 1.0;
         draw();
     }
 
-    private void makePath(Paint c, double w){
+    private void makePath(){
         path = new Path();
-        path.setStroke(c);
-        path.setStrokeWidth(w);
-        path.setStrokeDashOffset(w);
+        path.setStroke(color);
+        path.setStrokeWidth(width);
+        path.setStrokeDashOffset(width);
         path.setOnMouseClicked(this::setSelected);
         path.setOnMousePressed(this::onMousePressed);
         path.setOnMouseDragged(this::onMouseDragged);
@@ -102,7 +103,9 @@ public class Vertex extends Selectable {
         controller = vertex.controller;
         init(vertex.arrowType, vertex.lineType, vertex.duplex, vertex.vertexType == VertexType.Curved);
         value = vertex.value;
-        makePath(vertex.path.getStroke(), vertex.path.getStrokeWidth());
+        color = vertex.color;
+        width = vertex.width;
+        makePath();
 
         copyPoints(vertex);
     }
@@ -112,19 +115,21 @@ public class Vertex extends Selectable {
     }
 
     public void setColor(Color color){
+        this.color = color;
         path.setStroke(color);
     }
 
-    public Paint getColor(){
-        return path.getStroke();
+    public Color getColor(){
+        return color;
     }
 
     public void setLineWidth(double width){
+        this.width = width;
         path.setStrokeWidth(width);
     }
 
     public double getLineWidth(){
-        return path.getStrokeWidth();
+        return width;
     }
 
     public void setValue(double v){ value = v;}
@@ -153,7 +158,7 @@ public class Vertex extends Selectable {
         if(from == fromNode) draw();
     }
 
-    public void draw() {
+    private void draw() {
         group.getChildren().removeAll(arrows);
         group.getChildren().remove(path);
         path = new Path();
@@ -248,9 +253,9 @@ public class Vertex extends Selectable {
 
         for(Selectable s : selected){
             Vertex vertex = (Vertex) s;
-            if(v != String.valueOf(vertex.getValue())) v = "";
-            if(lt != vertex.lineType.toString()) lt = "";
-            if(at != vertex.arrowType.toString()) at = "";
+            if(!v.equals(String.valueOf(vertex.getValue()))) v = "";
+            if(!lt.equals(vertex.lineType.toString())) lt = "";
+            if(!at.equals(vertex.arrowType.toString())) at = "";
             isDuplex = isDuplex && vertex.isDuplex();
             if(width != vertex.getLineWidth()) width = -1;
         }
@@ -258,6 +263,8 @@ public class Vertex extends Selectable {
         TextField labelField = new TextField(),
                 valueField = new TextField(v),
                 widthField = new TextField(width < 0 ? Double.toString(width) : "");
+
+        ColorPicker colorPicker = new ColorPicker(); colorPicker.setValue(color);
 
         CheckBox duplexBox = new CheckBox(); duplexBox.selectedProperty().setValue(isDuplex);
 
@@ -268,22 +275,23 @@ public class Vertex extends Selectable {
 
         GridPane pane = new GridPane();
         pane.getChildren().addAll(labelName, lineName, arrowName, widthName, valueName, duplexName,
-                labelField, lineTypeChoiceBox, arrowTypeChoiceBox, widthField, valueField, duplexBox, btn);
+                labelField, lineTypeChoiceBox, arrowTypeChoiceBox, widthField, colorPicker, valueField, duplexBox, btn);
 
         GridPane.setConstraints(labelName, 0, 0); GridPane.setConstraints(labelField, 1, 0);
         GridPane.setConstraints(lineName, 0, 1); GridPane.setConstraints(lineTypeChoiceBox, 1, 1);
         GridPane.setConstraints(arrowName, 0, 2); GridPane.setConstraints(arrowTypeChoiceBox, 1, 2);
         GridPane.setConstraints(widthName, 0, 3); GridPane.setConstraints(widthField, 1, 3);
-        GridPane.setConstraints(valueName, 0, 4); GridPane.setConstraints(valueField, 1, 4);
-        GridPane.setConstraints(duplexName, 0, 5); GridPane.setConstraints(duplexBox, 1, 5);
-        GridPane.setConstraints(btn, 1, 7);
+        GridPane.setConstraints(colorPicker, 0, 4);
+        GridPane.setConstraints(valueName, 0, 5); GridPane.setConstraints(valueField, 1, 5);
+        GridPane.setConstraints(duplexName, 0, 6); GridPane.setConstraints(duplexBox, 1, 6);
+        GridPane.setConstraints(btn, 1, 8);
 
         duplexBox.setOnAction(e -> selected.forEach(s -> ((Vertex) s).setDuplex(duplexBox.isSelected()) ));
 
         btn.setOnAction(e -> {
             selected.forEach(s -> s.setLabel(labelField.getText()));
 
-            MultiAction.applyVertexPropertiesChange(controller.getProject(), lineTypeChoiceBox, arrowTypeChoiceBox, widthField, valueField);
+            MultiAction.applyVertexPropertiesChange(controller.getProject(), lineTypeChoiceBox, arrowTypeChoiceBox, widthField, colorPicker, valueField);
             controller.getProject().draw();
         });
     }
@@ -368,7 +376,8 @@ public class Vertex extends Selectable {
 
     @Override
     public void refresh(Project project) {
-        group = project.getGroup();
+        super.refresh(project);
+        points.forEach(p -> p.refresh(this));
         draw();
     }
 

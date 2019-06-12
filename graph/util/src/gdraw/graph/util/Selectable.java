@@ -3,6 +3,7 @@ package gdraw.graph.util;
 import gdraw.graph.util.action.SelectableCreationListener;
 import gdraw.main.MainController;
 import gdraw.main.Project;
+import javafx.scene.Group;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
@@ -15,7 +16,9 @@ import java.util.ArrayList;
 
 public abstract class Selectable implements Serializable {
     protected transient MainController controller;
-    protected SelectableCreationListener creationListener;
+    private SelectableCreationListener creationListener;
+    protected transient Group group;
+    protected transient boolean selected;
     protected Label label;
 
     public abstract void checkSelect(Rectangle rectangle);
@@ -50,7 +53,10 @@ public abstract class Selectable implements Serializable {
 
     public abstract boolean isNode();
 
-    public abstract void refresh(Project project);
+    public void refresh(Project project){
+        group = project.getGroup();
+        controller = project.getController();
+    }
 
     public void setCreationListener(SelectableCreationListener listener){
         creationListener = listener;

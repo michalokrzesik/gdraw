@@ -32,13 +32,12 @@ public class Node extends Selectable {
     protected boolean isGroupNodes;
     protected ArrayList<Node> subNodes;
     protected ArrayList<Vertex> vertices;
-    protected transient Group group;
     protected boolean isCollapsed;
     protected double widthCollapsed;
     protected double heightCollapsed;
-    protected transient boolean selected;
-    private transient Circle[] circles = new Circle[8];
+    private transient Circle[] circles;
     private transient boolean hidden;
+    private Node parent;
 
     protected transient TreeItem<Node> treeItem;
 
@@ -66,6 +65,10 @@ public class Node extends Selectable {
             treeItem.setGraphic(imageView);
         }
 
+    }
+
+    public void setParent() {
+        parent = treeItem.getParent().getValue();
     }
 
     private void makeImageView() {
@@ -96,6 +99,7 @@ public class Node extends Selectable {
     private void setCircles() {
         double w = getWidth(), h = getHeight();
         double x = center.getX() - w/2, y = center.getY() - h/2;
+        circles = new Circle[8];
         circles[0].setCenterX(x); circles[0].setCenterY(y);
         circles[1].setCenterX(x); circles[1].setCenterY(y + h/2);
         circles[2].setCenterX(x); circles[2].setCenterY(y + h);
@@ -235,7 +239,7 @@ public class Node extends Selectable {
         vertices.remove(vertex);
     }
 
-    public Vertex newVertex(Point2D start, Point2D stop, Node toNode, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double width, double value, Paint color){
+    public Vertex newVertex(Point2D start, Point2D stop, Node toNode, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double width, double value, Color color){
         VertexPoint startVP = new VertexPoint(start), stopVP = new VertexPoint(stop);
         startVP.setPointBounded(start, this);
         stopVP.setPointBounded(stop, toNode);
@@ -379,13 +383,14 @@ public class Node extends Selectable {
             group.getChildren().removeAll(circles);
         }
 
-        if(isGroupNodes) subNodes.forEach((Node n) -> n.draw());
+        if(isCollapsed) subNodes.forEach(Node::hide);
+        else subNodes.forEach(Node::draw);
     }
 
     private void hide() {
         if(!hidden) {
             group.getChildren().remove(imageView);
-            subNodes.forEach(node -> node.hide());
+            subNodes.forEach(Node::hide);
             hidden = true;
         }
     }
@@ -428,7 +433,13 @@ public class Node extends Selectable {
 
     @Override
     public void refresh(Project project) {
-        group = project.getGroup();
+        superRefresh(project);
+        makeImageView();
+        selected = false;
+        treeItem = new TreeItem<>(this);
+        parent.getTreeItem().getChildren().add(treeItem);
+        subNodes.forEach(n -> n.refresh(project));
+        vertices.forEach(v -> v.refresh(project));
         draw();
     }
 
@@ -454,6 +465,7 @@ public class Node extends Selectable {
 
     public void setCollapsed(boolean isCollapsed) {
         this.isCollapsed = isCollapsed;
+        draw();
     }
 
     public Image getImage() {
@@ -516,4 +528,7 @@ public class Node extends Selectable {
         grouping.getItems().addAll(group, ungroup, nodesToGroups, groupsToNodes, separatorMenuItem1, collapse, extend);
     }
 
+    protected void superRefresh(Project project) {
+        super.refresh(project);
+    }
 }

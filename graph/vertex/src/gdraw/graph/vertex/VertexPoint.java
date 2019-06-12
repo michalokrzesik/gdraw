@@ -25,6 +25,7 @@ public class VertexPoint implements Serializable {
 
     public VertexPoint(double x, double y, Vertex vertex, VertexPointOrientation orientation) {
         this(x,y);
+        this.orientation = orientation;
         setVertex(vertex);
     }
 
@@ -43,13 +44,22 @@ public class VertexPoint implements Serializable {
 
     public VertexPoint(double x, double y) {
         point = new Point2D(x, y);
-        this.orientation = orientation;
+        this.orientation = VertexPointOrientation.NONE;
         hardPoint = true;
+        setCircle();
+    }
+
+    private void setCircle() {
         circle = new Circle();
-        circle.setCenterX(x);
-        circle.setCenterY(y);
+        circle.setCenterX(point.getX());
+        circle.setCenterY(point.getY());
         circle.setRadius(3);
         circle.setFill(Color.BLUE);
+    }
+
+    public void refresh(Vertex vertex){
+        setCircle();
+        setVertex(vertex);
     }
 
     public double getX(){

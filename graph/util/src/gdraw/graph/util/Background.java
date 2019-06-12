@@ -3,6 +3,7 @@ package gdraw.graph.util;
 import gdraw.graph.node.Node;
 import gdraw.main.MainController;
 
+import gdraw.main.Project;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
@@ -17,11 +18,17 @@ public class Background extends Node {
 
     public Background(MainController mainController, Canvas canvas, Image image, Group group, double w, double h){
         this(new Point2D(w/2, h/2), image, group, mainController);
-        canvas.setWidth(w);
-        canvas.setHeight(h);
+        width = w;
+        height = h;
+        setCanvas(canvas);
+    }
+
+    private void setCanvas(Canvas canvas){
+        canvas.setWidth(width);
+        canvas.setHeight(height);
         canvas.getGraphicsContext2D().setStroke(Color.BLANCHEDALMOND);
         canvas.setOnMouseClicked(e -> setSelected(true));
-        canvas.setOnContextMenuRequested(mainController::contextMenu);
+        canvas.setOnContextMenuRequested(controller::contextMenu);
         canvas.setOnMousePressed(e -> {
             setSelected(true);
             x = e.getX();
@@ -33,17 +40,16 @@ public class Background extends Node {
         });
         canvas.setOnMouseReleased(e -> {
             draw();
-            mainController.select(x, y, e.getX(), e.getY());
+            controller.select(x, y, e.getX(), e.getY());
         });
-        setWidth(w);
-        setHeight(h);
 
         this.canvas = canvas;
+        draw();
         this.treeItem = new TreeItem<>(this);
         this.treeItem.setGraphic(canvas);
     }
 
-    public Background(Point2D center, Image image, Group group, MainController mainController) {
+    private Background(Point2D center, Image image, Group group, MainController mainController) {
         super(center, image, group, null, mainController);
     }
 
@@ -57,14 +63,20 @@ public class Background extends Node {
 
     public void setImage(Image newImage){ image = newImage; }
 
-    public Canvas getCanvas() {
-        if(canvas == null) {
-            canvas = new Canvas(getWidth(), getHeight());
-            draw();
-        }
-        return canvas;
+    @Override
+    public boolean isNode(){ return false; }
+
+    @Override
+    public void setParent(){
+        treeItem.getChildren().forEach(c -> subNodes.add(c.getValue()));
+        subNodes.forEach(Node::setParent);
     }
 
     @Override
-    public boolean isNode(){ return false; }
+    public void refresh(Project project){
+        superRefresh(project);
+        canvas = new Canvas();
+        setCanvas(canvas);
+        subNodes.forEach(n -> n.refresh(project));
+    }
 }

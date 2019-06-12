@@ -8,10 +8,7 @@ import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.Vertex;
 import gdraw.main.Project;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -143,13 +140,13 @@ public class MultiAction extends Action {
         //Jeśli w objects nie było node'ów, nic się nie dzieje
     }
 
-    public static void applyVertexPropertiesChange(Project project, ChoiceBox<LineType> lineTypeChoiceBox, ChoiceBox<ArrowType> arrowTypeChoiceBox, TextField widthField, TextField valueField) {
+    public static void applyVertexPropertiesChange(Project project, ChoiceBox<LineType> lineTypeChoiceBox, ChoiceBox<ArrowType> arrowTypeChoiceBox, TextField widthField, ColorPicker colorPicker, TextField valueField) {
         MultiAction ma = new MultiAction(project.getRedo(), project.getUndo());
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
         project.getSelected().forEach(o -> {
             Vertex v = (Vertex) o;
-            VertexEdit.apply(multiFrom, v, lineTypeChoiceBox, arrowTypeChoiceBox, widthField, valueField, multiTo);
+            VertexEdit.apply(multiFrom, v, lineTypeChoiceBox, arrowTypeChoiceBox, widthField, colorPicker, valueField, multiTo);
         });
 
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki

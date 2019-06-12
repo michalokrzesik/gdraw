@@ -21,7 +21,7 @@ public class VertexCreation extends Action {
     private LineType lineType;
     private boolean duplex, curved;
     private double width, value;
-    private Paint color;
+    private Color color;
     private SelectableCreationListener vertex, fromNode, toNode;
 
     private ActionType type;
