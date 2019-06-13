@@ -70,7 +70,7 @@ public class MainController {
     @FXML
     TextField width;
 
-    private MIandButtonPair undo = new MIandButtonPair(undoMI, undoB), redo = new MIandButtonPair(redoMI, redoB);
+    private MIandButtonPair undo, redo;
 
     private ArrayList<Project> projects;
     private Project activeProject;
@@ -80,16 +80,22 @@ public class MainController {
     private ArrayList<Request> requestedVertices;
 
     public void initialize() throws URISyntaxException {
-        nodeLibraryAccordion.getPanes().addAll(
+        /*nodeLibraryAccordion.getPanes().addAll(
                 new NodeLibrary("./libraries/Ostatnie.zip", nodeLibraryAccordion, this)
-        );
+        );*/
         clipboard = new ArrayList<>();
         projects = new ArrayList<>();
         requestedNodes = new ArrayList<>();
         requestedVertices = new ArrayList<>();
+        undo = new MIandButtonPair(undoMI, undoB);
+        redo = new MIandButtonPair(redoMI, redoB);
         undo.setDisable(true);
         redo.setDisable(true);
 
+        lineType.getItems().addAll(LineType.values());
+        lineType.setValue(LineType.Straight);
+        arrowType.getItems().addAll(ArrowType.values());
+        arrowType.setValue(ArrowType.None);
         //TODO
     }
 

@@ -14,6 +14,11 @@ import java.util.ArrayList;
 public enum ArrowType implements Serializable {
     None{
         public void draw(ArrayList<Shape> arrows, Paint color, VertexPoint source, VertexPoint destination){}
+
+        @Override
+        public String toString() {
+            return "———";
+        }
     },
     Opened{
         @Override
@@ -24,6 +29,11 @@ public enum ArrowType implements Serializable {
             for(double coordinate : points)
                 polyline.getPoints().add(coordinate);
             arrows.add(polyline);
+        }
+
+        @Override
+        public String toString() {
+            return "———>";
         }
     },
     Filled{
@@ -39,6 +49,11 @@ public enum ArrowType implements Serializable {
             for(double coordinate : points)
                 polygon.getPoints().add(coordinate);
             arrows.add(polygon);
+        }
+
+        @Override
+        public String toString() {
+            return "———▶";
         }
     };
 

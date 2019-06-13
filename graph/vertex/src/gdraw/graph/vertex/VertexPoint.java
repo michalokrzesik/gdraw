@@ -4,7 +4,6 @@ import gdraw.graph.node.Node;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 
@@ -14,9 +13,9 @@ public class VertexPoint implements Serializable {
     private boolean hardPoint;
     private transient Circle circle;
 
-    public VertexPoint(@NotNull Point2D point, Vertex vertex){ this(point.getX(), point.getY(), vertex); }
+    public VertexPoint(Point2D point, Vertex vertex){ this(point.getX(), point.getY(), vertex); }
 
-    public VertexPoint(@NotNull Point2D point, Vertex vertex, boolean hardPoint){
+    public VertexPoint(Point2D point, Vertex vertex, boolean hardPoint){
         this(point.getX(), point.getY(), vertex);
         setHardPoint(hardPoint);
     }
