@@ -58,8 +58,8 @@ public class Project implements Serializable {
         this.group = new Group();
         double width = canvas.getWidth(),
         height = canvas.getHeight();
-        background = new Background(controller, canvas, new Image("/white.png"), this.group, width, height);
-        this.group.getChildren().add(canvas);
+        background = new Background(controller, canvas, new Image(new File("./libraries/default_bck.png").toURI().toString()), this.group, width, height);
+        group.getChildren().add(canvas);
         setNodes();
     }
 

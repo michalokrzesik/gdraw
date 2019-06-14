@@ -42,7 +42,6 @@ public class Node extends Selectable {
     protected transient TreeItem<Node> treeItem;
 
     public Node(Point2D center, Image image, Group group, TreeItem<Node> parent, MainController mainController){
-        mainController.addObject(this);
         controller = mainController;
         this.center = center;
         this.image = image;
@@ -54,13 +53,15 @@ public class Node extends Selectable {
         isCollapsed = false;
         isGroupNodes = false;
         vertices = new ArrayList<>();
+        subNodes = new ArrayList<>();
         this.group = group;
-        makeImageView();
-        setSelected();
-        setCircles();
+        treeItem = new TreeItem<>(this);
 
         if(parent != null) {
-            treeItem = new TreeItem<>(this);
+            mainController.addObject(this);
+            makeImageView();
+            setSelected();
+            setCircles();
             parent.getChildren().add(treeItem);
             treeItem.setGraphic(imageView);
         }
@@ -92,6 +93,7 @@ public class Node extends Selectable {
         heightCollapsed = node.heightCollapsed;
         isGroupNodes = node.isGroupNodes;
         isCollapsed = node.isCollapsed;
+        treeItem = new TreeItem<>(this);
 
         setCircles();
     }
@@ -100,19 +102,19 @@ public class Node extends Selectable {
         double w = getWidth(), h = getHeight();
         double x = center.getX() - w/2, y = center.getY() - h/2;
         circles = new Circle[8];
-        circles[0].setCenterX(x); circles[0].setCenterY(y);
-        circles[1].setCenterX(x); circles[1].setCenterY(y + h/2);
-        circles[2].setCenterX(x); circles[2].setCenterY(y + h);
-        circles[3].setCenterX(x + w/2); circles[3].setCenterY(y + h);
-        circles[4].setCenterX(x + w); circles[4].setCenterY(y + h);
-        circles[5].setCenterX(x + w); circles[5].setCenterY(y + h/2);
-        circles[6].setCenterX(x + w); circles[6].setCenterY(y);
-        circles[7].setCenterX(x + w/2); circles[7].setCenterY(y);
+
+        circles[0] = new Circle(3); circles[0].setCenterX(x); circles[0].setCenterY(y);
+        circles[1] = new Circle(3); circles[1].setCenterX(x); circles[1].setCenterY(y + h/2);
+        circles[2] = new Circle(3); circles[2].setCenterX(x); circles[2].setCenterY(y + h);
+        circles[3] = new Circle(3); circles[3].setCenterX(x + w/2); circles[3].setCenterY(y + h);
+        circles[4] = new Circle(3); circles[4].setCenterX(x + w); circles[4].setCenterY(y + h);
+        circles[5] = new Circle(3); circles[5].setCenterX(x + w); circles[5].setCenterY(y + h/2);
+        circles[6] = new Circle(3); circles[6].setCenterX(x + w); circles[6].setCenterY(y);
+        circles[7] = new Circle(3); circles[7].setCenterX(x + w/2); circles[7].setCenterY(y);
 
         for(int i = 0; i < circles.length; i++){
             circles[i].setFill(Color.BLUE);
             circles[i].setStroke(Color.BLUE);
-            circles[i].setRadius(3);
             int finalI = i;
             circles[i].setOnMouseDragged(e -> CircleHelper.move(controller.getProject(),this, finalI, e.getX() - circles[finalI].getCenterX(), e.getY() - circles[finalI].getCenterY()));
         }
@@ -121,7 +123,7 @@ public class Node extends Selectable {
     public Node(Point2D center, Image image, Group group, boolean isGroupNodes, TreeItem<Node> parent, MainController mainController){
         this(center, image, group, parent, mainController);
         this.isGroupNodes = isGroupNodes;
-        if(isGroupNodes) subNodes = new ArrayList<>();
+        subNodes = new ArrayList<>();
     }
 
     public void setSelected(boolean selected) {
@@ -261,9 +263,9 @@ public class Node extends Selectable {
     }
 
     public void groupNodes(Node node){
-        TreeItem<Node> nodeTI = node.getTreeItem();
-        nodeTI.getParent().getChildren().remove(nodeTI);
-        nodeTI.getParent().getValue().removeSubNode(node);
+        TreeItem<Node> nodeTI = node.getTreeItem(), parent = nodeTI.getParent();
+        parent.getChildren().remove(nodeTI);
+        parent.getValue().removeSubNode(node);
         treeItem.getChildren().add(nodeTI);
         subNodes.add(node);
         expandIfNeeded();
@@ -292,7 +294,9 @@ public class Node extends Selectable {
     }
 
     private void fitInGroup() {
-        Node parent = treeItem.getParent().getValue();
+        TreeItem<Node> p = treeItem.getParent();
+        if(p == null) return;
+        Node parent = p.getValue();
         double px = parent.getCenter().getX(), py = parent.getCenter().getY(), pw = parent.getWidth(), ph = parent.getHeight();
         double x = center.getX(), y = center.getY();
 
@@ -304,7 +308,7 @@ public class Node extends Selectable {
         dx = (dx > 0 ? dx : (x + w/2) - (px + pw/2));
         dy = (dy > 0 ? dy : (y + h/2) - (py + ph/2));
 
-        translate(dx, dy);
+        translate(dx, dy, false);
     }
 
     public void changeGroupToNode() {
@@ -395,12 +399,17 @@ public class Node extends Selectable {
         }
     }
 
+    @Override
     public void translate(double dx, double dy){
+        translate(dx, dy, true);
+    }
+
+    public void translate(double dx, double dy, boolean fit){
         double x = center.getX() + dx, y = center.getY() + dy;
         center = new Point2D(x, y);
-        fitInGroup();
+        if(fit) fitInGroup();
         vertices.forEach((Vertex v) -> v.translateNode(this, dx, dy));
-        if(isGroupNodes) subNodes.forEach((Node n) -> n.translate(dx, dy));
+        if(isGroupNodes) subNodes.forEach(n -> n.translate(dx, dy));
     }
 
     @Override

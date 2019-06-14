@@ -11,6 +11,10 @@ import javafx.scene.layout.FlowPane;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -20,58 +24,53 @@ import gdraw.main.Main;
 
 public class NodeLibrary extends TitledPane {
     private MainController controller;
-    private String path;
+    private File path;
     private Accordion parent;
     private FlowPane pane;
     private ImageViewWithName selected;
 
-    public NodeLibrary(String path, Accordion parent, MainController controller) throws URISyntaxException {
-        super(new File(Main.class.getResource(path).toURI()).getName(), null);
+    public NodeLibrary(File path, Accordion parent, MainController controller, FlowPane pane) {
+        super(path.getName(), pane);
         this.controller = controller;
         this.parent = parent;
         this.path = path;
-        pane = new FlowPane();
-        this.getChildren().add(pane);
-        try {
-            show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+        this.pane = pane;
+        show();
+    }
+
+    private void show() {
+        /*URL zipUrl = Main.class.getResource(path);
+        File zipFile = new File(zipUrl.toURI()); */
+        //ZipFile zip = new ZipFile(path);
+        for(File file: path.listFiles()) {
+            pane.getChildren().add(
+                    new ImageViewWithName(
+                            this,
+                            file.getName(),
+                            new Image(file.toURI().toString())));
         }
     }
 
-    private void show() throws IOException, URISyntaxException {
-        URL zipUrl = Main.class.getResource(path);
+    public void addNode(File nodePath) throws IOException {
+        /*URL zipUrl = Main.class.getResource(path);
         File zipFile = new File(zipUrl.toURI());
-        ZipFile zip = new ZipFile(zipFile);
-        zip.stream().forEach(
-                (e) -> pane.getChildren().add(
-                        new ImageViewWithName(
-                                this,
-                                e.getName(),
-                                new Image(getClass().getResource(e.getName()).toExternalForm())))
-        );
+        ZipFile zip = new ZipFile(path);*/
+/*        for(File file : path.listFiles())
+            if(file.getName() == nodePath.getName())
+                return;*/
+//            addOrRemoveNode(nodePath, true);
+
+        Files.copy(nodePath.toPath(), Paths.get(path.getAbsolutePath() + File.pathSeparator + nodePath.getName()), StandardCopyOption.REPLACE_EXISTING);
     }
 
-    public void addNode(String nodePath) throws IOException, URISyntaxException {
-        URL zipUrl = Main.class.getResource(path);
-        File zipFile = new File(zipUrl.toURI());
-        ZipFile zip = new ZipFile(zipFile);
-
-        if(zip.getEntry(nodePath.substring(nodePath.lastIndexOf(File.separator))) == null)
-            addOrRemoveNode(nodePath, true);
-    }
-
-    public void addOrRemoveNode(String nodePathOrName, boolean add) throws URISyntaxException, IOException {
-        URL oldUrl = Main.class.getResource(path);
+    /*public void addOrRemoveNode(String nodePathOrName, boolean add) throws URISyntaxException, IOException {
+        URL oldUrl = Main.class.getResource(path.getAbsolutePath());
         File oldFile = new File(oldUrl.toURI());
         ZipFile in = new ZipFile(oldFile);
 
-        String newPath = path.replace(".zip", "_tmp.zip");
-        URL newURL = Main.class.getResource(newPath);
-        File newFile = new File(newURL.toURI());
-        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(newFile));
+        URL newURL = Main.class.getResource(path.getAbsolutePath().replace(".zip", "_tmp.zip"));
+        path = new File(newURL.toURI());
+        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(path));
 
         in.stream().forEach((e) -> {
             if(add || e.getName() != nodePathOrName) {
@@ -93,7 +92,7 @@ public class NodeLibrary extends TitledPane {
         out.close();
         in.close();
 
-        newFile.renameTo(oldFile);
+        path.renameTo(oldFile);
 
         pane.getChildren().add(new ImageView(new Image(getClass().getResource(nodePathOrName).toExternalForm())));
     }
@@ -107,14 +106,15 @@ public class NodeLibrary extends TitledPane {
         }
         out.closeEntry();
         inputStream.close();
-    }
+    }*/
 
     public void setSelected(ImageViewWithName selected) {
         this.selected = selected;
     }
 
     public void unselect() {
-        selected.unselect();
+        if(selected != null)
+            selected.unselect();
     }
 
 
@@ -122,12 +122,12 @@ public class NodeLibrary extends TitledPane {
         return parent.getPanes();
     }
 
-    public String getPath(String name) throws URISyntaxException, IOException {
-        URL zipUrl = Main.class.getResource(path);
+    public File getPath(String name) {
+        /*URL zipUrl = Main.class.getResource(path);
         File zipFile = new File(zipUrl.toURI());
-        ZipFile zip = new ZipFile(zipFile);
-        File dir = zipFile.getParentFile();
-        String path = dir + File.separator + name;
+        ZipFile zip = new ZipFile(path);/
+        File dir = path.getParentFile();
+        String path = dir.getAbsolutePath() + File.separator + name;
         File file = new File(path);
         file.delete();                                  //W razie gdyby istniało już
 
@@ -138,26 +138,34 @@ public class NodeLibrary extends TitledPane {
             bos.write(bytesIn, 0, read);
         }
         bos.close();
+         */
+        for(File file : path.listFiles())
+            if(file.getName().equals(name))
+                return file;
 
-        return path;
+        return null;
     }
 
-    public void remove(String name) throws IOException, URISyntaxException {
-        addOrRemoveNode(name, false);
+    public void remove(String name) {
+        //addOrRemoveNode(name, false);
+        getPath(name).delete();
     }
 
     public NodeLibrary newLibraryWithNode(String libraryName, String nodeName) throws IOException, URISyntaxException {
-        URL zipUrl = Main.class.getResource(path);
+        /*URL zipUrl = Main.class.getResource(path);
         File zipFile = new File(zipUrl.toURI());
-        ZipFile zip = new ZipFile(zipFile);
-        File dir = zipFile.getParentFile();
-        String path = dir + File.separator + libraryName + ".zip";
+        ZipFile zip = new ZipFile(path);*/
+        File dir = path.getParentFile();
+        String path = dir.getAbsolutePath() + File.pathSeparator + libraryName;
         File file = new File(path);
-        ZipOutputStream newZip = new ZipOutputStream(new FileOutputStream(file));
+        file.mkdir();
+/*        ZipOutputStream newZip = new ZipOutputStream(new FileOutputStream(file));
 
         addEntry(nodeName, zip.getInputStream(zip.getEntry(nodeName)), newZip);
-
-        return new NodeLibrary(path, parent, controller);
+*/
+        NodeLibrary ret = new NodeLibrary(file, parent, controller, new FlowPane());
+        ret.addNode(getPath(nodeName));
+        return ret;
     }
 
     public void toGraph(){ selected.addToGraph(); }
@@ -166,9 +174,10 @@ public class NodeLibrary extends TitledPane {
         controller.addNode(image);
     }
 
-    public String getName() throws URISyntaxException {
-        URL zipUrl = Main.class.getResource(path);
+    public String getName() {
+        /*URL zipUrl = Main.class.getResource(path);
         File zipFile = new File(zipUrl.toURI());
-        return zipFile.getName();
+        return zipFile.getName();*/
+        return path.getName();
     }
 }

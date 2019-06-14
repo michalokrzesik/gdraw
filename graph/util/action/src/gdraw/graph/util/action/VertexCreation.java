@@ -7,7 +7,6 @@ import gdraw.graph.vertex.Vertex;
 import gdraw.graph.vertex.VertexType;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 public class VertexCreation extends Action {
 

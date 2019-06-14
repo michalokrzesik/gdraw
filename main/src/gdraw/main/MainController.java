@@ -14,7 +14,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
@@ -23,6 +22,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 
@@ -79,10 +79,10 @@ public class MainController {
     private ArrayList<Request> requestedNodes;
     private ArrayList<Request> requestedVertices;
 
-    public void initialize() throws URISyntaxException {
-        /*nodeLibraryAccordion.getPanes().addAll(
-                new NodeLibrary("./libraries/Ostatnie.zip", nodeLibraryAccordion, this)
-        );*/
+    public void initialize() {
+        nodeLibraryAccordion.getPanes().addAll(
+                new NodeLibrary(new File("./libraries/OSTATNIE"), nodeLibraryAccordion, this, new FlowPane())
+        );
         clipboard = new ArrayList<>();
         projects = new ArrayList<>();
         requestedNodes = new ArrayList<>();
@@ -96,11 +96,11 @@ public class MainController {
         lineType.setValue(LineType.Straight);
         arrowType.getItems().addAll(ArrowType.values());
         arrowType.setValue(ArrowType.None);
-        //TODO
     }
 
     public void addNodeToActiveLibrary(ActionEvent actionEvent) throws IOException, URISyntaxException {
-        String path = (ImageFileChooser("Wybierz obraz", null).showOpenDialog(null).getAbsolutePath());
+        File path = (ImageFileChooser("Wybierz obraz", null).showOpenDialog(null));
+        if(path == null) return;
         ((NodeLibrary) nodeLibraryAccordion.getExpandedPane()).addNode(path);
     }
 
@@ -110,6 +110,7 @@ public class MainController {
         String[] formatNames = ImageIO.getWriterFormatNames();
         for(String formatName : formatNames)
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(formatName + " format","*." + formatName));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Wszystkie pliki", "*"));
         fileChooser.setSelectedExtensionFilter(fileChooser.getExtensionFilters().get(0));
         if(name != null)
             fileChooser.setInitialFileName(name + fileChooser.getSelectedExtensionFilter().getExtensions().get(0));
@@ -118,9 +119,10 @@ public class MainController {
 
 
     public void addNodeLibrary(ActionEvent actionEvent) throws URISyntaxException {
-        String path = (new FileChooser().showOpenDialog(null).getAbsolutePath());
+        File path = (new FileChooser().showOpenDialog(null));
+        if(path == null) return;
 
-        TitledPane titledPane = new NodeLibrary(path, nodeLibraryAccordion, this);
+        TitledPane titledPane = new NodeLibrary(path, nodeLibraryAccordion, this, new FlowPane());
         nodeLibraryAccordion.getChildrenUnmodifiable().add(titledPane);
         nodeLibraryAccordion.setExpandedPane(titledPane);
 
@@ -176,6 +178,8 @@ public class MainController {
 
         Canvas canvas = new Canvas(projectWidth, projectHeight);
         Project project = new Project(this, projectName, canvas, properties, undo, redo);
+
+        project.setTab(tabForProject(project));
 
         projects.add(project);
         setProject(project);
@@ -373,6 +377,7 @@ public class MainController {
     public void setProject(Project project) {
         activeProject = project;
         hierarchy.setContent(project.getTreeView());
+
         project.setProperties();
     }
 

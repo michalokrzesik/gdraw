@@ -2,7 +2,7 @@ package gdraw.graph.node;
 
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.effect.Bloom;
+import javafx.scene.effect.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -11,6 +11,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -20,6 +21,8 @@ public class ImageViewWithName extends ImageView {
 
     public ImageViewWithName(NodeLibrary parent, String name, Image image) {
         super(image);
+        setFitHeight(100);
+        setFitWidth(100);
         this.name = name;
         this.parent = parent;
 
@@ -38,13 +41,7 @@ public class ImageViewWithName extends ImageView {
             MenuItem toParent = new MenuItem("Przenieś do kategorii");
             toParent.setOnAction(e -> {
                 selectParentAndAdd();
-                try {
-                    parent.remove(name);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                } catch (URISyntaxException ex) {
-                    ex.printStackTrace();
-                }
+                parent.remove(name);
             });
 
             MenuItem newParent = new MenuItem("Utwórz kategorię z...");
@@ -60,9 +57,7 @@ public class ImageViewWithName extends ImageView {
                     if(lib.isEmpty() || lib.contains(" ")) lib = "Nowa Kategoria";
                     try {
                         parent.getLibraryList().add(parent.newLibraryWithNode(lib, name));
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    } catch (URISyntaxException ex) {
+                    } catch (IOException | URISyntaxException ex) {
                         ex.printStackTrace();
                     }
                     window.close();
@@ -76,15 +71,7 @@ public class ImageViewWithName extends ImageView {
             });
 
             MenuItem delete = new MenuItem("Usuń z kategorii");
-            delete.setOnAction(e -> {
-                try {
-                    parent.remove(name);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                } catch (URISyntaxException ex) {
-                    ex.printStackTrace();
-                }
-            });
+            delete.setOnAction(e -> parent.remove(name));
 
             contextMenu.getItems().addAll(toGraph, addParent, toParent, newParent, delete);
             contextMenu.show(this, event.getScreenX(), event.getScreenY());
@@ -94,15 +81,14 @@ public class ImageViewWithName extends ImageView {
 
     public void addToGraph() {
         parent.toGraph(getImage());
-        for(TitledPane titledPane : parent.getLibraryList()){
+        for(TitledPane titledPane : parent.getLibraryList()) {
             NodeLibrary library = (NodeLibrary) titledPane;
-            try {
-                if(library.getName() == "Ostatnie.zip")
+            if (library.getName().equals("OSTATNIE")) {
+                try {
                     library.addNode(parent.getPath(name));
-            } catch (URISyntaxException ex) {
-                ex.printStackTrace();
-            } catch (IOException ex) {
-                ex.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -117,23 +103,16 @@ public class ImageViewWithName extends ImageView {
 
         ListView<TitledPane> libraryListView = new ListView<>(parent.getLibraryList());
         libraryListView.setOnMouseClicked(event1 -> {
-            String path = null;
-            try {
-                path = parent.getPath(name);
-            } catch (URISyntaxException ex) {
-                ex.printStackTrace();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            File path = parent.getPath(name);
+
             TitledPane titledPane = libraryListView.getSelectionModel().getSelectedItem();
             NodeLibrary library = (NodeLibrary) titledPane;
             try {
                 library.addNode(path);
-            } catch (URISyntaxException ex) {
-                ex.printStackTrace();
-            } catch (IOException ex) {
-                ex.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
             window.close();
         });
 
@@ -145,7 +124,7 @@ public class ImageViewWithName extends ImageView {
     private void select() {
         parent.unselect();
         parent.setSelected(this);
-        this.setEffect(new Bloom());
+        this.setEffect(new InnerShadow());
     }
 
     public void unselect(){

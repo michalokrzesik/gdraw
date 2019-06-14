@@ -1,6 +1,7 @@
 package gdraw.graph.util;
 
 import gdraw.graph.node.Node;
+import gdraw.graph.util.action.SelectableCreationListener;
 import gdraw.main.MainController;
 
 import gdraw.main.Project;
@@ -18,6 +19,8 @@ public class Background extends Node {
 
     public Background(MainController mainController, Canvas canvas, Image image, Group group, double w, double h){
         this(new Point2D(w/2, h/2), image, group, mainController);
+        treeItem = new TreeItem<>(this);
+        new SelectableCreationListener(this);
         width = w;
         height = h;
         setCanvas(canvas);

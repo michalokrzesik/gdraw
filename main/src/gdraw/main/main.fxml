@@ -39,7 +39,7 @@
                <content>
                   <ScrollPane fitToHeight="true" fitToWidth="true">
                      <content>
-                        <Accordion fx:id="nodeLibraryAccoridion" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity">
+                        <Accordion fx:id="nodeLibraryAccordion" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity">
                            <contextMenu>
                               <ContextMenu>
                                 <items>
@@ -62,7 +62,7 @@
                   <ScrollPane fx:id="properties" fitToHeight="true" fitToWidth="true" />
                </content>
             </TitledPane>
-            <TabPane tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowSpan="2147483647" />
+            <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowSpan="2147483647" />
          </children>
       </GridPane>
    </center>
