@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckMenuItem?>
@@ -17,6 +18,9 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.effect.ImageInput?>
+<?import javafx.scene.effect.SepiaTone?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -39,7 +43,7 @@
                <content>
                   <ScrollPane fitToHeight="true" fitToWidth="true">
                      <content>
-                        <Accordion fx:id="nodeLibraryAccoridion" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity">
+                        <Accordion fx:id="nodeLibraryAccordion" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #FDF5E6;">
                            <contextMenu>
                               <ContextMenu>
                                 <items>
@@ -48,21 +52,39 @@
                                 </items>
                               </ContextMenu>
                            </contextMenu>
+                           <effect>
+                              <SepiaTone level="0.3" />
+                           </effect>
                         </Accordion>
                      </content></ScrollPane>
                </content>
+               <effect>
+                  <SepiaTone />
+               </effect>
             </TitledPane>
             <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Hierarchia" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                <content>
-                  <ScrollPane fx:id="hierarchy" fitToHeight="true" fitToWidth="true" />
+                  <ScrollPane fx:id="hierarchy" fitToHeight="true" fitToWidth="true" style="-fx-background-color: #FDF5E6;">
+                     <effect>
+                        <SepiaTone level="0.3" />
+                     </effect></ScrollPane>
                </content>
+               <effect>
+                  <SepiaTone />
+               </effect>
             </TitledPane>
             <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Właściwości" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                <content>
-                  <ScrollPane fx:id="properties" fitToHeight="true" fitToWidth="true" />
+                  <ScrollPane fx:id="properties" fitToHeight="true" fitToWidth="true" style="-fx-background-color: #FDF5E6;">
+                     <effect>
+                        <SepiaTone level="0.3" />
+                     </effect></ScrollPane>
                </content>
+               <effect>
+                  <SepiaTone />
+               </effect>
             </TitledPane>
-            <TabPane tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowSpan="2147483647" />
+            <TabPane style="-fx-background-color: #FDF5E6; -fx-border-color: #DEB887; -fx-border-radius: 5;" tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowSpan="2147483647" />
          </children>
       </GridPane>
    </center>
@@ -74,26 +96,125 @@
         </columnConstraints>
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <ToolBar prefHeight="40.0" prefWidth="200.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
+            <ToolBar style="-fx-background-color: #F5DEB3; -fx-background-radius: 7;" translateY="-3.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
               <items>
-                <Button mnemonicParsing="false" onAction="#newProject" text="Nowy projekt" />
-                  <Button layoutX="10.0" layoutY="13.0" mnemonicParsing="false" onAction="#openProject" text="Otwórz" />
-                  <Button layoutX="54.0" layoutY="13.0" mnemonicParsing="false" onAction="#saveProject" text="Zapisz" />
-                  <Button layoutX="104.0" layoutY="13.0" mnemonicParsing="false" onAction="#cutSelected" text="Wytnij" />
-                  <Button layoutX="149.0" layoutY="13.0" mnemonicParsing="false" onAction="#copySelected" text="Kopiuj" />
-                  <Button layoutX="188.0" layoutY="13.0" mnemonicParsing="false" onAction="#paste" text="Wklej" />
-                  <Button layoutX="236.0" layoutY="13.0" mnemonicParsing="false" onAction="#deleteSelected" text="Usuń" />
-                  <Button fx:id="undoB" layoutX="285.0" layoutY="13.0" mnemonicParsing="false" onAction="#undo" text="Cofnij" />
-                  <Button fx:id="redoB" layoutX="340.0" layoutY="13.0" mnemonicParsing="false" onAction="#redo" text="Powtórz" />
-                 <Button layoutX="390.0" layoutY="63.0" mnemonicParsing="false" onAction="#addNode" text="Dodaj węzeł" />
-                  <MenuButton mnemonicParsing="false" text="Krawędź">
+                <Button mnemonicParsing="false" onAction="#newProject" prefHeight="27.0" prefWidth="15.0" text="Nowy">
+                     <effect>
+                        <ImageInput>
+                           <source>
+                              <Image url="file:./toolbar_images/new.png" />
+                           </source>
+                        </ImageInput>
+                     </effect>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
+                  <Button layoutX="10.0" layoutY="13.0" mnemonicParsing="false" onAction="#openProject" prefHeight="25.0" prefWidth="25.0" text="Otwórz">
+                     <effect>
+                        <ImageInput>
+                           <source>
+                              <Image url="file:./toolbar_images/open.png" />
+                           </source>
+                        </ImageInput>
+                     </effect>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
+                  <Button contentDisplay="GRAPHIC_ONLY" layoutX="54.0" layoutY="13.0" mnemonicParsing="false" onAction="#saveProject" prefHeight="14.0" prefWidth="24.0" style="-fx-background-size: 10;" text="Zapisz">
+                     <effect>
+                        <ImageInput>
+                           <source>
+                              <Image url="file:./toolbar_images/save.png" />
+                           </source></ImageInput>
+                     </effect>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
+                  <Button layoutX="104.0" layoutY="13.0" mnemonicParsing="false" onAction="#cutSelected" prefHeight="25.0" prefWidth="30.0" text="Wytnij">
+                     <effect>
+                        <ImageInput y="3.0">
+                           <source>
+                              <Image url="file:./toolbar_images/cut.png" />
+                           </source>
+                        </ImageInput>
+                     </effect>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
+                  <Button layoutX="149.0" layoutY="13.0" mnemonicParsing="false" onAction="#copySelected" prefHeight="33.0" prefWidth="29.0" text="Kopiuj">
+                     <effect>
+                        <ImageInput x="3.0">
+                           <source>
+                              <Image url="file:./toolbar_images/copy.png" />
+                           </source>
+                        </ImageInput>
+                     </effect>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
+                  <Button layoutX="188.0" layoutY="13.0" mnemonicParsing="false" onAction="#paste" prefHeight="34.0" prefWidth="24.0" text="Wklej">
+                     <effect>
+                        <ImageInput>
+                           <source>
+                              <Image url="file:./toolbar_images/paste.png" />
+                           </source>
+                        </ImageInput>
+                     </effect>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
+                  <Button layoutX="236.0" layoutY="13.0" mnemonicParsing="false" onAction="#deleteSelected" prefHeight="25.0" prefWidth="30.0" text="Usuń">
+                     <effect>
+                        <ImageInput>
+                           <source>
+                              <Image url="file:./toolbar_images/delete.png" />
+                           </source>
+                        </ImageInput>
+                     </effect>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
+                  <Button fx:id="undoB" layoutX="285.0" layoutY="13.0" mnemonicParsing="false" onAction="#undo" prefHeight="25.0" prefWidth="22.0" text="Cofnij">
+                     <effect>
+                        <ImageInput>
+                           <source>
+                              <Image url="file:./toolbar_images/undo.png" />
+                           </source>
+                        </ImageInput>
+                     </effect>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
+                  <Button fx:id="redoB" layoutX="340.0" layoutY="13.0" mnemonicParsing="false" onAction="#redo" prefHeight="25.0" prefWidth="22.0" text="Powtórz">
+                     <effect>
+                        <ImageInput>
+                           <source>
+                              <Image url="file:./toolbar_images/redo.png" />
+                           </source>
+                        </ImageInput>
+                     </effect>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
+                 <Button layoutX="390.0" layoutY="63.0" mnemonicParsing="false" onAction="#addNode" prefHeight="25.0" prefWidth="27.0" text="Dodaj węzeł">
+                     <effect>
+                        <ImageInput>
+                           <source>
+                              <Image url="file:./toolbar_images/addNode.png" />
+                           </source>
+                        </ImageInput>
+                     </effect>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
+                  <MenuButton mnemonicParsing="false" prefHeight="25.0" prefWidth="28.0" text="Krawędź">
                      <items>
                         <CheckMenuItem fx:id="duplex" mnemonicParsing="false" text="Dwustronna" />
                         <CheckMenuItem fx:id="curved" mnemonicParsing="false" text="Zaokrąglona" />
-                        <MenuItem mnemonicParsing="false">
+                        <MenuItem mnemonicParsing="false" style="-fx-effect: none;">
                            <graphic>
                               <GridPane>
                                 <columnConstraints>
@@ -119,10 +240,20 @@
                            </graphic>
                         </MenuItem>
                      </items>
+                     <effect>
+                        <ImageInput>
+                           <source>
+                              <Image url="file:./toolbar_images/vertex.png" />
+                           </source>
+                        </ImageInput>
+                     </effect>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
                   </MenuButton>
               </items>
             </ToolBar>
-            <MenuBar GridPane.columnSpan="2147483647">
+            <MenuBar style="-fx-background-color: #D2B48C; -fx-background-radius: 5; -fx-border-color: #DEB887; -fx-border-radius: 5;" translateY="-3.0" GridPane.columnSpan="2147483647">
               <menus>
                 <Menu mnemonicParsing="false" text="Plik">
                   <items>
