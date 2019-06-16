@@ -19,11 +19,11 @@
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.effect.ImageInput?>
-<?import javafx.scene.effect.SepiaTone?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 
 <BorderPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gdraw.main.MainController">
@@ -39,11 +39,11 @@
             <ColumnConstraints percentWidth="25.0" />
          </columnConstraints>
          <children>
-            <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" text="Węzły" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2147483647" GridPane.vgrow="ALWAYS">
+            <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #FDF5E6; -fx-color: #D2B48C;" text="Węzły" GridPane.hgrow="NEVER" GridPane.rowSpan="2147483647" GridPane.vgrow="SOMETIMES">
                <content>
-                  <ScrollPane fitToHeight="true" fitToWidth="true">
+                  <ScrollPane fitToHeight="true" fitToWidth="true" maxWidth="320.0">
                      <content>
-                        <Accordion fx:id="nodeLibraryAccordion" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #FDF5E6;">
+                        <Accordion fx:id="nodeLibraryAccordion" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="0.0" style="-fx-background-color: #FDF5E6;">
                            <contextMenu>
                               <ContextMenu>
                                 <items>
@@ -52,37 +52,26 @@
                                 </items>
                               </ContextMenu>
                            </contextMenu>
-                           <effect>
-                              <SepiaTone level="0.3" />
-                           </effect>
                         </Accordion>
-                     </content></ScrollPane>
+                     </content>
+                  </ScrollPane>
                </content>
-               <effect>
-                  <SepiaTone />
-               </effect>
             </TitledPane>
-            <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Hierarchia" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+            <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-color: #D2B48C; -fx-background-color: #FDF5E6;" text="Hierarchia" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                <content>
                   <ScrollPane fx:id="hierarchy" fitToHeight="true" fitToWidth="true" style="-fx-background-color: #FDF5E6;">
-                     <effect>
-                        <SepiaTone level="0.3" />
-                     </effect></ScrollPane>
+                     <content>
+                        <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #FDF5E6;" />
+                     </content></ScrollPane>
                </content>
-               <effect>
-                  <SepiaTone />
-               </effect>
             </TitledPane>
-            <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Właściwości" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+            <TitledPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-color: #D2B48C; -fx-background-color: #FDF5E6;" text="Właściwości" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                <content>
                   <ScrollPane fx:id="properties" fitToHeight="true" fitToWidth="true" style="-fx-background-color: #FDF5E6;">
-                     <effect>
-                        <SepiaTone level="0.3" />
-                     </effect></ScrollPane>
+                     <content>
+                        <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #FDF5E6;" />
+                     </content></ScrollPane>
                </content>
-               <effect>
-                  <SepiaTone />
-               </effect>
             </TitledPane>
             <TabPane fx:id="tabPane" style="-fx-background-color: #FDF5E6; -fx-border-color: #DEB887; -fx-border-radius: 5;" tabClosingPolicy="UNAVAILABLE" GridPane.columnIndex="1" GridPane.rowSpan="2147483647" />
          </children>

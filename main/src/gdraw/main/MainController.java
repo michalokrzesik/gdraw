@@ -2,22 +2,20 @@ package gdraw.main;
 
 import gdraw.graph.node.Node;
 import gdraw.graph.node.NodeDragModel;
-import gdraw.graph.util.MIandButtonPair;
-import gdraw.graph.util.Selectable;
+import gdraw.graph.util.*;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.Vertex;
-import gdraw.graph.util.Request;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ContextMenuEvent;
@@ -25,12 +23,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 
 import java.awt.image.RenderedImage;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import gdraw.graph.node.NodeLibrary;
 import javafx.stage.Modality;
@@ -81,15 +81,22 @@ public class MainController {
     private ArrayList<Request> requestedVertices;
 
     public void initialize() {
-        nodeLibraryAccordion.getPanes().addAll(
-                new NodeLibrary(new File("./libraries/OSTATNIE"), nodeLibraryAccordion, this, new FlowPane())
+        nodeLibraryAccordion.getPanes().add(
+                new NodeLibrary(new File("./libraries/OSTATNIE"), nodeLibraryAccordion, this, new LibraryPane())
         );
+
+        for(File library : Objects.requireNonNull(new File("./libraries").listFiles(File::isDirectory)))
+            if(!library.getName().equals("OSTATNIE"))
+                nodeLibraryAccordion.getPanes().add(
+                        new NodeLibrary(library, nodeLibraryAccordion, this, new LibraryPane())
+                );
+
         clipboard = new ArrayList<>();
         projects = new ArrayList<>();
         requestedNodes = new ArrayList<>();
         requestedVertices = new ArrayList<>();
-        undo = new MIandButtonPair(undoMI, undoB);
-        redo = new MIandButtonPair(redoMI, redoB);
+        undo = new MIandButtonPair(undoMI, undoB, this);
+        redo = new MIandButtonPair(redoMI, redoB, this);
         undo.setDisable(true);
         redo.setDisable(true);
 
@@ -99,7 +106,7 @@ public class MainController {
         arrowType.setValue(ArrowType.None);
     }
 
-    public void addNodeToActiveLibrary(ActionEvent actionEvent) throws IOException, URISyntaxException {
+    public void addNodeToActiveLibrary(ActionEvent actionEvent) throws IOException {
         File path = (ImageFileChooser("Wybierz obraz", null).showOpenDialog(null));
         if(path == null) return;
         ((NodeLibrary) nodeLibraryAccordion.getExpandedPane()).addNode(path);
@@ -123,7 +130,7 @@ public class MainController {
         File path = (new FileChooser().showOpenDialog(null));
         if(path == null) return;
 
-        TitledPane titledPane = new NodeLibrary(path, nodeLibraryAccordion, this, new FlowPane());
+        TitledPane titledPane = new NodeLibrary(path, nodeLibraryAccordion, this, new LibraryPane());
         nodeLibraryAccordion.getChildrenUnmodifiable().add(titledPane);
         nodeLibraryAccordion.setExpandedPane(titledPane);
 
@@ -136,32 +143,34 @@ public class MainController {
 
 
     public void addNode(Image image) {
-        activeProject.addNode(image);
+        if(activeProject != null) activeProject.addNode(image);
     }
 
     public void clearSelected() {
-        activeProject.clearSelected();
+        if(activeProject != null) activeProject.clearSelected();
     }
 
-    public void select(double x1, double y1, double x2, double y2) {
-        activeProject.checkSelect(x1, y1, x2, y2);
+    public void select(Rectangle selection) {
+        if(activeProject != null) activeProject.checkSelect(selection);
     }
 
-    public void select(Selectable item, boolean ctrlPressed){ activeProject.select(item, ctrlPressed); }
+    public void select(Selectable item, boolean ctrlPressed){
+        if(activeProject != null) activeProject.select(item, ctrlPressed);
+    }
 
     public Tab tabForProject(Project project){
-        //żeby canvas był na środku
-        BorderPane borderPane = new BorderPane();
-//        borderPane.setPrefHeight(TAB_PANE_H);
-//        borderPane.setPrefWidth(TAB_PANE_W);
-        borderPane.setCenter(project.getGroup());
 
         ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(borderPane);
+        scrollPane.setContent(project.getGroup());
+        scrollPane.setStyle("-fx-background-color: #FDF5E6; " +
+                "-fx-border-color: #FDF5E6;");
+
 
 
         Tab tab = new Tab(project.getName());
         tab.setContent(scrollPane);
+        tab.setStyle("-fx-background-color: #FDF5E6; " +
+                "-fx-border-color: #FDF5E6;");
 
         tabPane.getTabs().add(tab);
         tab.setOnSelectionChanged(e -> {
@@ -177,8 +186,8 @@ public class MainController {
         double projectWidth = Double.parseDouble(array[1]);
         double projectHeight = Double.parseDouble(array[2]);
 
-        Canvas canvas = new Canvas(projectWidth, projectHeight);
-        Project project = new Project(this, projectName, canvas, properties, undo, redo);
+        Project project = new Project(this, projectName, projectWidth, projectHeight,
+                hierarchy, properties, undo, redo);
 
         project.setTab(tabForProject(project));
 
@@ -193,7 +202,7 @@ public class MainController {
     private void newProject(Project project, File file) {
         Tab tab = tabForProject(project);
 
-        project.refresh(file, this, tab, properties, undo, redo);
+        project.refresh(file, this, tab, hierarchy, properties, undo, redo);
 
         project.setTab(tab);//zmiana zakładki
         projects.add(project);
@@ -288,7 +297,8 @@ public class MainController {
      * @param event
      */
     public void saveProject(ActionEvent event) {
-        saveProject(activeProject);
+        if(activeProject != null)
+            saveProject(activeProject);
     }
 
     /**
@@ -296,7 +306,8 @@ public class MainController {
      * @param event
      */
     public void closeProject(ActionEvent event) {
-        closeProjectAlert(activeProject);
+        if(activeProject != null)
+            closeProjectAlert(activeProject);
     }
 
     private void closeProjectAlert(Project project) {
@@ -372,7 +383,8 @@ public class MainController {
     }
 
     public void saveProjectAs(ActionEvent actionEvent) {
-        saveProjectAs(activeProject);
+        if(activeProject != null)
+            saveProjectAs(activeProject);
     }
 
     public void setProject(Project project) {
@@ -388,6 +400,7 @@ public class MainController {
     }
 
     public void exportGraph(ActionEvent actionEvent) {
+        if(activeProject == null) return;;
         File file = ImageFileChooser("Eksportuj graf", activeProject.getName()).showSaveDialog(null);
         if(file != null) {
             String extension = file.getName().split(".")[1];
@@ -402,33 +415,35 @@ public class MainController {
     }
 
     public void onMousePressed(MouseEvent e, Selectable item) {
-        activeProject.onMousePressed(e, item);
+        if(activeProject != null) activeProject.onMousePressed(e, item);
     }
 
     public void onMouseDragged(MouseEvent e, Selectable item) {
-        activeProject.onMouseDragged(e, item);
+        if(activeProject != null) activeProject.onMouseDragged(e, item);
     }
 
     public void addObject(Selectable object) {
-        activeProject.newObject(object);
+        if(activeProject != null) activeProject.newObject(object);
     }
 
     public void removeObject(Selectable object){
-        activeProject.removeObject(object);
+        if(activeProject != null) activeProject.removeObject(object);
     }
 
     public void undo(ActionEvent actionEvent) {
-        activeProject.undo();
+        if(activeProject != null) activeProject.undo();
     }
 
 
     public void redo(ActionEvent actionEvent) {
-        activeProject.redo();
+        if(activeProject != null) activeProject.redo();
     }
 
     public void copySelected(ActionEvent actionEvent) {
+        if(activeProject == null) return;
         clipboard.clear();
-        activeProject.getSelected().forEach(object -> clipboard.add(object.copy()));
+        ArrayList<Selectable> selected = activeProject.getSelected();
+        if(!selected.isEmpty()) selected.forEach(object -> clipboard.add(object.copy()));
     }
 
     public void request(boolean isFrom, Node node, Vertex vertex, Node oldNode) {
@@ -460,7 +475,8 @@ public class MainController {
     }
 
     public void deleteSelected(ActionEvent actionEvent) {
-        activeProject.deleteSelected();
+        if(activeProject != null)
+            activeProject.deleteSelected();
     }
 
     public Project getProject() {
@@ -473,6 +489,7 @@ public class MainController {
     }
 
     public void paste(ActionEvent actionEvent) {
+        if(activeProject == null) return;
         requestedVertices.clear();
 /*        requestedNodes.forEach(request -> {
             if(request.checkProject(activeProject))
@@ -483,12 +500,14 @@ public class MainController {
     }
 
     public void duplicateSelected(ActionEvent actionEvent) {
+        if(activeProject == null) return;
         copySelected(actionEvent);
         paste(actionEvent);
     }
 
     public void addVertex(ActionEvent actionEvent) {
-        activeProject.addVertex(
+        if(activeProject != null)
+            activeProject.addVertex(
                 lineType.getSelectionModel().getSelectedItem(),
                 arrowType.getSelectionModel().getSelectedItem(),
                 vertexColor.getValue(),
@@ -498,30 +517,31 @@ public class MainController {
     }
 
     public void onMouseReleased(MouseEvent e, Selectable item) {
-        activeProject.onMouseReleased(e, item);
+        if(activeProject != null) activeProject.onMouseReleased(e, item);
     }
 
     public void groupSelected(ActionEvent actionEvent) {
-        activeProject.groupSelected();
+        if(activeProject != null) activeProject.groupSelected();
     }
 
     public void ungroupSelected(ActionEvent actionEvent) {
-        activeProject.ungroupSelected();
+        if(activeProject != null) activeProject.ungroupSelected();
     }
 
     public void nodesToGroups(ActionEvent actionEvent) {
-        activeProject.nodesToGroups();
+        if(activeProject != null) activeProject.nodesToGroups();
     }
 
     public void groupsToNodes(ActionEvent actionEvent) {
-        activeProject.groupsToNodes();
+        if(activeProject != null) activeProject.groupsToNodes();
     }
 
     public void moveToGroup(ActionEvent actionEvent) {
-        activeProject.moveToGroup();
+        if(activeProject != null) activeProject.moveToGroup();
     }
 
     public void changeBackground(ActionEvent actionEvent) {
+        if(activeProject == null) return;
         File file = ImageFileChooser("Wybierz obraz", null).showSaveDialog(null);
         if(file != null) {
             try {
@@ -533,6 +553,7 @@ public class MainController {
     }
 
     public void contextMenu(ContextMenuEvent contextMenuEvent) {
+        if(activeProject == null) return;
         activeProject.setDragModel(NodeDragModel.Standard);
 
         ContextMenu contextMenu = new ContextMenu();
@@ -559,10 +580,16 @@ public class MainController {
     }
 
     public void collapse(ActionEvent actionEvent) {
-        activeProject.changeCollapsed(true);
+        if(activeProject != null)
+            activeProject.changeCollapsed(true);
     }
 
     public void extend(ActionEvent actionEvent) {
-        activeProject.changeCollapsed(false);
+        if(activeProject != null)
+            activeProject.changeCollapsed(false);
+    }
+
+    public void forceDraw() {
+        if(activeProject != null) activeProject.draw();
     }
 }

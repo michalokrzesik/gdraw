@@ -34,15 +34,15 @@ public class MultiAction extends Action {
     protected MultiAction(ActionHelper from, ActionHelper to){
         this.from = from;
         this.to = to;
-        multiFrom = new ActionHelper(new MIandButtonPair(new MenuItem(), new Button()));
-        multiTo = new ActionHelper(new MIandButtonPair(new MenuItem(), new Button()));
+        multiFrom = new ActionHelper(new MIandButtonPair(new MenuItem(), new Button(), from.getController()));
+        multiTo = new ActionHelper(new MIandButtonPair(new MenuItem(), new Button(), from.getController()));
     }
 
     public static void applyNodeChangeSize(ActionHelper undo, List<Selectable> objects, double w, double h, ActionHelper redo){
         MultiAction ma = new MultiAction(redo, undo);
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
-        objects.forEach(o -> {
+        if(!objects.isEmpty()) objects.forEach(o -> {
             if(o.isNode()) NodeChangeSize.apply(multiFrom, (Node) o, w, h, multiTo);
         });
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
@@ -53,7 +53,8 @@ public class MultiAction extends Action {
         MultiAction ma = new MultiAction(project.getRedo(), project.getUndo());
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
-        project.getSelected().forEach(o -> Translate.applyTranslate(multiFrom, o, dx, dy, multiTo));
+        ArrayList<Selectable> selected = project.getSelected();
+        if(!selected.isEmpty()) selected.forEach(o -> Translate.applyTranslate(multiFrom, o, dx, dy, multiTo));
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
         //Jeśli w objects nie było node'ów, nic się nie dzieje
     }
@@ -84,7 +85,7 @@ public class MultiAction extends Action {
         MultiAction ma = new MultiAction(redo, undo);
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
-        selected.forEach(o -> {
+        if(!selected.isEmpty()) selected.forEach(o -> {
             if(o.isNode()) NodeCreation.applyDelete(multiFrom, (Node) o, multiTo);
             else VertexCreation.applyDelete(multiFrom, (Vertex) o, multiTo);
         });
@@ -98,11 +99,12 @@ public class MultiAction extends Action {
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
         ArrayList<Vertex> vertices = new ArrayList<>();
-        clipboard.forEach(o -> {
+        if(!clipboard.isEmpty()) clipboard.forEach(o -> {
             if(o.isNode()) NodeCreation.applyCopy(multiFrom, (Node) o, ma, multiTo);
             else vertices.add((Vertex) o);
         });
-        vertices.forEach(o -> VertexCreation.applyCopy(multiFrom, o, ma, multiTo));
+        if(!vertices.isEmpty())
+            vertices.forEach(o -> VertexCreation.applyCopy(multiFrom, o, ma, multiTo));
 
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
         //Jeśli w objects nie było node'ów, nic się nie dzieje
@@ -129,7 +131,8 @@ public class MultiAction extends Action {
         MultiAction ma = new MultiAction(project.getRedo(), project.getUndo());
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
-        project.getSelected().forEach(o -> {
+        ArrayList<Selectable> selected = project.getSelected();
+        if(!selected.isEmpty()) selected.forEach(o -> {
             Translate.applyTranslate(multiFrom, o, x, y, multiTo);
             double width = w > 0 ? w : ((Node) o).getWidth();
             double height = h > 0 ? h : ((Node) o).getHeight();
@@ -144,7 +147,8 @@ public class MultiAction extends Action {
         MultiAction ma = new MultiAction(project.getRedo(), project.getUndo());
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
-        project.getSelected().forEach(o -> {
+        ArrayList<Selectable> selected = project.getSelected();
+        if(!selected.isEmpty()) selected.forEach(o -> {
             Vertex v = (Vertex) o;
             VertexEdit.apply(multiFrom, v, lineTypeChoiceBox, arrowTypeChoiceBox, widthField, colorPicker, valueField, multiTo);
         });

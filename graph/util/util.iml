@@ -5,11 +5,11 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="1.8 (2)" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="node" />
-    <orderEntry type="module" module-name="main" />
-    <orderEntry type="module" module-name="vertex" />
-    <orderEntry type="module" module-name="action" />
+    <orderEntry type="module" module-name="node" exported="" />
+    <orderEntry type="module" module-name="main" exported="" />
+    <orderEntry type="module" module-name="vertex" exported="" />
+    <orderEntry type="module" module-name="action" exported="" />
   </component>
 </module>

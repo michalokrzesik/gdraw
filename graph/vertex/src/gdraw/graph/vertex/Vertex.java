@@ -185,6 +185,8 @@ public class Vertex extends Selectable {
         if (duplex) arrowType.draw(arrows, path.getStroke(), points.get(1), points.getFirst());
         group.getChildren().addAll(arrows);
 
+        if(label != null) label.draw();
+
     }
 
     private void center(VertexPoint mid){
@@ -230,7 +232,7 @@ public class Vertex extends Selectable {
         newLabel += " (" + value + ")";
         if(label == null){
             label = new Label(
-                    newLabel,
+                    newLabel, group,
                     getCenterForLabel()
             );
         }
@@ -273,23 +275,19 @@ public class Vertex extends Selectable {
 
         Button btn = new Button("Zatwierdź");
 
-        GridPane pane = new GridPane();
-        pane.getChildren().addAll(labelName, lineName, arrowName, widthName, valueName, duplexName,
-                labelField, lineTypeChoiceBox, arrowTypeChoiceBox, widthField, colorPicker, valueField, duplexBox, btn);
+        properties.setContent(getPropertiesGridPane(labelName, lineName, arrowName, widthName, valueName, duplexName,
+                colorPicker,
+                labelField, lineTypeChoiceBox, arrowTypeChoiceBox, widthField, valueField, duplexBox,
+                btn));
 
-        GridPane.setConstraints(labelName, 0, 0); GridPane.setConstraints(labelField, 1, 0);
-        GridPane.setConstraints(lineName, 0, 1); GridPane.setConstraints(lineTypeChoiceBox, 1, 1);
-        GridPane.setConstraints(arrowName, 0, 2); GridPane.setConstraints(arrowTypeChoiceBox, 1, 2);
-        GridPane.setConstraints(widthName, 0, 3); GridPane.setConstraints(widthField, 1, 3);
-        GridPane.setConstraints(colorPicker, 0, 4);
-        GridPane.setConstraints(valueName, 0, 5); GridPane.setConstraints(valueField, 1, 5);
-        GridPane.setConstraints(duplexName, 0, 6); GridPane.setConstraints(duplexBox, 1, 6);
-        GridPane.setConstraints(btn, 1, 8);
-
-        duplexBox.setOnAction(e -> selected.forEach(s -> ((Vertex) s).setDuplex(duplexBox.isSelected()) ));
+        duplexBox.setOnAction(e -> {
+            if(!selected.isEmpty())
+                selected.forEach(s -> ((Vertex) s).setDuplex(duplexBox.isSelected()));
+        });
 
         btn.setOnAction(e -> {
-            selected.forEach(s -> s.setLabel(labelField.getText()));
+            if(!selected.isEmpty())
+                selected.forEach(s -> s.setLabel(labelField.getText()));
 
             MultiAction.applyVertexPropertiesChange(controller.getProject(), lineTypeChoiceBox, arrowTypeChoiceBox, widthField, colorPicker, valueField);
             controller.getProject().draw();
@@ -366,6 +364,7 @@ public class Vertex extends Selectable {
         toNode = null;
         group.getChildren().remove(path);
         controller.getProject().removeObject(this);
+        if(label != null) label.hide();
         setSelected(false);
     }
 

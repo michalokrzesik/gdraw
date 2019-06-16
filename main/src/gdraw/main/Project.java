@@ -3,6 +3,7 @@ package gdraw.main;
 import gdraw.graph.node.Node;
 import gdraw.graph.node.NodeDragModel;
 import gdraw.graph.util.Background;
+import gdraw.graph.util.Hierarchy;
 import gdraw.graph.util.MIandButtonPair;
 import gdraw.graph.util.Selectable;
 import gdraw.graph.util.action.*;
@@ -29,7 +30,8 @@ import java.util.ListIterator;
 public class Project implements Serializable {
 
     private transient File file;
-    private transient TreeView<Node> nodes;
+    private transient Hierarchy nodes;
+    private transient ScrollPane hierarchy;
     private Background background;
     private ArrayList<Selectable> graphObjects;
     private transient ArrayList<Selectable> selected;
@@ -43,9 +45,12 @@ public class Project implements Serializable {
     private transient ActionHelper undo;
     private transient ActionHelper redo;
 
-    public Project(MainController mainController, String projectName, Canvas canvas, ScrollPane scrollPane, MIandButtonPair undoFXML, MIandButtonPair redoFXML) {
+    public Project(MainController mainController, String projectName,double w, double h,
+                   ScrollPane hScrollPane, ScrollPane pScrollPane,
+                   MIandButtonPair undoFXML, MIandButtonPair redoFXML) {
         name = projectName;
-        properties = scrollPane;
+        properties = pScrollPane;
+        hierarchy = hScrollPane;
         graphObjects = new ArrayList<>();
         selected = new ArrayList<>();
         dragModel = NodeDragModel.Standard;
@@ -56,20 +61,23 @@ public class Project implements Serializable {
         file = null;
         controller = mainController;
         this.group = new Group();
-        double width = canvas.getWidth(),
-        height = canvas.getHeight();
-        background = new Background(controller, canvas, new Image(new File("./libraries/default_bck.png").toURI().toString()), this.group, width, height);
-        group.getChildren().add(canvas);
+
+        double width = w,
+        height = h;
+        background = new Background(controller, new Image(new File("./libraries/default_bck.png").toURI().toString()), this.group, width, height);
         setNodes();
     }
 
-    public void refresh(File file, MainController mainController, Tab tab, ScrollPane scrollPane, MIandButtonPair undoFXML, MIandButtonPair redoFXML) {
+    public void refresh(File file, MainController mainController, Tab tab,
+                        ScrollPane hScrollPane, ScrollPane pScrollPane,
+                        MIandButtonPair undoFXML, MIandButtonPair redoFXML) {
         controller = mainController;
         undo = new ActionHelper(undoFXML);
         redo = new ActionHelper(redoFXML);
         this.tab = tab;
         group = new Group();
-        properties = scrollPane;
+        properties = pScrollPane;
+        hierarchy = hScrollPane;
         selected = new ArrayList<>();
         this.file = file;
         background.refresh(this);
@@ -77,10 +85,10 @@ public class Project implements Serializable {
     }
 
     private void setNodes() {
-        nodes = new TreeView<>();
+        nodes = new Hierarchy();
         nodes.setRoot(background.getTreeItem());
         nodes.getSelectionModel().selectedItemProperty().addListener((observableValue, oldTreeItem, newTreeItem) -> {
-            oldTreeItem.getValue().setSelected(false);
+            if(oldTreeItem != null) oldTreeItem.getValue().setSelected(false);
             newTreeItem.getValue().setSelected(true);
         });
         nodes.setOnContextMenuRequested(e -> {
@@ -91,19 +99,19 @@ public class Project implements Serializable {
                 contextMenu.show(nodes, e.getScreenX(), e.getScreenY());
             }
         });
+        hierarchy.setContent(nodes);
     }
 
     public NodeDragModel getDragModel() { return dragModel; }
 
     public void setDragModel(NodeDragModel model) { dragModel = model; }
 
-    public void checkSelect(double x1, double y1, double x2, double y2) {
-        Rectangle rectangle = new Rectangle(x1, y1, x2 - x1, y2 - y1);
-        graphObjects.forEach(s -> s.checkSelect(rectangle));
+    public void checkSelect(Rectangle selection) {
+        if(!graphObjects.isEmpty()) graphObjects.forEach(s -> s.checkSelect(selection));
     }
 
     public void clearSelected() {
-        selected.forEach(s -> s.setSelected(false));
+        if(!selected.isEmpty()) selected.forEach(s -> s.setSelected(false));
         selected.clear();
         setProperties();
     }
@@ -133,9 +141,9 @@ public class Project implements Serializable {
     }
 
     public void draw() {
-        TreeItem<Node> root = nodes.getRoot();
-        root.getValue().draw();
-        root.getChildren().forEach(treeItem -> treeItem.getValue().draw());
+        background.draw();
+        ObservableList<TreeItem<Node>> children = background.getTreeItem().getChildren();
+        if(!children.isEmpty()) children.forEach(treeItem -> treeItem.getValue().draw());
     }
 
     public WritableImage snapshot() {
@@ -143,14 +151,18 @@ public class Project implements Serializable {
     }
 
     public void select(Selectable item, boolean ctrlPressed) {
+        boolean select = true, contains = selected.contains(item);
         if(!ctrlPressed) {
             clearSelected();
+        }
+        else if(contains) {
+            select = false;
+        }
+        if(select && !contains){
             selected.add(item);
         }
-        else if(selected.contains(item)) {
-            selected.remove(item);
-            item.setSelected(false);
-        }
+        else selected.remove(item);
+        item.setSelected(select);
         setProperties();
     }
 
@@ -182,7 +194,9 @@ public class Project implements Serializable {
                 Label labelName = new Label("Etykieta: ");
                 TextField labelField = new TextField();
                 Button btn = new Button("Zatwierdź");
-                btn.setOnAction(e -> selected.forEach(s -> s.setLabel(labelField.getText())));
+                btn.setOnAction(e -> {
+                    if(!selected.isEmpty()) selected.forEach(s -> s.setLabel(labelField.getText()));
+                });
 
                 GridPane pane = new GridPane();
                 pane.getChildren().addAll(labelName, labelField, btn);
@@ -252,7 +266,7 @@ public class Project implements Serializable {
         ArrayList<Double> minMaxs = new ArrayList<>();
         ArrayList<Node> nodes = new ArrayList<>();
         minMaxs.add(Double.MAX_VALUE); minMaxs.add(0.0); minMaxs.add(Double.MAX_VALUE); minMaxs.add(0.0);
-        selected.forEach(s -> {
+        if(!selected.isEmpty()) selected.forEach(s -> {
             if(s.isNode()){
                 Node node = (Node) s;
                 nodes.add(node);
@@ -276,7 +290,7 @@ public class Project implements Serializable {
                 new Point2D((minMaxs.get(0) + minMaxs.get(1))/2, (minMaxs.get(2) + minMaxs.get(3))/2),
                 new Image("standardGroup.png"),
                 group, true, parent, controller);
-        new SelectableCreationListener(groupNode);
+        groupNode.setCreationListener(new SelectableCreationListener(groupNode));
 
         GroupManagement.applyGroup(undo, groupNode, parent, nodes, redo);
 
@@ -339,7 +353,7 @@ public class Project implements Serializable {
     }
 
     public void changeCollapsed(boolean collapsed) {
-        selected.forEach(o -> {
+        if(!selected.isEmpty()) selected.forEach(o -> {
             if(o.isNode() && ((Node) o).isGroupNodes()) ((Node) o).setCollapsed(collapsed);
         });
     }

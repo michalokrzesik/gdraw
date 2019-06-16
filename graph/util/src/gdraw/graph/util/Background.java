@@ -5,55 +5,68 @@ import gdraw.graph.util.action.SelectableCreationListener;
 import gdraw.main.MainController;
 
 import gdraw.main.Project;
+import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 public class Background extends Node {
-
-    transient private Canvas canvas;
     private double x, y;
+    private transient Rectangle selection;
 
-    public Background(MainController mainController, Canvas canvas, Image image, Group group, double w, double h){
+    public Background(MainController mainController, Image image, Group group, double w, double h){
         this(new Point2D(w/2, h/2), image, group, mainController);
         treeItem = new TreeItem<>(this);
-        new SelectableCreationListener(this);
+        setCreationListener(new SelectableCreationListener(this));
         width = w;
         height = h;
-        setCanvas(canvas);
+        makeImageView();
     }
 
-    private void setCanvas(Canvas canvas){
-        canvas.setWidth(width);
-        canvas.setHeight(height);
-        canvas.getGraphicsContext2D().setStroke(Color.BLANCHEDALMOND);
-        canvas.setOnMouseClicked(e -> setSelected(true));
-        canvas.setOnContextMenuRequested(controller::contextMenu);
-        canvas.setOnMousePressed(e -> {
+    private void makeImageView(){
+        imageView = new ImageView(image);
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
+        imageView.setOnMouseClicked(e -> setSelected(true));
+        imageView.setOnContextMenuRequested(controller::contextMenu);
+        imageView.setOnMousePressed(e -> {
             setSelected(true);
             x = e.getX();
             y = e.getY();
         });
-        canvas.setOnMouseDragged(e -> {
+        imageView.setOnMouseDragged(e -> {
             draw();
-            canvas.getGraphicsContext2D().strokeRect(x, y, e.getX() - x, e.getY() - y);
+            selection = new Rectangle(x, y, e.getX() - x, e.getY() - y);
+            selection.setStroke(Color.BLANCHEDALMOND);
+            group.getChildren().add(selection);
         });
-        canvas.setOnMouseReleased(e -> {
+        imageView.setOnMouseReleased(e -> {
+            controller.select(selection);
             draw();
-            controller.select(x, y, e.getX(), e.getY());
         });
+        group.getChildren().add(imageView);
+        group.setLayoutX(0);
+        group.setLayoutY(0);
 
-        this.canvas = canvas;
         draw();
         this.treeItem = new TreeItem<>(this);
-        this.treeItem.setGraphic(canvas);
+        ImageView graphic = new ImageView(image);
+        graphic.setFitWidth(10);
+        graphic.setFitHeight(10);
+        this.treeItem.setGraphic(graphic);
+        label = new Label("Tło", group);
+        label.hide();
+
     }
 
     private Background(Point2D center, Image image, Group group, MainController mainController) {
         super(center, image, group, null, mainController);
+        setCreationListener(new SelectableCreationListener(this));
     }
 
     @Override
@@ -61,7 +74,15 @@ public class Background extends Node {
 
     @Override
     public void draw(){
-        canvas.getGraphicsContext2D().drawImage(image, 0, 0, canvas.getWidth(), canvas.getHeight());
+        group.setLayoutX(0);
+        group.setLayoutY(0);
+        imageView.setX(0);
+        imageView.setY(0);
+        imageView.setImage(image);
+        if(selection != null){
+            group.getChildren().remove(selection);
+            selection = null;
+        }
     }
 
     public void setImage(Image newImage){ image = newImage; }
@@ -71,15 +92,16 @@ public class Background extends Node {
 
     @Override
     public void setParent(){
-        treeItem.getChildren().forEach(c -> subNodes.add(c.getValue()));
-        subNodes.forEach(Node::setParent);
+        ObservableList<TreeItem<Node>> children = treeItem.getChildren();
+        if(!children.isEmpty()) children.forEach(c -> subNodes.add(c.getValue()));
+        if(!subNodes.isEmpty()) subNodes.forEach(Node::setParent);
     }
 
     @Override
     public void refresh(Project project){
         superRefresh(project);
-        canvas = new Canvas();
-        setCanvas(canvas);
-        subNodes.forEach(n -> n.refresh(project));
+        makeImageView();
+        if(!subNodes.isEmpty())
+            subNodes.forEach(n -> n.refresh(project));
     }
 }

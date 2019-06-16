@@ -28,7 +28,8 @@ public class GroupManagement extends MultiAction {
 
     private GroupManagement(ActionHelper from, Node node, ActionHelper to) {
         super(from, to);
-
+        this.node = node.getCreationListener();
+        type = ActionType.ToGroup;
     }
 
     private GroupManagement(ActionHelper from, ActionHelper to){
@@ -47,7 +48,7 @@ public class GroupManagement extends MultiAction {
         GroupManagement ma = new GroupManagement(redo, undo);
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
-        selected.forEach(o -> {
+        if(!selected.isEmpty()) selected.forEach(o -> {
             if(o.isNode()) GroupManagement.applyUngroup(multiFrom, (Node) o, multiTo);
         });
 
@@ -75,7 +76,7 @@ public class GroupManagement extends MultiAction {
         parentOfParent.getValue().getSubNodes().add(parent);
 
 
-        nodes.forEach(o -> GroupManagement.applyGroup(multiFrom, o, parent, multiTo));
+        if(!nodes.isEmpty()) nodes.forEach(o -> GroupManagement.applyGroup(multiFrom, o, parent, multiTo));
 
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
         //Jeśli w objects nie było node'ów, nic się nie dzieje
@@ -90,7 +91,7 @@ public class GroupManagement extends MultiAction {
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
 
-        selected.forEach(o -> {
+        if(!selected.isEmpty()) selected.forEach(o -> {
             if(o.isNode()){
                 ArrayList<Selectable> subNodes = new ArrayList<>();
                 subNodes.addAll(((Node) o).getSubNodes());
@@ -108,7 +109,7 @@ public class GroupManagement extends MultiAction {
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
 
-        selected.forEach(o -> {
+        if(!selected.isEmpty()) selected.forEach(o -> {
             if(o.isNode())
                 GroupManagement.applyToGroup(multiFrom, (Node) o, multiTo);
         });

@@ -1,5 +1,6 @@
 package gdraw.graph.node;
 
+import javafx.collections.FXCollections;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.*;
@@ -10,10 +11,10 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 public class ImageViewWithName extends ImageView {
     private String name;
@@ -101,12 +102,11 @@ public class ImageViewWithName extends ImageView {
         window.initModality(Modality.APPLICATION_MODAL);
         window.setTitle("Wybierz kategorie");
 
-        ListView<TitledPane> libraryListView = new ListView<>(parent.getLibraryList());
+        ListView<NodeLibraryRef> libraryListView = new ListView<>(parent.getLibraryListRef());
         libraryListView.setOnMouseClicked(event1 -> {
             File path = parent.getPath(name);
 
-            TitledPane titledPane = libraryListView.getSelectionModel().getSelectedItem();
-            NodeLibrary library = (NodeLibrary) titledPane;
+            NodeLibrary library = libraryListView.getSelectionModel().getSelectedItem().getLibrary();
             try {
                 library.addNode(path);
             } catch (IOException e) {
@@ -115,6 +115,7 @@ public class ImageViewWithName extends ImageView {
 
             window.close();
         });
+
 
         Pane pane = new Pane(libraryListView);
         window.setScene(new Scene(pane));

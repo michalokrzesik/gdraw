@@ -24,7 +24,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
 public class Node extends Selectable {
-    private transient ImageView imageView;
+    protected transient ImageView imageView;
     protected Point2D center;
     protected double width;
     protected double height;
@@ -63,7 +63,10 @@ public class Node extends Selectable {
             setSelected();
             setCircles();
             parent.getChildren().add(treeItem);
-            treeItem.setGraphic(imageView);
+            ImageView graphic = new ImageView(image);
+            graphic.setFitHeight(10);
+            graphic.setFitWidth(10);
+            treeItem.setGraphic(graphic);
         }
 
     }
@@ -135,7 +138,7 @@ public class Node extends Selectable {
     public void setLabel(String newLabel){
         if(label == null){
             label = new Label(
-                    newLabel,
+                    newLabel, group,
                     new Point2D(center.getX() - 10, center.getY() - 10)
             );
         }
@@ -174,18 +177,12 @@ public class Node extends Selectable {
 
         Button btn = new Button("Zatwierdź");
 
-        GridPane pane = new GridPane();
-        pane.getChildren().addAll(labelName, centerName, xName, yName, widthName, heightName, groupName,
-                labelField, xField, yField, widthField, heightField, groupBox, btn);
-
-        GridPane.setConstraints(labelName, 0, 0); GridPane.setConstraints(labelField, 1, 0);
-        GridPane.setConstraints(centerName, 0, 1);
-        GridPane.setConstraints(xName, 0, 2); GridPane.setConstraints(xField, 1, 2);
-        GridPane.setConstraints(yName, 0, 3); GridPane.setConstraints(yField, 1, 3);
-        GridPane.setConstraints(widthName, 0, 4); GridPane.setConstraints(widthField, 1, 4);
-        GridPane.setConstraints(heightName, 0, 5); GridPane.setConstraints(heightField, 1, 5);
-        GridPane.setConstraints(groupName, 0, 6); GridPane.setConstraints(groupBox, 1, 6);
-        GridPane.setConstraints(btn, 1, 8);
+        properties.setContent(
+                getPropertiesGridPane(labelName, xName, yName, widthName, heightName, groupName,
+                        centerName,
+                        labelField, xField, yField, widthField, heightField, groupBox,
+                        btn)
+        );
 
         groupBox.setOnAction(e -> {
             if(groupBox.isSelected()) controller.nodesToGroups(e);
@@ -197,7 +194,7 @@ public class Node extends Selectable {
         double finalYmax = ymax;
         double finalYmin = ymin;
         btn.setOnAction(e -> {
-            selected.forEach(s -> s.setLabel(labelField.getText()));
+            if(!selected.isEmpty()) selected.forEach(s -> s.setLabel(labelField.getText()));
             double x = (finalXmax + finalXmin)/2, y = (finalYmax + finalYmin)/2, w, h;
             try{
                 x = Double.parseDouble(xField.getText()) - x;
@@ -219,10 +216,10 @@ public class Node extends Selectable {
 
     public Node copy(TreeItem<Node> parent){
         Node ret = new Node(new Point2D(center.getX() + 5, center.getY() + 5), image, group, isGroupNodes, parent, controller);
-        if(this.isGroupNodes)
+        if(this.isGroupNodes && !this.subNodes.isEmpty())
             for(Node node : subNodes)
                 node.copy(ret.getTreeItem());
-        vertices.forEach(vertex -> {
+        if(!vertices.isEmpty()) vertices.forEach(vertex -> {
             vertex.copy();
             controller.request(vertex.getFromNode() == this, ret, vertex, this);
         });
@@ -297,11 +294,12 @@ public class Node extends Selectable {
         TreeItem<Node> p = treeItem.getParent();
         if(p == null) return;
         Node parent = p.getValue();
-        double px = parent.getCenter().getX(), py = parent.getCenter().getY(), pw = parent.getWidth(), ph = parent.getHeight();
-        double x = center.getX(), y = center.getY();
+        double px = parent.getCenter().getX(), py = parent.getCenter().getY(),
+                pw = parent.getWidth(), ph = parent.getHeight(),
+                x = center.getX(), y = center.getY();
 
-        if(getWidth() > parent.getWidth()) setWidth(parent.getWidth());
-        if(getHeight() > parent.getHeight()) setHeight(parent.getHeight());
+        if(getWidth() > pw) setWidth(pw);
+        if(getHeight() > ph) setHeight(ph);
         double w = getWidth(), h = getHeight();
 
         double dx = (x - w/2) - (px - pw/2), dy = (y - h/2) - (py - ph/2);
@@ -369,7 +367,8 @@ public class Node extends Selectable {
 
     public void draw(){
         hide();
-        vertices.forEach((Vertex v) -> v.draw(this));
+        if(!vertices.isEmpty())
+            vertices.forEach((Vertex v) -> v.draw(this));
         group.getChildren().add(imageView);
         hidden = false;
 
@@ -377,8 +376,8 @@ public class Node extends Selectable {
         double x = center.getX() - w/2, y = center.getY() - h/2;
         imageView.setFitWidth(w);
         imageView.setFitHeight(h);
-        imageView.setLayoutX(x);
-        imageView.setLayoutY(y);
+        imageView.setX(x);
+        imageView.setY(y);
         if(selected){
             setCircles();
             group.getChildren().addAll(circles);
@@ -386,15 +385,19 @@ public class Node extends Selectable {
         else{
             group.getChildren().removeAll(circles);
         }
-
-        if(isCollapsed) subNodes.forEach(Node::hide);
-        else subNodes.forEach(Node::draw);
+        if(!subNodes.isEmpty()) {
+            if (isCollapsed) subNodes.forEach(Node::hide);
+            else subNodes.forEach(Node::draw);
+        }
+        if(label != null) label.draw();
     }
 
     private void hide() {
         if(!hidden) {
+            if(label != null) label.hide();
             group.getChildren().remove(imageView);
-            subNodes.forEach(Node::hide);
+            if(!subNodes.isEmpty())
+                subNodes.forEach(Node::hide);
             hidden = true;
         }
     }
@@ -408,20 +411,25 @@ public class Node extends Selectable {
         double x = center.getX() + dx, y = center.getY() + dy;
         center = new Point2D(x, y);
         if(fit) fitInGroup();
-        vertices.forEach((Vertex v) -> v.translateNode(this, dx, dy));
-        if(isGroupNodes) subNodes.forEach(n -> n.translate(dx, dy));
+        else {
+            if (!vertices.isEmpty())
+                vertices.forEach(v -> v.translateNode(this, dx, dy));
+            if (isGroupNodes && !subNodes.isEmpty()) subNodes.forEach(n -> n.translate(dx, dy));
+        }
     }
 
     @Override
     public Selectable copy() {
         Node ret = new Node(this);
         ret.treeItem = new TreeItem<>(ret);
-        vertices.forEach(vertex -> {
-            if(vertex.isSelected()) {
-                controller.request(vertex.getFromNode() == this, ret, vertex, this);
-            }
-        });
-        subNodes.forEach(node -> node.copy(ret.treeItem));
+        if(!vertices.isEmpty())
+            vertices.forEach(vertex -> {
+                if (vertex.isSelected()) {
+                    controller.request(vertex.getFromNode() == this, ret, vertex, this);
+                }
+            });
+        if(!subNodes.isEmpty())
+            subNodes.forEach(node -> node.copy(ret.treeItem));
         return ret;
     }
 
@@ -433,6 +441,7 @@ public class Node extends Selectable {
         parent.getChildren().remove(treeItem);
         setSelected(false);
         group.getChildren().remove(imageView);
+        if(label != null) label.hide();
     }
 
     @Override
@@ -447,8 +456,10 @@ public class Node extends Selectable {
         selected = false;
         treeItem = new TreeItem<>(this);
         parent.getTreeItem().getChildren().add(treeItem);
-        subNodes.forEach(n -> n.refresh(project));
-        vertices.forEach(v -> v.refresh(project));
+        if(!subNodes.isEmpty())
+            subNodes.forEach(n -> n.refresh(project));
+        if(!vertices.isEmpty())
+            vertices.forEach(v -> v.refresh(project));
         draw();
     }
 

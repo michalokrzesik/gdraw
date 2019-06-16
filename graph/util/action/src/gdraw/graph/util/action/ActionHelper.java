@@ -1,6 +1,7 @@
 package gdraw.graph.util.action;
 
 import gdraw.graph.util.MIandButtonPair;
+import gdraw.main.MainController;
 
 import java.util.Stack;
 
@@ -10,6 +11,14 @@ public class ActionHelper {
 
     public void clear() {
         stack.clear();
+    }
+
+    public void forceDraw() {
+        FXML.forceDraw();
+    }
+
+    public MainController getController() {
+        return FXML.getController();
     }
 
     public interface Helper {
@@ -38,6 +47,7 @@ public class ActionHelper {
     }
 
     public void forEach(Helper h){
-        stack.forEach(e -> h.apply(e));
+        if(!stack.empty())
+            stack.forEach(e -> h.apply(e));
     }
 }

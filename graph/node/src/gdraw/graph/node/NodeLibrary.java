@@ -1,6 +1,9 @@
 package gdraw.graph.node;
 
+import gdraw.graph.util.LibraryPane;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
@@ -15,6 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -26,15 +31,18 @@ public class NodeLibrary extends TitledPane {
     private MainController controller;
     private File path;
     private Accordion parent;
-    private FlowPane pane;
+    private LibraryPane pane;
     private ImageViewWithName selected;
+    private NodeLibraryRef ref;
 
-    public NodeLibrary(File path, Accordion parent, MainController controller, FlowPane pane) {
+    public NodeLibrary(File path, Accordion parent, MainController controller, LibraryPane pane) {
         super(path.getName(), pane);
+        setMaxWidth(400);
         this.controller = controller;
         this.parent = parent;
         this.path = path;
         this.pane = pane;
+        ref = new NodeLibraryRef(this);
         show();
     }
 
@@ -42,8 +50,9 @@ public class NodeLibrary extends TitledPane {
         /*URL zipUrl = Main.class.getResource(path);
         File zipFile = new File(zipUrl.toURI()); */
         //ZipFile zip = new ZipFile(path);
+        pane.clear();
         for(File file: path.listFiles()) {
-            pane.getChildren().add(
+            pane.add(
                     new ImageViewWithName(
                             this,
                             file.getName(),
@@ -60,7 +69,8 @@ public class NodeLibrary extends TitledPane {
                 return;*/
 //            addOrRemoveNode(nodePath, true);
 
-        Files.copy(nodePath.toPath(), Paths.get(path.getAbsolutePath() + File.pathSeparator + nodePath.getName()), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(nodePath.toPath(), Paths.get(path.getAbsolutePath() + "/" + nodePath.getName()), StandardCopyOption.REPLACE_EXISTING);
+        show();
     }
 
     /*public void addOrRemoveNode(String nodePathOrName, boolean add) throws URISyntaxException, IOException {
@@ -122,6 +132,10 @@ public class NodeLibrary extends TitledPane {
         return parent.getPanes();
     }
 
+    private NodeLibraryRef getRef() {
+        return ref;
+    }
+
     public File getPath(String name) {
         /*URL zipUrl = Main.class.getResource(path);
         File zipFile = new File(zipUrl.toURI());
@@ -149,6 +163,7 @@ public class NodeLibrary extends TitledPane {
     public void remove(String name) {
         //addOrRemoveNode(name, false);
         getPath(name).delete();
+        show();
     }
 
     public NodeLibrary newLibraryWithNode(String libraryName, String nodeName) throws IOException, URISyntaxException {
@@ -156,14 +171,14 @@ public class NodeLibrary extends TitledPane {
         File zipFile = new File(zipUrl.toURI());
         ZipFile zip = new ZipFile(path);*/
         File dir = path.getParentFile();
-        String path = dir.getAbsolutePath() + File.pathSeparator + libraryName;
+        String path = dir.getAbsolutePath() + "/" + libraryName;
         File file = new File(path);
         file.mkdir();
 /*        ZipOutputStream newZip = new ZipOutputStream(new FileOutputStream(file));
 
         addEntry(nodeName, zip.getInputStream(zip.getEntry(nodeName)), newZip);
 */
-        NodeLibrary ret = new NodeLibrary(file, parent, controller, new FlowPane());
+        NodeLibrary ret = new NodeLibrary(file, parent, controller, new LibraryPane());
         ret.addNode(getPath(nodeName));
         return ret;
     }
@@ -179,5 +194,11 @@ public class NodeLibrary extends TitledPane {
         File zipFile = new File(zipUrl.toURI());
         return zipFile.getName();*/
         return path.getName();
+    }
+
+    public ObservableList<NodeLibraryRef> getLibraryListRef() {
+        ArrayList<NodeLibraryRef> res = new ArrayList<>();
+        parent.getPanes().forEach(tp -> res.add(((NodeLibrary) tp).getRef()));
+        return FXCollections.observableList(res);
     }
 }

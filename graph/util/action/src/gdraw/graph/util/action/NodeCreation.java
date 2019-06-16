@@ -2,6 +2,7 @@ package gdraw.graph.util.action;
 
 import gdraw.graph.node.Node;
 import gdraw.graph.util.Selectable;
+import gdraw.graph.vertex.Vertex;
 import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.geometry.Point2D;
@@ -9,6 +10,7 @@ import javafx.scene.Group;
 import javafx.scene.image.Image;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class NodeCreation extends MultiAction {
 
@@ -37,6 +39,7 @@ public class NodeCreation extends MultiAction {
         parent = project.getBackground().getCreationListener();
         controller = project.getController();
         type = ActionType.Create;
+        node = null;
     }
 
     private enum ActionType{
@@ -73,7 +76,8 @@ public class NodeCreation extends MultiAction {
     public static void applyCopy(ActionHelper undo, Node node, MultiAction requestManager, ActionHelper redo){
         NodeCreation creator = new NodeCreation(redo, node, requestManager, undo);
         creator.action();
-        node.getVertices().forEach(vertex -> requestManager.request(vertex.getFromNode() == node, creator.getNode(), vertex, node));
+        List<Vertex> vertices = node.getVertices();
+        if(!vertices.isEmpty()) vertices.forEach(vertex -> requestManager.request(vertex.getFromNode() == node, creator.getNode(), vertex, node));
     }
 
     private Node getNode() {
