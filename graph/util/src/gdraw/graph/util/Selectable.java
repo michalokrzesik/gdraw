@@ -21,6 +21,8 @@ public abstract class Selectable implements Serializable {
 
     public abstract void checkSelect(Rectangle rectangle);
 
+    public abstract void checkSelect(double x, double y);
+
     public abstract void setSelected(boolean b);
 
     public abstract void translate(double dx, double dy);

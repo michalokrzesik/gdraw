@@ -75,6 +75,15 @@ public class Project implements Serializable {
 
     public Canvas setCanvas(double w, double h){
         canvas = new Canvas(w, h);
+        canvas.setOnMouseClicked(e -> {
+            Selectable found = background;
+            if(!graphObjects.isEmpty())
+                for(Selectable object : graphObjects)
+                    if(object.checkSelect(e.getX(), e.getY()) && object.isCloserThan(found))
+                        found = object;
+            if(found.isNode()) select(found, e.isControlDown());
+            else found.setSelected(true);
+        });
         //TODO MouseEvents
         return canvas;
     }
@@ -158,7 +167,7 @@ public class Project implements Serializable {
     }
 
     public WritableImage snapshot() {
-        return pane.snapshot(new SnapshotParameters(), null);
+        return canvas.snapshot(new SnapshotParameters(), null);
     }
 
     public void select(Selectable item, boolean ctrlPressed) {
