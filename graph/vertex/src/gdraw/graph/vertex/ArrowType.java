@@ -1,19 +1,17 @@
 package gdraw.graph.vertex;
 
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Shape;
-import javafx.util.Pair;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public enum ArrowType implements Serializable {
     None{
-        public void draw(ArrayList<Shape> arrows, Paint color, VertexPoint source, VertexPoint destination){}
+        public void draw(GraphicsContext gc, Paint color, VertexPoint source, VertexPoint destination){}
 
         @Override
         public String toString() {
@@ -22,13 +20,15 @@ public enum ArrowType implements Serializable {
     },
     Opened{
         @Override
-        public void draw(ArrayList<Shape> arrows, Paint color, VertexPoint source, VertexPoint destination) {
+        public void draw(GraphicsContext gc, Paint color, VertexPoint source, VertexPoint destination) {
             double[] points = arrowPoints(source, destination, 5.0);
-            Polyline polyline = new Polyline();
-            polyline.setStroke(color);
-            for(double coordinate : points)
-                polyline.getPoints().add(coordinate);
-            arrows.add(polyline);
+            /*Polyline polyline = new Polyline();
+            polyline*/gc.setStroke(color);
+//            for(double coordinate : points)
+//                polyline.getPoints().add(coordinate);
+//            arrows.add(polyline);
+            double[] xs = { points[0], points[2], points[4] }, ys = { points[1], points[3], points[5] };
+            gc.strokePolyline(xs, ys, 3);
         }
 
         @Override
@@ -38,17 +38,23 @@ public enum ArrowType implements Serializable {
     },
     Filled{
         @Override
-        public void draw(ArrayList<Shape> arrows, Paint color, VertexPoint source, VertexPoint destination) {
+        public void draw(GraphicsContext gc, Paint color, VertexPoint source, VertexPoint destination) {
             double[] points = arrowPoints(source, destination, 5.0);
- /*           double[] xPoints = {points.getKey().getX(), points.getValue().getX(), destination.getX()},
-                    yPoints = {points.getKey().getY(), points.getValue().getY(), destination.getY()};
- */
-            Polygon polygon = new Polygon();
-            polygon.setFill(color);
-            polygon.setStroke(color);
-            for(double coordinate : points)
-                polygon.getPoints().add(coordinate);
-            arrows.add(polygon);
+//            double[] xPoints = {points.getKey().getX(), points.getValue().getX(), destination.getX()},
+//                    yPoints = {points.getKey().getY(), points.getValue().getY(), destination.getY()};
+//
+//            Polygon polygon = new Polygon();
+//            polygon.setFill(color);
+//            polygon.setStroke(color);
+//            for(double coordinate : points)
+//                polygon.getPoints().add(coordinate);
+//            arrows.add(polygon);
+            double[] xs = { points[0], points[2], points[4] }, ys = { points[1], points[3], points[5] };
+            gc.setFill(color);
+            gc.setStroke(color);
+            gc.fillPolygon(xs, ys, 3);
+
+
         }
 
         @Override
@@ -80,5 +86,5 @@ public enum ArrowType implements Serializable {
         return points;
     }
 
-    abstract public void draw(ArrayList<Shape> arrows, Paint color, VertexPoint source, VertexPoint destination);
+    abstract public void draw(GraphicsContext gc, Paint color, VertexPoint source, VertexPoint destination);
     }

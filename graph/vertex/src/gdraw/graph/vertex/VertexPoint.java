@@ -2,6 +2,7 @@ package gdraw.graph.vertex;
 
 import gdraw.graph.node.Node;
 import javafx.geometry.Point2D;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
@@ -113,5 +114,16 @@ public class VertexPoint implements Serializable {
         y = Math.min(y, ycenter + halfHeight);
 
         setPoint(new Point2D(x, y));
+    }
+
+    public void draw(GraphicsContext gc, double width, boolean isSelected) {
+        if(isSelected){
+            gc.setFill(isHardPoint() ? Color.BLUE: Color.BLANCHEDALMOND);
+            gc.fillOval(getX() - width/2 - 1, getY() - width/2 - 1, width + 2, width + 2);
+        }
+        else {
+            gc.setFill(Color.GRAY);
+            gc.fillOval(getX() - width/2, getY() - width/2, width, width);
+        }
     }
 }

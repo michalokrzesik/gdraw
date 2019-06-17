@@ -1,12 +1,16 @@
 package gdraw.graph.node;
 
+import gdraw.graph.util.LibraryPane;
 import gdraw.graph.util.Selectable;
+import gdraw.graph.util.action.Action;
 import gdraw.graph.util.action.MultiAction;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.VertexPoint;
 import gdraw.main.MainController;
 import gdraw.main.Project;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.geometry.Point2D;
@@ -22,7 +26,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
 public class Node extends Selectable {
-    protected transient ImageView imageView;
+//    protected transient Canvas imageView;
     protected Point2D center;
     protected double width;
     protected double height;
@@ -39,7 +43,7 @@ public class Node extends Selectable {
 
     protected transient TreeItem<Node> treeItem;
 
-    public Node(Point2D center, Image image, Pane pane, TreeItem<Node> parent, MainController mainController){
+    public Node(Point2D center, Image image, Canvas canvas, TreeItem<Node> parent, MainController mainController){
         controller = mainController;
         this.center = center;
         this.image = image;
@@ -52,12 +56,13 @@ public class Node extends Selectable {
         isGroupNodes = false;
         vertices = new ArrayList<>();
         subNodes = new ArrayList<>();
-        this.pane = pane;
+        //this.pane = pane;
+        this.canvas = canvas;
         treeItem = new TreeItem<>(this);
 
         if(parent != null) {
             mainController.addObject(this);
-            makeImageView();
+            //makeImageView();
             setSelected();
             setCircles();
             parent.getChildren().add(treeItem);
@@ -65,6 +70,7 @@ public class Node extends Selectable {
             graphic.setFitHeight(10);
             graphic.setFitWidth(10);
             treeItem.setGraphic(graphic);
+            draw();
         }
 
     }
@@ -73,21 +79,22 @@ public class Node extends Selectable {
         parent = treeItem.getParent().getValue();
     }
 
-    private void makeImageView() {
-        imageView = new ImageView(image);
-        imageView.setOnMouseClicked(this::setSelected);
-        imageView.setOnContextMenuRequested(controller::contextMenu);
-        imageView.setOnMousePressed(this::onMousePressed);
-        imageView.setOnMouseDragged(this::onMouseDragged);
-        imageView.setOnMouseReleased(this::onMouseReleased);
-
-    }
+//    private void makeImageView() {
+//        //imageView = new ImageView(image);
+//        imageView = new Canvas(getWidth(), getHeight());
+//        imageView.setOnMouseClicked(this::setSelected);
+//        imageView.setOnContextMenuRequested(controller::contextMenu);
+//        imageView.setOnMousePressed(this::onMousePressed);
+//        imageView.setOnMouseDragged(this::onMouseDragged);
+//        imageView.setOnMouseReleased(this::onMouseReleased);
+//
+//    }
 
     public Node(Node node) {
         controller = node.controller;
         center = node.center;
         image = node.image;
-        makeImageView();
+//        makeImageView();
         hidden = node.hidden;
         width = node.width;
         widthCollapsed = node.widthCollapsed;
@@ -105,25 +112,19 @@ public class Node extends Selectable {
         double x = center.getX() - w/2, y = center.getY() - h/2;
         circles = new Circle[8];
 
-        circles[0] = new Circle(3); circles[0].setCenterX(x); circles[0].setCenterY(y);
-        circles[1] = new Circle(3); circles[1].setCenterX(x); circles[1].setCenterY(y + h/2);
-        circles[2] = new Circle(3); circles[2].setCenterX(x); circles[2].setCenterY(y + h);
-        circles[3] = new Circle(3); circles[3].setCenterX(x + w/2); circles[3].setCenterY(y + h);
-        circles[4] = new Circle(3); circles[4].setCenterX(x + w); circles[4].setCenterY(y + h);
-        circles[5] = new Circle(3); circles[5].setCenterX(x + w); circles[5].setCenterY(y + h/2);
-        circles[6] = new Circle(3); circles[6].setCenterX(x + w); circles[6].setCenterY(y);
-        circles[7] = new Circle(3); circles[7].setCenterX(x + w/2); circles[7].setCenterY(y);
+        circles[0] = new Circle(2); circles[0].setCenterX(x); circles[0].setCenterY(y);
+        circles[1] = new Circle(2); circles[1].setCenterX(x); circles[1].setCenterY(y + h/2);
+        circles[2] = new Circle(2); circles[2].setCenterX(x); circles[2].setCenterY(y + h);
+        circles[3] = new Circle(2); circles[3].setCenterX(x + w/2); circles[3].setCenterY(y + h);
+        circles[4] = new Circle(2); circles[4].setCenterX(x + w); circles[4].setCenterY(y + h);
+        circles[5] = new Circle(2); circles[5].setCenterX(x + w); circles[5].setCenterY(y + h/2);
+        circles[6] = new Circle(2); circles[6].setCenterX(x + w); circles[6].setCenterY(y);
+        circles[7] = new Circle(2); circles[7].setCenterX(x + w/2); circles[7].setCenterY(y);
 
-        for(int i = 0; i < circles.length; i++){
-            circles[i].setFill(Color.BLUE);
-            circles[i].setStroke(Color.BLUE);
-            int finalI = i;
-            circles[i].setOnMouseDragged(e -> CircleHelper.move(controller.getProject(),this, finalI, e.getX() - circles[finalI].getCenterX(), e.getY() - circles[finalI].getCenterY()));
-        }
     }
 
-    public Node(Point2D center, Image image, Pane pane, boolean isGroupNodes, TreeItem<Node> parent, MainController mainController){
-        this(center, image, pane, parent, mainController);
+    public Node(Point2D center, Image image, Canvas canvas, boolean isGroupNodes, TreeItem<Node> parent, MainController mainController){
+        this(center, image, canvas, parent, mainController);
         this.isGroupNodes = isGroupNodes;
         subNodes = new ArrayList<>();
     }
@@ -137,7 +138,7 @@ public class Node extends Selectable {
     public void setLabel(String newLabel){
         if(label == null){
             label = new Label(
-                    newLabel, pane,
+                    newLabel, canvas,
                     new Point2D(center.getX() - 10, center.getY() - 10)
             );
         }
@@ -208,13 +209,13 @@ public class Node extends Selectable {
                 h = Double.parseDouble(heightField.getText());
             } catch(Exception e1) { h = -1; }
 
-            MultiAction.applyNodePropertiesChange(controller.getProject(), x, y, w, h);
+            controller.getProject().getActionHolder().add(MultiAction.applyNodePropertiesChange(controller.getProject(), x, y, w, h));
             controller.getProject().draw();
         });
     }
 
     public Node copy(TreeItem<Node> parent){
-        Node ret = new Node(new Point2D(center.getX() + 5, center.getY() + 5), image, pane, isGroupNodes, parent, controller);
+        Node ret = new Node(new Point2D(center.getX() + 5, center.getY() + 5), image, canvas, isGroupNodes, parent, controller);
         if(this.isGroupNodes && !this.subNodes.isEmpty())
             for(Node node : subNodes)
                 node.copy(ret.getTreeItem());
@@ -241,7 +242,7 @@ public class Node extends Selectable {
         VertexPoint startVP = new VertexPoint(start), stopVP = new VertexPoint(stop);
         startVP.setPointBounded(start, this);
         stopVP.setPointBounded(stop, toNode);
-        Vertex vertex = new Vertex(this, toNode, startVP.getPoint(), stopVP.getPoint(), pane, arrow, line, isDuplex, isCurved, width, color, controller);
+        Vertex vertex = new Vertex(this, toNode, startVP.getPoint(), stopVP.getPoint(), canvas, arrow, line, isDuplex, isCurved, width, color, controller);
         vertex.setValue(value);
         vertices.add(vertex);
         return vertex;
@@ -365,42 +366,46 @@ public class Node extends Selectable {
     }
 
     public void draw(){
-        hide();
+        //hide();
         if(!vertices.isEmpty())
             vertices.forEach((Vertex v) -> v.draw(this));
-        if(!pane.getChildren().contains(imageView)) pane.getChildren().add(imageView);
-        imageView.toFront();
-        hidden = false;
+//        if(!pane.getChildren().contains(imageView)) pane.getChildren().add(imageView);
+//        imageView.toFront();
+        //hidden = false;
 
         double w = getWidth(), h = getHeight();
         double x = center.getX() - w/2, y = center.getY() - h/2;
-        imageView.setFitWidth(w);
-        imageView.setFitHeight(h);
-        imageView.setX(x);
-        imageView.setY(y);
-        if(selected){
+//        imageView.setFitWidth(w);
+//        imageView.setFitHeight(h);
+//        imageView.setX(x);
+//        imageView.setY(y);
+//        imageView.setLayoutX(x);
+//        imageView.setLayoutY(y);
+//        imageView.getGraphicsContext2D().drawImage(image, 0, 0, w, h);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.drawImage(image, x, y, w, h);
+        if(selected) {
             setCircles();
-            pane.getChildren().addAll(circles);
-        }
-        else{
-            pane.getChildren().removeAll(circles);
+            gc.setStroke(Color.BLUE);
+            gc.setFill(Color.BLUE);
+            for (int i = 0; i < circles.length; i++)
+                gc.fillOval(circles[i].getCenterX() - 1, circles[i].getCenterY() - 1, 2, 2);
         }
         if(!subNodes.isEmpty()) {
-            if (isCollapsed) subNodes.forEach(Node::hide);
-            else subNodes.forEach(Node::draw);
+            if (!isCollapsed) subNodes.forEach(Node::draw);
         }
         if(label != null) label.draw();
     }
 
-    private void hide() {
-        if(!hidden) {
-            if(label != null) label.hide();
-            imageView.toBack();
-            if(!subNodes.isEmpty())
-                subNodes.forEach(Node::hide);
-            hidden = true;
-        }
-    }
+//    private void hide() {
+//        if(!hidden) {
+//            if(label != null) label.hide();
+//            imageView.toBack();
+//            if(!subNodes.isEmpty())
+//                subNodes.forEach(Node::hide);
+//            hidden = true;
+//        }
+//    }
 
     @Override
     public void translate(double dx, double dy){
@@ -410,8 +415,10 @@ public class Node extends Selectable {
     public void translate(double dx, double dy, boolean fit){
         double x = center.getX() + dx, y = center.getY() + dy;
         center = new Point2D(x, y);
-        imageView.setX(x);
-        imageView.setY(y);
+//        imageView.setX(x);
+//        imageView.setY(y);
+//        imageView.setLayoutY(y);
+//        imageView.setLayoutX(x);
         if(fit) fitInGroup();
         else {
             if (!vertices.isEmpty())
@@ -442,8 +449,8 @@ public class Node extends Selectable {
         parent.getValue().removeSubNode(this);
         parent.getChildren().remove(treeItem);
         setSelected(false);
-        pane.getChildren().remove(imageView);
-        if(label != null) label.hide();
+//        pane.getChildren().remove(imageView);
+//        if(label != null) label.hide();
     }
 
     @Override
@@ -454,7 +461,7 @@ public class Node extends Selectable {
     @Override
     public void refresh(Project project) {
         superRefresh(project);
-        makeImageView();
+//        makeImageView();
         selected = false;
         treeItem = new TreeItem<>(this);
         parent.getTreeItem().getChildren().add(treeItem);
@@ -494,8 +501,8 @@ public class Node extends Selectable {
         return image;
     }
 
-    public Pane getProjectPane() {
-        return pane;
+    public Canvas getProjectCanvas() {
+        return canvas;
     }
 
     public boolean isGroupNodes() {

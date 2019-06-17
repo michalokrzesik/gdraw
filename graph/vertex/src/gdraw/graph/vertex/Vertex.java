@@ -7,6 +7,8 @@ import gdraw.graph.util.action.VertexCreation;
 import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.geometry.Point2D;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -39,11 +41,11 @@ public class Vertex extends Selectable {
 
     private double value;
 
-    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, Pane pane, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w, Color c, MainController mainController){
+    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, Canvas canvas, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w, Color c, MainController mainController){
         controller = mainController;
         fromNode = from;
         toNode = to;
-        this.pane = pane;
+        this.canvas = canvas;
         init(arrow, line, isDuplex, isCurved);
         points.addLast(new VertexPoint(toPoint, this));
         points.addFirst(new VertexPoint(fromPoint, this));
@@ -80,7 +82,7 @@ public class Vertex extends Selectable {
         fromNode = from;
         toNode = to;
         toNode.addVertex(this);
-        pane = copy.pane;
+        canvas = copy.canvas;
         draw();
 
         VertexPoint startVP = points.getFirst();
@@ -150,8 +152,9 @@ public class Vertex extends Selectable {
     }
 
     private void drawSelect(VertexPoint point){
-        if(!pane.getChildren().contains(point.getCircle())) pane.getChildren().add(point.getCircle());
-        point.getCircle().toFront();
+//        if(!pane.getChildren().contains(point.getCircle())) pane.getChildren().add(point.getCircle());
+//        point.getCircle().toFront();
+        point.draw(canvas.getGraphicsContext2D(), width,true);
     }
 
     public void draw(Node from){
@@ -159,19 +162,22 @@ public class Vertex extends Selectable {
     }
 
     private void draw() {
-        pane.getChildren().removeAll(arrows);
-        pane.getChildren().remove(path);
-        path = new Path();
-        if(!pane.getChildren().contains(path))
-            pane.getChildren().add(path);
-        path.toFront();
-        arrows.clear();
+//        pane.getChildren().removeAll(arrows);
+//        pane.getChildren().remove(path);
+        makePath();
+//        if(!pane.getChildren().contains(path))
+//            pane.getChildren().add(path);
+//        path.toFront();
+//        arrows.clear();
 
+        GraphicsContext gc = canvas.getGraphicsContext2D();
         Iterator<VertexPoint> it = points.listIterator();
         VertexPoint prev = null, now = null;
         if (it.hasNext()) prev = it.next();
-        lineType.set(path);
-        path.getElements().add(new MoveTo(prev.getX(), prev.getY()));
+        lineType.set(gc, width);
+        gc.beginPath();
+        gc.moveTo(/*);
+        path.getElements().add(new MoveTo(*/prev.getX(), prev.getY());
         while (it.hasNext()) {
             now = it.next();
             vertexType.createMid(this, points, prev, now);
@@ -179,17 +185,18 @@ public class Vertex extends Selectable {
             it = points.listIterator(points.indexOf(prev));
             now = it.next();
 
-            path.getElements().add(vertexType.newElement(prev, now));
-            if (selected) drawSelect(prev);
+            /*path.getElements().add(*/vertexType.newElement(gc, prev, now);
+            //if (selected) drawSelect(prev);
         }
-        if(selected) drawSelect(now);
+        gc.stroke();
+        if(selected) points.forEach(this::drawSelect);
 
-        arrowType.draw(arrows, path.getStroke(), prev, now);
-        if (duplex) arrowType.draw(arrows, path.getStroke(), points.get(1), points.getFirst());
-        if(!arrows.isEmpty()) {
-            pane.getChildren().addAll(arrows);
-            arrows.forEach(javafx.scene.Node::toFront);
-        }
+        arrowType.draw(gc, path.getStroke(), prev, now);
+        if (duplex) arrowType.draw(gc, path.getStroke(), points.get(1), points.getFirst());
+//        if(!arrows.isEmpty()) {
+////            pane.getChildren().addAll(arrows);
+////            arrows.forEach(javafx.scene.Node::toFront);
+//        }
         if(label != null) label.draw();
 
     }
@@ -237,7 +244,7 @@ public class Vertex extends Selectable {
         newLabel += " (" + value + ")";
         if(label == null){
             label = new Label(
-                    newLabel, pane,
+                    newLabel, canvas,
                     getCenterForLabel()
             );
         }
@@ -294,7 +301,7 @@ public class Vertex extends Selectable {
             if(!selected.isEmpty())
                 selected.forEach(s -> s.setLabel(labelField.getText()));
 
-            MultiAction.applyVertexPropertiesChange(controller.getProject(), lineTypeChoiceBox, arrowTypeChoiceBox, widthField, colorPicker, valueField);
+            controller.getProject().getActionHolder().add(MultiAction.applyVertexPropertiesChange(controller.getProject(), lineTypeChoiceBox, arrowTypeChoiceBox, widthField, colorPicker, valueField));
             controller.getProject().draw();
         });
     }
@@ -359,7 +366,7 @@ public class Vertex extends Selectable {
     @Override
     public void delete() {
         Project project = controller.getProject();
-        VertexCreation.applyDelete(project.getUndo(), this, project.getRedo());
+        controller.getProject().getActionHolder().add(VertexCreation.applyDelete(project.getUndo(), this, project.getRedo()));
     }
 
     public void finishDelete(){
@@ -367,9 +374,9 @@ public class Vertex extends Selectable {
         fromNode = null;
         toNode.deleteVertex(this);
         toNode = null;
-        pane.getChildren().remove(path);
+//        pane.getChildren().remove(path);
         controller.getProject().removeObject(this);
-        if(label != null) label.hide();
+//        if(label != null) label.hide();
         setSelected(false);
     }
 

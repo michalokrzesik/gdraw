@@ -7,7 +7,6 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 public class VertexEdit extends Action {
     private SelectableCreationListener vertex;
@@ -27,7 +26,7 @@ public class VertexEdit extends Action {
         value = v;
     }
 
-    public static void apply(ActionHelper undo,
+    public static Action apply(ActionHelper undo,
                              Vertex vertex, ChoiceBox<LineType> lineTypeChoiceBox, ChoiceBox<ArrowType> arrowTypeChoiceBox,
                              TextField widthField, ColorPicker colorPicker, TextField valueField,
                              ActionHelper redo) {
@@ -45,7 +44,9 @@ public class VertexEdit extends Action {
             v = Double.parseDouble(valueField.getText());
         } catch(Exception e1) { v = vertex.getValue(); }
 
-        new VertexEdit(redo, vertex, lineType, arrowType, w, colorPicker.getValue(), v, undo).action();
+        Action action = new VertexEdit(redo, vertex, lineType, arrowType, w, colorPicker.getValue(), v, undo);
+        action.action();
+        return action;
     }
 
     @Override

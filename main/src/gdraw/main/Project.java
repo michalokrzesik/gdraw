@@ -12,6 +12,7 @@ import gdraw.graph.vertex.LineType;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
@@ -37,17 +38,20 @@ public class Project implements Serializable {
     private transient Tab tab;
     private String name;
     private transient MainController controller;
-    private transient Pane pane;
+//    private transient Pane pane;
+    private transient Canvas canvas;
     private transient ScrollPane properties;
     private NodeDragModel dragModel;
 
     private transient ActionHelper undo;
     private transient ActionHelper redo;
+    private transient ArrayList<Action> actionHolder;
 
     public Project(MainController mainController, String projectName,double w, double h,
                    ScrollPane hScrollPane, ScrollPane pScrollPane,
                    MIandButtonPair undoFXML, MIandButtonPair redoFXML) {
         name = projectName;
+        actionHolder = new ArrayList<>();
         properties = pScrollPane;
         hierarchy = hScrollPane;
         graphObjects = new ArrayList<>();
@@ -59,12 +63,20 @@ public class Project implements Serializable {
 
         file = null;
         controller = mainController;
-        this.pane = new Pane();
+//        this.pane = new Pane();
+
+        canvas = setCanvas(w, h);
 
         double width = w,
         height = h;
-        background = new Background(controller, new Image(new File("./libraries/default_bck.png").toURI().toString()), this.pane, width, height);
+        background = new Background(controller, new Image(new File("./libraries/default_bck.png").toURI().toString()), canvas, width, height);
         setNodes();
+    }
+
+    public Canvas setCanvas(double w, double h){
+        canvas = new Canvas(w, h);
+        //TODO MouseEvents
+        return canvas;
     }
 
     public void refresh(File file, MainController mainController, Tab tab,
@@ -74,12 +86,12 @@ public class Project implements Serializable {
         undo = new ActionHelper(undoFXML);
         redo = new ActionHelper(redoFXML);
         this.tab = tab;
-        pane = new Pane();
         properties = pScrollPane;
         hierarchy = hScrollPane;
         selected = new ArrayList<>();
         this.file = file;
         background.refresh(this);
+        canvas = background.getProjectCanvas();
         setNodes();
     }
 
@@ -209,8 +221,8 @@ public class Project implements Serializable {
         }
     }
 
-    public Pane getPane() {
-        return pane;
+    public Canvas getCanvas() {
+        return canvas;
     }
 
     public void newObject(Selectable object){
@@ -234,11 +246,11 @@ public class Project implements Serializable {
     }
 
     public void deleteSelected() {
-        MultiAction.applyDelete(undo, selected, redo);
+        actionHolder.add(MultiAction.applyDelete(undo, selected, redo));
     }
 
     public void paste(ArrayList<Selectable> clipboard) {
-        MultiAction.applyCreate(undo, clipboard, redo);
+        actionHolder.add(MultiAction.applyCreate(undo, clipboard, redo));
         /*
         clipboard.forEach(s -> {
             graphObjects.add(s);
@@ -291,7 +303,7 @@ public class Project implements Serializable {
                 pane, true, parent, controller);
         groupNode.setCreationListener(new SelectableCreationListener(groupNode));
 
-        GroupManagement.applyGroup(undo, groupNode, parent, nodes, redo);
+        actionHolder.add(GroupManagement.applyGroup(undo, groupNode, parent, nodes, redo));
 
 //        groupNode.groupNodes(nodes);
 
@@ -313,18 +325,18 @@ public class Project implements Serializable {
         if(parent != null && isGroup)
             parent.unGroup(sNodes);
  */
-        GroupManagement.applyUngroup(undo, selected, redo);
+        actionHolder.add(GroupManagement.applyUngroup(undo, selected, redo));
     }
 
     public void nodesToGroups() {
-        GroupManagement.applyToGroup(undo, selected, redo);
+        actionHolder.add(GroupManagement.applyToGroup(undo, selected, redo));
 /*        selected.forEach(s -> {
             if(s.isNode()) ((Node) s).groupNodes();
         });
   */  }
 
     public void groupsToNodes() {
-        GroupManagement.applyToNode(undo, selected, redo);
+        actionHolder.add(GroupManagement.applyToNode(undo, selected, redo));
     /*    selected.forEach(s -> {
             if(s.isNode()) ((Node) s).changeGroupToNode();
         });
@@ -344,7 +356,7 @@ public class Project implements Serializable {
     }
 
     public void addNode(Image image) {
-        NodeCreation.applyCreate(undo, this, image, redo);
+        actionHolder.add(NodeCreation.applyCreate(undo, this, image, redo));
     }
 
     public MainController getController() {
@@ -359,5 +371,9 @@ public class Project implements Serializable {
 
     public void setParents() {
         background.setParent();
+    }
+
+    public ArrayList<Action> getActionHolder() {
+        return actionHolder;
     }
 }

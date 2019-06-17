@@ -1,6 +1,7 @@
 package gdraw.graph.vertex;
 
 import javafx.geometry.Point2D;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.PathElement;
 import javafx.scene.shape.QuadCurveTo;
@@ -11,8 +12,8 @@ import java.util.LinkedList;
 public enum VertexType implements Serializable {
     Straight{
         @Override
-        public PathElement newElement(VertexPoint a, VertexPoint b) {
-            return new LineTo(b.getX(),b.getY());
+        public void newElement(GraphicsContext gc, VertexPoint a, VertexPoint b) {
+            gc.lineTo(b.getX(),b.getY());
         }
 
         @Override
@@ -40,9 +41,9 @@ public enum VertexType implements Serializable {
         }
 
         @Override
-        public PathElement newElement(VertexPoint a, VertexPoint b) {
+        public void newElement(GraphicsContext gc, VertexPoint a, VertexPoint b) {
             Point2D c = controlPoint(a, b);
-            return new QuadCurveTo(c.getX(), c.getY(), b.getX(), b.getY());
+            gc.quadraticCurveTo(c.getX(), c.getY(), b.getX(), b.getY());
         }
 
         @Override
@@ -104,7 +105,7 @@ public enum VertexType implements Serializable {
     };
 
 
-    abstract public PathElement newElement(VertexPoint a, VertexPoint b);
+    abstract public void newElement(GraphicsContext gc, VertexPoint a, VertexPoint b);
 
     public abstract void createMid(Vertex vertex, LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now);
 

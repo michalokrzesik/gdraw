@@ -14,8 +14,10 @@ public class NodeChangeSize extends Action {
         this.dh = dh;
     }
 
-    public static void apply(ActionHelper undo, Node node, double w, double h, ActionHelper redo){
-        new NodeChangeSize(redo, node, w - node.getWidth(), h - node.getHeight(), undo).action();
+    public static Action apply(ActionHelper undo, Node node, double w, double h, ActionHelper redo){
+        Action action = new NodeChangeSize(redo, node, w - node.getWidth(), h - node.getHeight(), undo);
+        action.action();
+        return action;
     }
 
     @Override

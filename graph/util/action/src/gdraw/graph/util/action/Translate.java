@@ -1,8 +1,6 @@
 package gdraw.graph.util.action;
 
-import gdraw.graph.node.Node;
 import gdraw.graph.util.Selectable;
-import gdraw.graph.vertex.Vertex;
 
 public class Translate extends Action {
     private SelectableCreationListener listener;
@@ -17,8 +15,10 @@ public class Translate extends Action {
         to.push(this);
     }
 
-    public static void applyTranslate(ActionHelper undo, Selectable object, double dx, double dy, ActionHelper redo) {
-        new Translate(redo, object, dx, dy, undo).action();
+    public static Action applyTranslate(ActionHelper undo, Selectable object, double dx, double dy, ActionHelper redo) {
+        Action action = new Translate(redo, object, dx, dy, undo);
+        action.action();
+        return action;
     }
 
     @Override

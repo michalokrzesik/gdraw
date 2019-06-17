@@ -7,8 +7,9 @@ import java.io.Serializable;
 
 public enum LineType implements Serializable {
     Straight {
-        public void set(Path path){
-            path.getStrokeDashArray().clear();
+        public void set(GraphicsContext gc, double width){
+            gc.setLineWidth(width);
+            gc.setLineDashes(null); // getStrokeDashArray().clear();
         }
 
         @Override
@@ -17,36 +18,48 @@ public enum LineType implements Serializable {
         }
     },
     ThreeLength{
-        public void set(Path path){
-            path.getStrokeDashArray().clear();
-            path.getStrokeDashArray().addAll(3 * path.getStrokeWidth());
+        public void set(GraphicsContext gc, double width){
+            //path.getStrokeDashArray().clear();
+            //path.getStrokeDashArray().addAll(3 * path.getStrokeWidth());
+            gc.setLineDashes(3 * width);
+            gc.setLineWidth(width);
+            gc.setLineDashOffset(width);
         }
 
         @Override
         public String toString() { return "––– –––"; }
     },
     TwoLength{
-        public void set(Path path){
-            path.getStrokeDashArray().clear();
-            path.getStrokeDashArray().addAll(2 * path.getStrokeWidth());
+        public void set(GraphicsContext gc, double width){
+//            path.getStrokeDashArray().clear();
+//            path.getStrokeDashArray().addAll(2 * path.getStrokeWidth());
+            gc.setLineWidth(width);
+            gc.setLineDashOffset(width);
+            gc.setLineDashes(2 * width);
         }
 
         @Override
         public String toString() { return "–– –– ––"; }
     },
     Dot{
-        public void set(Path path){
-            path.getStrokeDashArray().clear();
-            path.getStrokeDashArray().addAll(path.getStrokeWidth());
+        public void set(GraphicsContext gc, double width){
+//            path.getStrokeDashArray().clear();
+//            path.getStrokeDashArray().addAll(path.getStrokeWidth());
+            gc.setLineWidth(width);
+            gc.setLineDashes(width);
+            gc.setLineDashOffset(width);
         }
 
         @Override
         public String toString() { return "• • • • •"; }
     },
     DotDash{
-        public void set(Path path){
-            path.getStrokeDashArray().clear();
-            path.getStrokeDashArray().addAll(path.getStrokeWidth(), 2 * path.getStrokeWidth());
+        public void set(GraphicsContext gc, double width){
+//            path.getStrokeDashArray().clear();
+//            path.getStrokeDashArray().addAll(path.getStrokeWidth(), 2 * path.getStrokeWidth());
+            gc.setLineWidth(width);
+            gc.setLineDashOffset(width);
+            gc.setLineDashes(width, 2* width);
         }
 
         @Override
@@ -55,6 +68,6 @@ public enum LineType implements Serializable {
         }
     };
 
-    abstract public void set(Path path);
+    abstract public void set(GraphicsContext gc, double width);
 
 }

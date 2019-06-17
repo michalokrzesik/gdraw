@@ -157,10 +157,10 @@ public class MainController {
 
     public Tab tabForProject(Project project){
 
-        ScrollPane scrollPane = new ScrollPane(project.getPane());
+        ScrollPane scrollPane = new ScrollPane(project.getCanvas());
         scrollPane.setStyle("-fx-background-color: #FDF5E6; " +
                 "-fx-border-color: #FDF5E6;");
-        project.getPane().setStyle("-fx-background-color: #FDF5E6; " +
+        project.getCanvas().setStyle("-fx-background-color: #FDF5E6; " +
                 "-fx-border-color: #FDF5E6;");
 
 

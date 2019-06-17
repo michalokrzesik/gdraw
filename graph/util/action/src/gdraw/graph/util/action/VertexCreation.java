@@ -69,24 +69,29 @@ public class VertexCreation extends Action {
         type = ActionType.Create;
     }
 
-    public static void applyCreate(ActionHelper undo,
+    public static Action applyCreate(ActionHelper undo,
                              Node fromNode, Point2D fromPoint, Point2D toPoint, Node toNode,
                              ArrowType arrowType, LineType lineType, boolean duplex, boolean curved,
                              double width, double value, Color color,
                              ActionHelper redo) {
-        (new VertexCreation(redo,
+        Action action = new VertexCreation(redo,
                 fromNode, fromPoint, toPoint, toNode,
                 arrowType, lineType, duplex, curved, width, value, color,
-                undo)
-        ).action();
+                undo);
+        action.action();
+        return action;
     }
 
-    public static void applyDelete(ActionHelper undo, Vertex vertex, ActionHelper redo) {
-        (new VertexCreation(redo, vertex, undo)).action();
+    public static Action applyDelete(ActionHelper undo, Vertex vertex, ActionHelper redo) {
+        Action action = new VertexCreation(redo, vertex, undo);
+        action.action();
+        return action;
     }
 
-    public static void applyCopy(ActionHelper undo, Vertex vertex, MultiAction requestManager, ActionHelper redo){
-        new VertexCreation(redo, vertex, requestManager, undo).action();
+    public static Action applyCopy(ActionHelper undo, Vertex vertex, MultiAction requestManager, ActionHelper redo){
+        Action action = new VertexCreation(redo, vertex, requestManager, undo);
+        action.action();
+        return action;
     }
 
     @Override

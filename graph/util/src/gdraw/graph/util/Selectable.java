@@ -3,10 +3,10 @@ package gdraw.graph.util;
 import gdraw.graph.util.action.SelectableCreationListener;
 import gdraw.main.MainController;
 import gdraw.main.Project;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 
 import java.io.Serializable;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public abstract class Selectable implements Serializable {
     protected transient MainController controller;
     private SelectableCreationListener creationListener;
-    protected transient Pane pane;
+    protected transient Canvas canvas;
     protected transient boolean selected;
     protected Label label;
 
@@ -52,7 +52,7 @@ public abstract class Selectable implements Serializable {
     public abstract boolean isNode();
 
     public void refresh(Project project){
-        pane = project.getPane();
+        canvas = project.getCanvas();
         controller = project.getController();
     }
 

@@ -1,6 +1,7 @@
 package gdraw.graph.node;
 
 import gdraw.graph.util.Selectable;
+import gdraw.graph.util.action.Action;
 import gdraw.graph.util.action.GroupManagement;
 import gdraw.graph.util.action.MultiAction;
 import gdraw.graph.util.action.VertexCreation;
@@ -54,7 +55,7 @@ public enum NodeDragModel implements Serializable {
 
         @Override
         public void released(Project project, MouseEvent e, Selectable item) {
-            MultiAction.applyTranslate(project, dx, dy);
+            actionHolder.add(MultiAction.applyTranslate(project, dx, dy));
         }
 
 
@@ -68,7 +69,7 @@ public enum NodeDragModel implements Serializable {
             start.setPointBounded(start.getPoint(), from);
             stop = new VertexPoint(e.getX(), e.getY());
             to = from;
-            pane = project.getPane();
+            pane = project.getCanvas();
             refresh();
             if(!pane.getChildren().contains(path))
                 pane.getChildren().add(path);
@@ -100,10 +101,10 @@ public enum NodeDragModel implements Serializable {
         public void released(Project project, MouseEvent e, Selectable item) {
             if(item.isNode()){
                 to = (Node) item;
-                VertexCreation.applyCreate(
+                actionHolder.add(VertexCreation.applyCreate(
                         project.getUndo(),
                         from, start.getPoint(), stop.getPoint(), to, arrowType, lineType, duplex, curved, width, 1, color,
-                        project.getRedo());
+                        project.getRedo()));
             }
             arrows.add(path);
             pane.getChildren().removeAll(arrows);
@@ -123,7 +124,7 @@ public enum NodeDragModel implements Serializable {
         @Override
         public void released(Project project, MouseEvent e, Selectable item) {
             if(item.isNode())
-                GroupManagement.applyGroup(project.getUndo(), from, (Node) item, project.getRedo());
+                actionHolder.add(GroupManagement.applyGroup(project.getUndo(), from, (Node) item, project.getRedo()));
             arrows.add(path);
             pane.getChildren().removeAll(arrows);
         }
@@ -141,6 +142,7 @@ public enum NodeDragModel implements Serializable {
     Node from, to;
     ArrayList<Shape> arrows = new ArrayList<>();
     Pane pane;
+    ArrayList<Action> actionHolder;
 
     public abstract void pressed(Project project, MouseEvent e, Selectable item);
     public abstract void dragged(Project project, MouseEvent e, Selectable item);
@@ -148,6 +150,7 @@ public enum NodeDragModel implements Serializable {
 
 
     public void set(LineType lineType, ArrowType arrowType, Color color, boolean duplex, boolean curved, String width) {
+        actionHolder = new ArrayList<>();
         this.lineType = lineType; this.arrowType = arrowType; this.color = color; this.duplex = duplex; this.curved = curved;
         try {
             this.width = Double.parseDouble(width);

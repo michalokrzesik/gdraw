@@ -7,8 +7,7 @@ import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
-import javafx.scene.layout.Pane;
-
+import javafx.scene.canvas.Canvas;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class NodeCreation extends MultiAction {
         height = image.getHeight(); heightCollapsed = height;
         center = new Point2D(width/2, height/2);
         this.image = image;
-        pane = project.getPane();
+        canvas = project.getCanvas();
         isCollapsed = false; isGroupNodes = false;
         label = "";
         parent = project.getBackground().getCreationListener();
@@ -50,7 +49,7 @@ public class NodeCreation extends MultiAction {
     private SelectableCreationListener node;
     private Point2D center;
     private Image image;
-    private Pane pane;
+    private Canvas canvas;
     private boolean isGroupNodes, isCollapsed;
     private double width, height, widthCollapsed, heightCollapsed;
     private String label;
@@ -59,25 +58,31 @@ public class NodeCreation extends MultiAction {
 
     private ActionType type;
 
-    public static void applyDelete(ActionHelper undo, Node o, ActionHelper redo) {
-        new NodeCreation(redo, o, undo).action();
+    public static Action applyDelete(ActionHelper undo, Node o, ActionHelper redo) {
+        Action action = new NodeCreation(redo, o, undo);
+        action.action();
+        return action;
     }
 
-    public static void applyCreate(ActionHelper undo, Project project, Image image, ActionHelper redo) {
-        new NodeCreation(redo, project, image, undo).action();
+    public static Action applyCreate(ActionHelper undo, Project project, Image image, ActionHelper redo) {
+        Action action = new NodeCreation(redo, project, image, undo);
+        action.action();
+        return action;
     }
 
-    public static void applyCreate(ActionHelper undo, Node node, ActionHelper redo) {
+    public static Action applyCreate(ActionHelper undo, Node node, ActionHelper redo) {
         NodeCreation creator = new NodeCreation(undo, node, redo);
         creator.action();
         creator.action();
+        return creator;
     }
 
-    public static void applyCopy(ActionHelper undo, Node node, MultiAction requestManager, ActionHelper redo){
+    public static Action applyCopy(ActionHelper undo, Node node, MultiAction requestManager, ActionHelper redo){
         NodeCreation creator = new NodeCreation(redo, node, requestManager, undo);
         creator.action();
         List<Vertex> vertices = node.getVertices();
         if(!vertices.isEmpty()) vertices.forEach(vertex -> requestManager.request(vertex.getFromNode() == node, creator.getNode(), vertex, node));
+        return creator;
     }
 
     private Node getNode() {
@@ -88,7 +93,7 @@ public class NodeCreation extends MultiAction {
     public void action() {
         switch (type){
             case Create:
-                Node object = new Node(center, image, pane, isGroupNodes, ((Node) parent.getObject()).getTreeItem(), controller);
+                Node object = new Node(center, image, canvas, isGroupNodes, ((Node) parent.getObject()).getTreeItem(), controller);
                 object.setWH(width, height, widthCollapsed, heightCollapsed);
                 object.setCollapsed(isCollapsed);
                 object.setLabel(label);
@@ -112,7 +117,7 @@ public class NodeCreation extends MultiAction {
                 multiFrom.clear();
                 multiTo.clear();
 
-                applyDelete(multiFrom, toDelete, multiTo);
+                actionHolder.add(applyDelete(multiFrom, toDelete, multiTo));
 
                 getInfoFromNode(objectToDelete);
 
@@ -128,7 +133,7 @@ public class NodeCreation extends MultiAction {
     private void getInfoFromNode(Node object) {
         center = object.getCenter();
         image = object.getImage();
-        pane = object.getProjectPane();
+        canvas = object.getProjectCanvas();
         isGroupNodes = object.isGroupNodes(); isCollapsed = object.isCollapsed();
         object.setCollapsed(false); width = object.getWidth(); height = object.getHeight();
         object.setCollapsed(true); widthCollapsed = object.getWidth(); heightCollapsed = object.getHeight();

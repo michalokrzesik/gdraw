@@ -44,31 +44,34 @@ public class GroupManagement extends MultiAction {
         type = ActionType.Group;
     }
 
-    public static void applyUngroup(ActionHelper undo, ArrayList<Selectable> selected, ActionHelper redo) {
+    public static Action applyUngroup(ActionHelper undo, ArrayList<Selectable> selected, ActionHelper redo) {
         GroupManagement ma = new GroupManagement(redo, undo);
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
         if(!selected.isEmpty()) selected.forEach(o -> {
-            if(o.isNode()) GroupManagement.applyUngroup(multiFrom, (Node) o, multiTo);
+            if(o.isNode()) ma.actionHolder.add(GroupManagement.applyUngroup(multiFrom, (Node) o, multiTo));
         });
 
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
         //Jeśli w objects nie było node'ów, nic się nie dzieje
+        return ma;
     }
 
-    public static void applyUngroup(ActionHelper undo, Node node, ActionHelper redo) {
-        new GroupManagement(redo, node, node.getTreeItem().getParent().getParent().getValue(), undo);
+    public static Action applyUngroup(ActionHelper undo, Node node, ActionHelper redo) {
+        GroupManagement action = new GroupManagement(redo, node, node.getTreeItem().getParent().getParent().getValue(), undo);
+        action.action();
+        return action;
     }
 
 
-    public static void applyGroup(ActionHelper undo, Node node, TreeItem<Node> parentOfParent, ArrayList<Node> nodes, ActionHelper redo) {
+    public static Action applyGroup(ActionHelper undo, Node node, TreeItem<Node> parentOfParent, ArrayList<Node> nodes, ActionHelper redo) {
         GroupManagement ma = new GroupManagement(redo, undo);
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
 
         SelectableCreationListener listener = node.getCreationListener();
 
-        NodeCreation.applyCreate(multiFrom, node, multiTo);
+        ma.actionHolder.add(NodeCreation.applyCreate(multiFrom, node, multiTo));
 
 
         Node parent = (Node) listener.getObject();
@@ -76,17 +79,20 @@ public class GroupManagement extends MultiAction {
         parentOfParent.getValue().getSubNodes().add(parent);
 
 
-        if(!nodes.isEmpty()) nodes.forEach(o -> GroupManagement.applyGroup(multiFrom, o, parent, multiTo));
+        if(!nodes.isEmpty()) nodes.forEach(o -> ma.actionHolder.add(GroupManagement.applyGroup(multiFrom, o, parent, multiTo)));
 
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
         //Jeśli w objects nie było node'ów, nic się nie dzieje
+        return ma;
     }
 
-    public static void applyGroup(ActionHelper undo, Node node, Node parent, ActionHelper redo) {
-        new GroupManagement(redo, node, parent, undo).action();
+    public static Action applyGroup(ActionHelper undo, Node node, Node parent, ActionHelper redo) {
+        Action action = new GroupManagement(redo, node, parent, undo);
+        action.action();
+        return action;
     }
 
-    public static void applyToNode(ActionHelper undo, ArrayList<Selectable> selected, ActionHelper redo) {
+    public static Action applyToNode(ActionHelper undo, ArrayList<Selectable> selected, ActionHelper redo) {
         GroupManagement ma = new GroupManagement(redo, undo);
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
@@ -95,31 +101,35 @@ public class GroupManagement extends MultiAction {
             if(o.isNode()){
                 ArrayList<Selectable> subNodes = new ArrayList<>();
                 if(!((Node) o).getSubNodes().isEmpty()) subNodes.addAll(((Node) o).getSubNodes());
-                GroupManagement.applyUngroup(multiFrom, subNodes, multiTo);
+                ma.actionHolder.add(GroupManagement.applyUngroup(multiFrom, subNodes, multiTo));
                 ((Node) o).changeGroupToNode();                                 //Dodanie czegoś do grupy od razu zmienia node w grupę, ergo - nie trzeba robić osobnej akcji
             }
         });
 
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
         //Jeśli w objects nie było node'ów, nic się nie dzieje
+        return ma;
     }
 
-    public static void applyToGroup(ActionHelper undo, ArrayList<Selectable> selected, ActionHelper redo) {
+    public static Action applyToGroup(ActionHelper undo, ArrayList<Selectable> selected, ActionHelper redo) {
         GroupManagement ma = new GroupManagement(redo, undo);
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
 
         if(!selected.isEmpty()) selected.forEach(o -> {
             if(o.isNode())
-                GroupManagement.applyToGroup(multiFrom, (Node) o, multiTo);
+                ma.actionHolder.add(GroupManagement.applyToGroup(multiFrom, (Node) o, multiTo));
         });
 
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
         //Jeśli w objects nie było node'ów, nic się nie dzieje
+        return ma;
     }
 
-    public static void applyToGroup(ActionHelper undo, Node node, ActionHelper redo){
-        new GroupManagement(redo, node, undo).action();
+    public static Action applyToGroup(ActionHelper undo, Node node, ActionHelper redo){
+        Action action = new GroupManagement(redo, node, undo);
+        action.action();
+        return action;
     }
 
     @Override
