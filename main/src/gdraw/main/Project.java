@@ -11,14 +11,13 @@ import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -38,7 +37,7 @@ public class Project implements Serializable {
     private transient Tab tab;
     private String name;
     private transient MainController controller;
-    private transient Group group;
+    private transient Pane pane;
     private transient ScrollPane properties;
     private NodeDragModel dragModel;
 
@@ -60,11 +59,11 @@ public class Project implements Serializable {
 
         file = null;
         controller = mainController;
-        this.group = new Group();
+        this.pane = new Pane();
 
         double width = w,
         height = h;
-        background = new Background(controller, new Image(new File("./libraries/default_bck.png").toURI().toString()), this.group, width, height);
+        background = new Background(controller, new Image(new File("./libraries/default_bck.png").toURI().toString()), this.pane, width, height);
         setNodes();
     }
 
@@ -75,7 +74,7 @@ public class Project implements Serializable {
         undo = new ActionHelper(undoFXML);
         redo = new ActionHelper(redoFXML);
         this.tab = tab;
-        group = new Group();
+        pane = new Pane();
         properties = pScrollPane;
         hierarchy = hScrollPane;
         selected = new ArrayList<>();
@@ -147,7 +146,7 @@ public class Project implements Serializable {
     }
 
     public WritableImage snapshot() {
-        return group.snapshot(new SnapshotParameters(), null);
+        return pane.snapshot(new SnapshotParameters(), null);
     }
 
     public void select(Selectable item, boolean ctrlPressed) {
@@ -210,8 +209,8 @@ public class Project implements Serializable {
         }
     }
 
-    public Group getGroup() {
-        return group;
+    public Pane getPane() {
+        return pane;
     }
 
     public void newObject(Selectable object){
@@ -289,7 +288,7 @@ public class Project implements Serializable {
         Node groupNode = new Node(
                 new Point2D((minMaxs.get(0) + minMaxs.get(1))/2, (minMaxs.get(2) + minMaxs.get(3))/2),
                 new Image("standardGroup.png"),
-                group, true, parent, controller);
+                pane, true, parent, controller);
         groupNode.setCreationListener(new SelectableCreationListener(groupNode));
 
         GroupManagement.applyGroup(undo, groupNode, parent, nodes, redo);

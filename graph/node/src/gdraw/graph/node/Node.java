@@ -7,16 +7,14 @@ import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.VertexPoint;
 import gdraw.main.MainController;
 import gdraw.main.Project;
-import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.geometry.Point2D;
 import java.util.ArrayList;
 
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 import gdraw.graph.vertex.Vertex;
 import gdraw.graph.util.Label;
@@ -41,7 +39,7 @@ public class Node extends Selectable {
 
     protected transient TreeItem<Node> treeItem;
 
-    public Node(Point2D center, Image image, Group group, TreeItem<Node> parent, MainController mainController){
+    public Node(Point2D center, Image image, Pane pane, TreeItem<Node> parent, MainController mainController){
         controller = mainController;
         this.center = center;
         this.image = image;
@@ -54,7 +52,7 @@ public class Node extends Selectable {
         isGroupNodes = false;
         vertices = new ArrayList<>();
         subNodes = new ArrayList<>();
-        this.group = group;
+        this.pane = pane;
         treeItem = new TreeItem<>(this);
 
         if(parent != null) {
@@ -81,6 +79,7 @@ public class Node extends Selectable {
         imageView.setOnContextMenuRequested(controller::contextMenu);
         imageView.setOnMousePressed(this::onMousePressed);
         imageView.setOnMouseDragged(this::onMouseDragged);
+        imageView.setOnMouseReleased(this::onMouseReleased);
 
     }
 
@@ -123,8 +122,8 @@ public class Node extends Selectable {
         }
     }
 
-    public Node(Point2D center, Image image, Group group, boolean isGroupNodes, TreeItem<Node> parent, MainController mainController){
-        this(center, image, group, parent, mainController);
+    public Node(Point2D center, Image image, Pane pane, boolean isGroupNodes, TreeItem<Node> parent, MainController mainController){
+        this(center, image, pane, parent, mainController);
         this.isGroupNodes = isGroupNodes;
         subNodes = new ArrayList<>();
     }
@@ -138,7 +137,7 @@ public class Node extends Selectable {
     public void setLabel(String newLabel){
         if(label == null){
             label = new Label(
-                    newLabel, group,
+                    newLabel, pane,
                     new Point2D(center.getX() - 10, center.getY() - 10)
             );
         }
@@ -215,7 +214,7 @@ public class Node extends Selectable {
     }
 
     public Node copy(TreeItem<Node> parent){
-        Node ret = new Node(new Point2D(center.getX() + 5, center.getY() + 5), image, group, isGroupNodes, parent, controller);
+        Node ret = new Node(new Point2D(center.getX() + 5, center.getY() + 5), image, pane, isGroupNodes, parent, controller);
         if(this.isGroupNodes && !this.subNodes.isEmpty())
             for(Node node : subNodes)
                 node.copy(ret.getTreeItem());
@@ -242,7 +241,7 @@ public class Node extends Selectable {
         VertexPoint startVP = new VertexPoint(start), stopVP = new VertexPoint(stop);
         startVP.setPointBounded(start, this);
         stopVP.setPointBounded(stop, toNode);
-        Vertex vertex = new Vertex(this, toNode, startVP.getPoint(), stopVP.getPoint(), group, arrow, line, isDuplex, isCurved, width, color, controller);
+        Vertex vertex = new Vertex(this, toNode, startVP.getPoint(), stopVP.getPoint(), pane, arrow, line, isDuplex, isCurved, width, color, controller);
         vertex.setValue(value);
         vertices.add(vertex);
         return vertex;
@@ -369,7 +368,8 @@ public class Node extends Selectable {
         hide();
         if(!vertices.isEmpty())
             vertices.forEach((Vertex v) -> v.draw(this));
-        group.getChildren().add(imageView);
+        if(!pane.getChildren().contains(imageView)) pane.getChildren().add(imageView);
+        imageView.toFront();
         hidden = false;
 
         double w = getWidth(), h = getHeight();
@@ -380,10 +380,10 @@ public class Node extends Selectable {
         imageView.setY(y);
         if(selected){
             setCircles();
-            group.getChildren().addAll(circles);
+            pane.getChildren().addAll(circles);
         }
         else{
-            group.getChildren().removeAll(circles);
+            pane.getChildren().removeAll(circles);
         }
         if(!subNodes.isEmpty()) {
             if (isCollapsed) subNodes.forEach(Node::hide);
@@ -395,7 +395,7 @@ public class Node extends Selectable {
     private void hide() {
         if(!hidden) {
             if(label != null) label.hide();
-            group.getChildren().remove(imageView);
+            imageView.toBack();
             if(!subNodes.isEmpty())
                 subNodes.forEach(Node::hide);
             hidden = true;
@@ -410,6 +410,8 @@ public class Node extends Selectable {
     public void translate(double dx, double dy, boolean fit){
         double x = center.getX() + dx, y = center.getY() + dy;
         center = new Point2D(x, y);
+        imageView.setX(x);
+        imageView.setY(y);
         if(fit) fitInGroup();
         else {
             if (!vertices.isEmpty())
@@ -440,7 +442,7 @@ public class Node extends Selectable {
         parent.getValue().removeSubNode(this);
         parent.getChildren().remove(treeItem);
         setSelected(false);
-        group.getChildren().remove(imageView);
+        pane.getChildren().remove(imageView);
         if(label != null) label.hide();
     }
 
@@ -492,8 +494,8 @@ public class Node extends Selectable {
         return image;
     }
 
-    public Group getProjectGroup() {
-        return group;
+    public Pane getProjectPane() {
+        return pane;
     }
 
     public boolean isGroupNodes() {

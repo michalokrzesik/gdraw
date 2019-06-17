@@ -7,11 +7,10 @@ import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -19,8 +18,8 @@ public class Background extends Node {
     private double x, y;
     private transient Rectangle selection;
 
-    public Background(MainController mainController, Image image, Group group, double w, double h){
-        this(new Point2D(w/2, h/2), image, group, mainController);
+    public Background(MainController mainController, Image image, Pane pane, double w, double h){
+        this(new Point2D(w/2, h/2), image, pane, mainController);
         treeItem = new TreeItem<>(this);
         setCreationListener(new SelectableCreationListener(this));
         width = w;
@@ -41,17 +40,22 @@ public class Background extends Node {
         });
         imageView.setOnMouseDragged(e -> {
             draw();
-            selection = new Rectangle(x, y, e.getX() - x, e.getY() - y);
+            double xmin = Double.min(x, e.getX()), ymin = Double.min(y, e.getY());
+            selection = new Rectangle(xmin, ymin, Math.abs(e.getX() - x), Math.abs(e.getY() - y));
             selection.setStroke(Color.BLANCHEDALMOND);
-            group.getChildren().add(selection);
+            selection.setFill(Color.TRANSPARENT);
+            pane.getChildren().add(selection);
+            selection.toFront();
         });
         imageView.setOnMouseReleased(e -> {
+            if(selection == null) return;
             controller.select(selection);
             draw();
         });
-        group.getChildren().add(imageView);
-        group.setLayoutX(0);
-        group.setLayoutY(0);
+        pane.getChildren().add(imageView);
+        imageView.toBack();
+        pane.setLayoutX(0);
+        pane.setLayoutY(0);
 
         draw();
         this.treeItem = new TreeItem<>(this);
@@ -59,13 +63,13 @@ public class Background extends Node {
         graphic.setFitWidth(10);
         graphic.setFitHeight(10);
         this.treeItem.setGraphic(graphic);
-        label = new Label("Tło", group);
+        label = new Label("Tło", pane);
         label.hide();
 
     }
 
-    private Background(Point2D center, Image image, Group group, MainController mainController) {
-        super(center, image, group, null, mainController);
+    private Background(Point2D center, Image image, Pane pane, MainController mainController) {
+        super(center, image, pane, null, mainController);
         setCreationListener(new SelectableCreationListener(this));
     }
 
@@ -74,18 +78,19 @@ public class Background extends Node {
 
     @Override
     public void draw(){
-        group.setLayoutX(0);
-        group.setLayoutY(0);
         imageView.setX(0);
         imageView.setY(0);
         imageView.setImage(image);
         if(selection != null){
-            group.getChildren().remove(selection);
+            pane.getChildren().remove(selection);
             selection = null;
         }
     }
 
-    public void setImage(Image newImage){ image = newImage; }
+    public void setImage(Image newImage){
+        image = newImage;
+        imageView.setImage(image);
+    }
 
     @Override
     public boolean isNode(){ return false; }

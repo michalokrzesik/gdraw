@@ -9,8 +9,8 @@ import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.VertexPoint;
 import gdraw.main.Project;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
@@ -68,9 +68,11 @@ public enum NodeDragModel implements Serializable {
             start.setPointBounded(start.getPoint(), from);
             stop = new VertexPoint(e.getX(), e.getY());
             to = from;
-            group = project.getGroup();
+            pane = project.getPane();
             refresh();
-            group.getChildren().add(path);
+            if(!pane.getChildren().contains(path))
+                pane.getChildren().add(path);
+            path.toFront();
         }
 
         private void refresh() {
@@ -78,10 +80,13 @@ public enum NodeDragModel implements Serializable {
             lineType.set(path);
             path.getElements().clear();
             path.getElements().addAll(new MoveTo(start.getX(), start.getY()), new LineTo(stop.getX(), stop.getY()));
-            group.getChildren().removeAll(arrows);
+            pane.getChildren().removeAll(arrows);
             arrowType.draw(arrows, color, start, stop);
             if(duplex) arrowType.draw(arrows, color, stop, start);
-            group.getChildren().addAll(arrows);
+            if(!arrows.isEmpty()) {
+                pane.getChildren().addAll(arrows);
+                arrows.forEach(javafx.scene.Node::toFront);
+            }
         }
 
         @Override
@@ -101,7 +106,7 @@ public enum NodeDragModel implements Serializable {
                         project.getRedo());
             }
             arrows.add(path);
-            group.getChildren().removeAll(arrows);
+            pane.getChildren().removeAll(arrows);
         }
     },
     Grouping{
@@ -120,7 +125,7 @@ public enum NodeDragModel implements Serializable {
             if(item.isNode())
                 GroupManagement.applyGroup(project.getUndo(), from, (Node) item, project.getRedo());
             arrows.add(path);
-            group.getChildren().removeAll(arrows);
+            pane.getChildren().removeAll(arrows);
         }
     };
 
@@ -135,7 +140,7 @@ public enum NodeDragModel implements Serializable {
     VertexPoint start, stop;
     Node from, to;
     ArrayList<Shape> arrows = new ArrayList<>();
-    Group group;
+    Pane pane;
 
     public abstract void pressed(Project project, MouseEvent e, Selectable item);
     public abstract void dragged(Project project, MouseEvent e, Selectable item);

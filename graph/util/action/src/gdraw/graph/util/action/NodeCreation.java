@@ -6,8 +6,8 @@ import gdraw.graph.vertex.Vertex;
 import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Pane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ public class NodeCreation extends MultiAction {
         height = image.getHeight(); heightCollapsed = height;
         center = new Point2D(width/2, height/2);
         this.image = image;
-        group = project.getGroup();
+        pane = project.getPane();
         isCollapsed = false; isGroupNodes = false;
         label = "";
         parent = project.getBackground().getCreationListener();
@@ -50,7 +50,7 @@ public class NodeCreation extends MultiAction {
     private SelectableCreationListener node;
     private Point2D center;
     private Image image;
-    private Group group;
+    private Pane pane;
     private boolean isGroupNodes, isCollapsed;
     private double width, height, widthCollapsed, heightCollapsed;
     private String label;
@@ -88,7 +88,7 @@ public class NodeCreation extends MultiAction {
     public void action() {
         switch (type){
             case Create:
-                Node object = new Node(center, image, group, isGroupNodes, ((Node) parent.getObject()).getTreeItem(), controller);
+                Node object = new Node(center, image, pane, isGroupNodes, ((Node) parent.getObject()).getTreeItem(), controller);
                 object.setWH(width, height, widthCollapsed, heightCollapsed);
                 object.setCollapsed(isCollapsed);
                 object.setLabel(label);
@@ -106,8 +106,8 @@ public class NodeCreation extends MultiAction {
                 Node objectToDelete = (Node) node.getObject();
 
                 ArrayList<Selectable> toDelete = new ArrayList<>();
-                toDelete.addAll(objectToDelete.getVertices());
-                toDelete.addAll(objectToDelete.getSubNodes());
+                if(!objectToDelete.getVertices().isEmpty()) toDelete.addAll(objectToDelete.getVertices());
+                if(!objectToDelete.getSubNodes().isEmpty()) toDelete.addAll(objectToDelete.getSubNodes());
 
                 multiFrom.clear();
                 multiTo.clear();
@@ -128,7 +128,7 @@ public class NodeCreation extends MultiAction {
     private void getInfoFromNode(Node object) {
         center = object.getCenter();
         image = object.getImage();
-        group = object.getProjectGroup();
+        pane = object.getProjectPane();
         isGroupNodes = object.isGroupNodes(); isCollapsed = object.isCollapsed();
         object.setCollapsed(false); width = object.getWidth(); height = object.getHeight();
         object.setCollapsed(true); widthCollapsed = object.getWidth(); heightCollapsed = object.getHeight();

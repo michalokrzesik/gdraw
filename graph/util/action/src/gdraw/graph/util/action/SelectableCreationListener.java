@@ -3,9 +3,11 @@ package gdraw.graph.util.action;
 import gdraw.graph.util.Selectable;
 
 public class SelectableCreationListener {
-    Selectable object;
+    private Selectable object;
+    private int count;                      //Hopefully blocks object deletion
 
     public SelectableCreationListener(Selectable selectable) {
+        count = 0;
         setObject(selectable);
     }
 
@@ -15,7 +17,12 @@ public class SelectableCreationListener {
     }
 
     public Selectable getObject(){
+        count ++;
         return object;
+    }
+
+    public int getCount(){
+        return count;
     }
 
 }

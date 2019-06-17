@@ -1,24 +1,23 @@
 package gdraw.graph.util;
 
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.Pane;
 
 import java.io.Serializable;
 
 public class Label implements Serializable {
     private String label;
     private Point2D upperLeft;
-    private Group group;
+    private Pane pane;
     private javafx.scene.control.Label object;
 
-    public Label(String label, Group group){
-        this(label, group, new Point2D(0,0));
+    public Label(String label, Pane pane){
+        this(label, pane, new Point2D(0,0));
     }
 
-    public Label(String label, Group group, Point2D point){
+    public Label(String label, Pane pane, Point2D point){
         this.label = label;
-        this.group = group;
+        this.pane = pane;
         upperLeft = point;
         object = new javafx.scene.control.Label(label);
         object.setLayoutX(upperLeft.getX());
@@ -27,7 +26,8 @@ public class Label implements Serializable {
     }
 
     public void draw() {
-        group.getChildren().add(object);
+        if(!pane.getChildren().contains(object)) pane.getChildren().add(object);
+        object.toFront();
     }
 
     public void setLabel(String newLabel) {
@@ -47,6 +47,6 @@ public class Label implements Serializable {
     }
 
     public void hide() {
-        group.getChildren().remove(object);
+        if(object != null) object.toBack();
     }
 }

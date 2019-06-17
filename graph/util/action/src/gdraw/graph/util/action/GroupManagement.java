@@ -94,7 +94,7 @@ public class GroupManagement extends MultiAction {
         if(!selected.isEmpty()) selected.forEach(o -> {
             if(o.isNode()){
                 ArrayList<Selectable> subNodes = new ArrayList<>();
-                subNodes.addAll(((Node) o).getSubNodes());
+                if(!((Node) o).getSubNodes().isEmpty()) subNodes.addAll(((Node) o).getSubNodes());
                 GroupManagement.applyUngroup(multiFrom, subNodes, multiTo);
                 ((Node) o).changeGroupToNode();                                 //Dodanie czegoś do grupy od razu zmienia node w grupę, ergo - nie trzeba robić osobnej akcji
             }

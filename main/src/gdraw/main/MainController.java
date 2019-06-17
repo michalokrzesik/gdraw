@@ -13,15 +13,12 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
@@ -160,9 +157,10 @@ public class MainController {
 
     public Tab tabForProject(Project project){
 
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(project.getGroup());
+        ScrollPane scrollPane = new ScrollPane(project.getPane());
         scrollPane.setStyle("-fx-background-color: #FDF5E6; " +
+                "-fx-border-color: #FDF5E6;");
+        project.getPane().setStyle("-fx-background-color: #FDF5E6; " +
                 "-fx-border-color: #FDF5E6;");
 
 
@@ -542,10 +540,10 @@ public class MainController {
 
     public void changeBackground(ActionEvent actionEvent) {
         if(activeProject == null) return;
-        File file = ImageFileChooser("Wybierz obraz", null).showSaveDialog(null);
+        File file = ImageFileChooser("Wybierz obraz", null).showOpenDialog(null);
         if(file != null) {
             try {
-                activeProject.getBackground().setImage(Image.impl_fromPlatformImage(ImageIO.read(file)));
+                activeProject.getBackground().setImage(SwingFXUtils.toFXImage(ImageIO.read(file), null));
             } catch (IOException e) {
                 e.printStackTrace();
             }

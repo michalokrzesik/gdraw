@@ -51,13 +51,14 @@ public class NodeLibrary extends TitledPane {
         File zipFile = new File(zipUrl.toURI()); */
         //ZipFile zip = new ZipFile(path);
         pane.clear();
-        for(File file: path.listFiles()) {
-            pane.add(
-                    new ImageViewWithName(
-                            this,
-                            file.getName(),
-                            new Image(file.toURI().toString())));
-        }
+        if(path.isDirectory() && path.listFiles().length > 0)
+            for(File file: path.listFiles()) {
+                pane.add(
+                        new ImageViewWithName(
+                                this,
+                                file.getName(),
+                                new Image(file.toURI().toString())));
+            }
     }
 
     public void addNode(File nodePath) throws IOException {

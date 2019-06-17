@@ -7,9 +7,8 @@ import gdraw.graph.util.action.VertexCreation;
 import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
@@ -40,11 +39,11 @@ public class Vertex extends Selectable {
 
     private double value;
 
-    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, Group group, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w, Color c, MainController mainController){
+    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, Pane pane, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w, Color c, MainController mainController){
         controller = mainController;
         fromNode = from;
         toNode = to;
-        this.group = group;
+        this.pane = pane;
         init(arrow, line, isDuplex, isCurved);
         points.addLast(new VertexPoint(toPoint, this));
         points.addFirst(new VertexPoint(fromPoint, this));
@@ -81,7 +80,7 @@ public class Vertex extends Selectable {
         fromNode = from;
         toNode = to;
         toNode.addVertex(this);
-        group = copy.group;
+        pane = copy.pane;
         draw();
 
         VertexPoint startVP = points.getFirst();
@@ -139,7 +138,7 @@ public class Vertex extends Selectable {
 
     public void setSelected(boolean selected){
         this.selected = selected;
-        if(!selected) points.forEach(point -> group.getChildren().remove(point.getCircle()));
+        if(!selected) points.forEach(point -> point.getCircle().toBack());
     }
 
     @Override
@@ -151,7 +150,8 @@ public class Vertex extends Selectable {
     }
 
     private void drawSelect(VertexPoint point){
-        group.getChildren().add(point.getCircle());
+        if(!pane.getChildren().contains(point.getCircle())) pane.getChildren().add(point.getCircle());
+        point.getCircle().toFront();
     }
 
     public void draw(Node from){
@@ -159,9 +159,12 @@ public class Vertex extends Selectable {
     }
 
     private void draw() {
-        group.getChildren().removeAll(arrows);
-        group.getChildren().remove(path);
+        pane.getChildren().removeAll(arrows);
+        pane.getChildren().remove(path);
         path = new Path();
+        if(!pane.getChildren().contains(path))
+            pane.getChildren().add(path);
+        path.toFront();
         arrows.clear();
 
         Iterator<VertexPoint> it = points.listIterator();
@@ -183,8 +186,10 @@ public class Vertex extends Selectable {
 
         arrowType.draw(arrows, path.getStroke(), prev, now);
         if (duplex) arrowType.draw(arrows, path.getStroke(), points.get(1), points.getFirst());
-        group.getChildren().addAll(arrows);
-
+        if(!arrows.isEmpty()) {
+            pane.getChildren().addAll(arrows);
+            arrows.forEach(javafx.scene.Node::toFront);
+        }
         if(label != null) label.draw();
 
     }
@@ -232,7 +237,7 @@ public class Vertex extends Selectable {
         newLabel += " (" + value + ")";
         if(label == null){
             label = new Label(
-                    newLabel, group,
+                    newLabel, pane,
                     getCenterForLabel()
             );
         }
@@ -362,7 +367,7 @@ public class Vertex extends Selectable {
         fromNode = null;
         toNode.deleteVertex(this);
         toNode = null;
-        group.getChildren().remove(path);
+        pane.getChildren().remove(path);
         controller.getProject().removeObject(this);
         if(label != null) label.hide();
         setSelected(false);
