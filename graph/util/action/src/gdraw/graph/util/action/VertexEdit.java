@@ -70,5 +70,6 @@ public class VertexEdit extends Action {
         color = oldColor;
 
         changeStacks();
+        v.forceProjectDraw();
     }
 }

@@ -27,6 +27,7 @@ public class Translate extends Action {
         dx = -dx;
         dy = -dy;
         changeStacks();
+        listener.getObject().forceProjectDraw();
     }
 
 }

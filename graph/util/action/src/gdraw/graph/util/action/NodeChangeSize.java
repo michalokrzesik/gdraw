@@ -29,6 +29,7 @@ public class NodeChangeSize extends Action {
         node.setWidth(w);
         node.setHeight(h);
         changeStacks();
+        node.forceProjectDraw();
     }
 
 }

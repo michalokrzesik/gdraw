@@ -1,8 +1,7 @@
 package gdraw.graph.node;
 
-import gdraw.graph.util.LibraryPane;
+import gdraw.graph.util.DragModel;
 import gdraw.graph.util.Selectable;
-import gdraw.graph.util.action.Action;
 import gdraw.graph.util.action.MultiAction;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
@@ -12,12 +11,12 @@ import gdraw.main.Project;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.geometry.Point2D;
 import java.util.ArrayList;
 
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import gdraw.graph.vertex.Vertex;
@@ -44,6 +43,10 @@ public class Node extends Selectable {
     protected transient TreeItem<Node> treeItem;
 
     public Node(Point2D center, Image image, Canvas canvas, TreeItem<Node> parent, MainController mainController){
+        this(center, image, canvas, parent, mainController, true);
+    }
+
+    public Node(Point2D center, Image image, Canvas canvas, TreeItem<Node> parent, MainController mainController, boolean isNode){
         controller = mainController;
         this.center = center;
         this.image = image;
@@ -60,7 +63,7 @@ public class Node extends Selectable {
         this.canvas = canvas;
         treeItem = new TreeItem<>(this);
 
-        if(parent != null) {
+        if(isNode) {
             mainController.addObject(this);
             //makeImageView();
             setSelected();
@@ -130,7 +133,7 @@ public class Node extends Selectable {
     }
 
     public void setSelected(boolean selected) {
-        controller.getProject().setDragModel(NodeDragModel.Standard);
+        controller.getProject().setDragModel(DragModel.Standard);
         this.selected = selected;
         draw();
     }
@@ -365,6 +368,11 @@ public class Node extends Selectable {
         translate(dw,0);
     }
 
+    public void draw(Canvas canvas){
+        this.canvas = canvas;
+        draw();
+    }
+
     public void draw(){
         //hide();
         if(!vertices.isEmpty())
@@ -383,6 +391,7 @@ public class Node extends Selectable {
 //        imageView.setLayoutY(y);
 //        imageView.getGraphicsContext2D().drawImage(image, 0, 0, w, h);
         GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setGlobalBlendMode(BlendMode.SRC_OVER);
         gc.drawImage(image, x, y, w, h);
         if(selected) {
             setCircles();
@@ -478,9 +487,15 @@ public class Node extends Selectable {
 
     @Override
     public void checkSelect(Rectangle rectangle) {
-        double w = getWidth()/2, h = getHeight()/2;
-        setSelected(rectangle.contains(center.getX() - w, center.getY() - h)
-                && rectangle.contains(center.getX() + w, center.getY() + h));
+        double w = getWidth()/2, h = getHeight()/2, x = center.getX(), y = center.getY();
+        setSelected(rectangle.contains(x - w, y - h)
+                && rectangle.contains(x + w, y + h));
+    }
+
+    @Override
+    public boolean checkSelect(double x, double y) {
+        double xc = center.getX(), yc = center.getY(), w = getWidth(), h = getHeight();
+        return (xc - w <= x) && (xc + w >= x) && (yc - h <= y) && (yc + h >= y);
     }
 
     public void deleteVertex(Vertex vertex) {

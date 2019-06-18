@@ -126,4 +126,8 @@ public class VertexPoint implements Serializable {
             gc.fillOval(getX() - width/2, getY() - width/2, width, width);
         }
     }
+
+    public void setPointBounded(Node node) {
+        setPointBounded(point, node);
+    }
 }

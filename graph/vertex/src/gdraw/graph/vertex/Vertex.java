@@ -56,6 +56,31 @@ public class Vertex extends Selectable {
         draw();
     }
 
+    public static void draw(Node from, VertexPoint begin, VertexPoint end, Node to, Canvas canvas) {
+        begin.setPointBounded(from);
+        end.setPointBounded(to);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        double bx = begin.getX(), by = begin.getY(), ex = end.getX(), ey = end.getY();
+
+        if(from == to){
+            double x = (bx + ex)/2, y = (by + ey)/2, w = from.getWidth(), h = from.getHeight();
+            Point2D center = from.getCenter();
+            double cx = center.getX(), cy = center.getY();
+            x = cx + (cx > x ? -3*w/2 : 3*w/2);
+            y = cy + (cy > y ? -3*h/2 : 3*h/2);
+            double[] points = ArrowType.arrowPoints(new VertexPoint(center), new VertexPoint(x, y), (w + h)/4);
+
+            gc.beginPath();
+            gc.moveTo(cx, cy);
+            gc.quadraticCurveTo(points[0], points[1], (cx + points[0])/2, (cy + points[1])/2);
+            gc.quadraticCurveTo(points[2], points[3], (points[2] + points[0])/2, (points[3] + points[1])/2);
+            gc.quadraticCurveTo(points[4], points[5], (points[2] + points[4])/2, (points[3] + points[5])/2);
+            gc.quadraticCurveTo(cx, cy, (cx + points[4])/2, (cy + points[5])/2);
+            gc.stroke();
+        }
+        else gc.strokeLine(bx, by, ex, ey);
+    }
+
     private void makePath(){
         path = new Path();
         path.setStroke(color);
@@ -347,6 +372,17 @@ public class Vertex extends Selectable {
         setSelected(all);
     }
 
+    private VertexPoint interactedPoint(double x, double y){
+        for(VertexPoint point : points)
+            if(point.getCircle().contains(x, y)) return point;
+        return null;
+    }
+
+    @Override
+    public boolean checkSelect(double x, double y) {
+        return interactedPoint(x, y) != null;
+    }
+
     public boolean isSelected() {
         return selected;
     }
@@ -435,5 +471,9 @@ public class Vertex extends Selectable {
 
     public void setArrowType(ArrowType arrowType) {
         this.arrowType = arrowType;
+    }
+
+    public void moveInteractedPoint(double x, double y, double nx, double ny) {
+        move(interactedPoint(x, y), new Point2D(nx, ny));
     }
 }

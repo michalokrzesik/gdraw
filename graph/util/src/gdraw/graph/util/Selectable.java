@@ -1,6 +1,8 @@
 package gdraw.graph.util;
 
+import gdraw.graph.node.Node;
 import gdraw.graph.util.action.SelectableCreationListener;
+import gdraw.graph.vertex.Vertex;
 import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.scene.canvas.Canvas;
@@ -21,7 +23,7 @@ public abstract class Selectable implements Serializable {
 
     public abstract void checkSelect(Rectangle rectangle);
 
-    public abstract void checkSelect(double x, double y);
+    public abstract boolean checkSelect(double x, double y);
 
     public abstract void setSelected(boolean b);
 
@@ -130,5 +132,30 @@ public abstract class Selectable implements Serializable {
         pane.setLayoutY(2);
 
         return pane;
+    }
+
+    private Node parentForIsCloserThan(){
+        if(!isNode()){
+            Vertex vThis = (Vertex) this;
+            Node vThisFrom = vThis.getFromNode(), vThisTo = vThis.getToNode();
+            return vThisFrom.isCloserThan(vThisTo) ? vThisFrom : vThisTo;
+        }
+        return (Node) this;
+    }
+
+    public boolean isCloserThan(Selectable found){
+        return depth(parentForIsCloserThan().getTreeItem())
+                >
+                depth(found.parentForIsCloserThan().getTreeItem());
+    }
+
+    private int depth(TreeItem<Node> treeItem) {
+        int res;
+        for(res = 0; treeItem != null; treeItem = treeItem.getParent(), res++);
+        return res;
+    }
+
+    public void forceProjectDraw() {
+        controller.forceDraw();
     }
 }

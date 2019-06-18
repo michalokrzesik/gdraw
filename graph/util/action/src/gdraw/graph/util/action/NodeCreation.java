@@ -128,6 +128,7 @@ public class NodeCreation extends MultiAction {
                 break;
         }
         changeStacks();
+        controller.forceDraw();
     }
 
     private void getInfoFromNode(Node object) {

@@ -31,53 +31,56 @@ public class ImageViewWithName extends ImageView {
 
         this.setOnContextMenuRequested(event -> {
             select();
-            ContextMenu contextMenu = new ContextMenu();
-
-            MenuItem toGraph = new MenuItem("Dodaj do grafu");
-            toGraph.setOnAction(e -> addToGraph());
-
-            MenuItem addParent = new MenuItem("Dodaj do kategorii");
-            addParent.setOnAction(e -> selectParentAndAdd());
-
-            MenuItem toParent = new MenuItem("Przenieś do kategorii");
-            toParent.setOnAction(e -> {
-                selectParentAndAdd();
-                parent.remove(name);
-            });
-
-            MenuItem newParent = new MenuItem("Utwórz kategorię z...");
-            newParent.setOnAction(e -> {
-                Stage window = new Stage();
-                window.initModality(Modality.APPLICATION_MODAL);
-                window.setTitle("Podaj nazwę kategorii");
-
-                TextField libraryName = new TextField();
-                Button button = new Button("Zatwierdź");
-                button.setOnAction(actionEvent -> {
-                    String lib = libraryName.getText();
-                    if(lib.isEmpty() || lib.contains(" ")) lib = "Nowa Kategoria";
-                    try {
-                        parent.getLibraryList().add(parent.newLibraryWithNode(lib, name));
-                    } catch (IOException | URISyntaxException ex) {
-                        ex.printStackTrace();
-                    }
-                    window.close();
-                });
-
-                FlowPane pane = new FlowPane();
-                pane.getChildren().addAll(libraryName, button);
-
-                window.setScene(new Scene(pane));
-                window.showAndWait();
-            });
-
-            MenuItem delete = new MenuItem("Usuń z kategorii");
-            delete.setOnAction(e -> parent.remove(name));
-
-            contextMenu.getItems().addAll(toGraph, addParent, toParent, newParent, delete);
-            contextMenu.show(this, event.getScreenX(), event.getScreenY());
+            parent.getOnContextMenuRequested().handle(event);
         });
 
+    }
+
+    public void contextMenu(ContextMenu contextMenu){
+        MenuItem toGraph = new MenuItem("Dodaj do grafu");
+        toGraph.setOnAction(e -> addToGraph());
+
+        MenuItem addParent = new MenuItem("Dodaj do kategorii");
+        addParent.setOnAction(e -> selectParentAndAdd());
+
+        MenuItem toParent = new MenuItem("Przenieś do kategorii");
+        toParent.setOnAction(e -> {
+            selectParentAndAdd();
+            parent.remove(name);
+        });
+
+        MenuItem newParent = new MenuItem("Utwórz kategorię z...");
+        newParent.setOnAction(e -> {
+            Stage window = new Stage();
+            window.initModality(Modality.APPLICATION_MODAL);
+            window.setTitle("Podaj nazwę kategorii");
+
+            TextField libraryName = new TextField();
+            Button button = new Button("Zatwierdź");
+            button.setOnAction(actionEvent -> {
+                String lib = libraryName.getText();
+                if(lib.isEmpty() || lib.contains(" ")) lib = "Nowa Kategoria";
+                try {
+                    parent.getLibraryList().add(parent.newLibraryWithNode(lib, name));
+                } catch (IOException | URISyntaxException ex) {
+                    ex.printStackTrace();
+                }
+                window.close();
+            });
+
+            FlowPane pane = new FlowPane();
+            pane.getChildren().addAll(libraryName, button);
+
+            window.setScene(new Scene(pane));
+            window.showAndWait();
+        });
+
+        MenuItem delete = new MenuItem("Usuń z kategorii");
+        delete.setOnAction(e -> parent.remove(name));
+
+        SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
+
+        contextMenu.getItems().addAll(toGraph, addParent, toParent, newParent, delete, separatorMenuItem);
     }
 
     public void addToGraph() {

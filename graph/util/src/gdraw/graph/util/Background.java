@@ -8,9 +8,12 @@ import gdraw.main.Project;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.TreeItem;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class Background extends Node {
@@ -23,6 +26,7 @@ public class Background extends Node {
         setCreationListener(new SelectableCreationListener(this));
         width = w;
         height = h;
+        this.canvas = canvas;
         makeImageView();
     }
 
@@ -57,8 +61,6 @@ public class Background extends Node {
 //        pane.setLayoutX(0);
 //        pane.setLayoutY(0);
 
-        canvas = new Canvas(width, height);
-
         draw();
         this.treeItem = new TreeItem<>(this);
         ImageView graphic = new ImageView(image);
@@ -71,7 +73,7 @@ public class Background extends Node {
     }
 
     private Background(Point2D center, Image image, Canvas canvas, MainController mainController) {
-        super(center, image, canvas, null, mainController);
+        super(center, image, canvas, null, mainController, false);
         setCreationListener(new SelectableCreationListener(this));
     }
 
@@ -83,9 +85,14 @@ public class Background extends Node {
 //        imageView.setX(0);
 //        imageView.setY(0);
 //        imageView.setImage(image);
-        canvas.getGraphicsContext2D().drawImage(image, 0, 0, width, height);
+
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setGlobalBlendMode(BlendMode.SRC_OVER);
+        gc.drawImage(image, 0, 0, width, height);
         selection = null;
 
+        if(treeItem.getChildren() != null)
+            treeItem.getChildren().forEach(c -> c.getValue().draw(canvas));
     }
 
     public void setImage(Image newImage){

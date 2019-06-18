@@ -1,11 +1,7 @@
 package gdraw.main;
 
 import gdraw.graph.node.Node;
-import gdraw.graph.node.NodeDragModel;
-import gdraw.graph.util.Background;
-import gdraw.graph.util.Hierarchy;
-import gdraw.graph.util.MIandButtonPair;
-import gdraw.graph.util.Selectable;
+import gdraw.graph.util.*;
 import gdraw.graph.util.action.*;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
@@ -14,11 +10,12 @@ import javafx.geometry.Point2D;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -41,7 +38,7 @@ public class Project implements Serializable {
 //    private transient Pane pane;
     private transient Canvas canvas;
     private transient ScrollPane properties;
-    private NodeDragModel dragModel;
+    private DragModel dragModel;
 
     private transient ActionHelper undo;
     private transient ActionHelper redo;
@@ -56,7 +53,7 @@ public class Project implements Serializable {
         hierarchy = hScrollPane;
         graphObjects = new ArrayList<>();
         selected = new ArrayList<>();
-        dragModel = NodeDragModel.Standard;
+        dragModel = DragModel.Standard;
 
         undo = new ActionHelper(undoFXML);
         redo = new ActionHelper(redoFXML);
@@ -76,16 +73,24 @@ public class Project implements Serializable {
     public Canvas setCanvas(double w, double h){
         canvas = new Canvas(w, h);
         canvas.setOnMouseClicked(e -> {
-            Selectable found = background;
-            if(!graphObjects.isEmpty())
-                for(Selectable object : graphObjects)
-                    if(object.checkSelect(e.getX(), e.getY()) && object.isCloserThan(found))
-                        found = object;
-            if(found.isNode()) select(found, e.isControlDown());
+            Selectable found = getInteractedObject(e);
+            if(found != background) select(found, e.isControlDown());
             else found.setSelected(true);
         });
-        //TODO MouseEvents
+        canvas.setOnMousePressed(e -> onMousePressed(e, getInteractedObject(e)));
+        canvas.setOnMouseDragged(e -> onMouseDragged(e, getInteractedObject(e)));
+        canvas.setOnMouseReleased(e -> onMouseReleased(e, getInteractedObject(e)));
+        canvas.setOnContextMenuRequested(controller::contextMenu);
         return canvas;
+    }
+
+    private Selectable getInteractedObject(MouseEvent e) {
+        Selectable found = background;
+        if(!graphObjects.isEmpty())
+            for(Selectable object : graphObjects)
+                if(object.checkSelect(e.getX(), e.getY()) && object.isCloserThan(found))
+                    found = object;
+        return found;
     }
 
     public void refresh(File file, MainController mainController, Tab tab,
@@ -122,9 +127,9 @@ public class Project implements Serializable {
         hierarchy.setContent(nodes);
     }
 
-    public NodeDragModel getDragModel() { return dragModel; }
+    public DragModel getDragModel() { return dragModel; }
 
-    public void setDragModel(NodeDragModel model) { dragModel = model; }
+    public void setDragModel(DragModel model) { dragModel = model; }
 
     public void checkSelect(Rectangle selection) {
         if(!graphObjects.isEmpty()) graphObjects.forEach(s -> s.checkSelect(selection));
@@ -162,8 +167,6 @@ public class Project implements Serializable {
 
     public void draw() {
         background.draw();
-        ObservableList<TreeItem<Node>> children = background.getTreeItem().getChildren();
-        if(!children.isEmpty()) children.forEach(treeItem -> treeItem.getValue().draw());
     }
 
     public WritableImage snapshot() {
@@ -187,12 +190,18 @@ public class Project implements Serializable {
     }
 
     public void onMousePressed(MouseEvent e, Selectable item) {
-        if(!item.isNode()) dragModel = NodeDragModel.Standard;
+        if(item == background) dragModel = DragModel.Select;
+        else if(!item.isNode()) dragModel = DragModel.Standard;
         dragModel.pressed(this, e, item);
     }
 
     public void onMouseDragged(MouseEvent e, Selectable item) {
         dragModel.dragged(this, e, item);
+    }
+
+    public void onMouseReleased(MouseEvent e, Selectable item) {
+        dragModel.released(this, e, item);
+        dragModel = DragModel.Standard;
     }
 
     public TreeView<Node> getTreeView() {
@@ -271,13 +280,8 @@ public class Project implements Serializable {
     }
 
     public void addVertex(LineType lineType, ArrowType arrowType, Color color, boolean duplex, boolean curved, String width) {
-            dragModel = NodeDragModel.Vertex;
+            dragModel = DragModel.Vertex;
             dragModel.set(lineType, arrowType, color, duplex, curved, width);
-    }
-
-    public void onMouseReleased(MouseEvent e, Selectable item) {
-        dragModel.released(this, e, item);
-        dragModel = NodeDragModel.Standard;
     }
 
     public void groupSelected() {
@@ -309,7 +313,7 @@ public class Project implements Serializable {
         Node groupNode = new Node(
                 new Point2D((minMaxs.get(0) + minMaxs.get(1))/2, (minMaxs.get(2) + minMaxs.get(3))/2),
                 new Image("standardGroup.png"),
-                pane, true, parent, controller);
+                canvas, true, parent, controller);
         groupNode.setCreationListener(new SelectableCreationListener(groupNode));
 
         actionHolder.add(GroupManagement.applyGroup(undo, groupNode, parent, nodes, redo));
@@ -352,7 +356,7 @@ public class Project implements Serializable {
    */ }
 
     public void moveToGroup() {
-        dragModel = NodeDragModel.Grouping;
+        dragModel = DragModel.Grouping;
         dragModel.set(LineType.Straight, ArrowType.Opened, Color.BLACK, false, false, "1");
     }
 

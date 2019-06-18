@@ -65,7 +65,7 @@ public enum ArrowType implements Serializable {
 
 
 
-    private static double[] arrowPoints(VertexPoint source, VertexPoint destination, double arrowHeadSize){
+    public static double[] arrowPoints(VertexPoint source, VertexPoint destination, double arrowHeadSize){
         //ArrowHead
         double angle = Math.atan2((destination.getY() - source.getY()), (destination.getX() - source.getX())) - Math.PI / 2.0;
         double sin = Math.sin(angle);

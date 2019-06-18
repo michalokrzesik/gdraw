@@ -92,6 +92,21 @@ public class GroupManagement extends MultiAction {
         return action;
     }
 
+    public static Action applyGroup(ActionHelper undo, Node node, ArrayList<Selectable> selected, ActionHelper redo) {
+        GroupManagement ma = new GroupManagement(redo, undo);
+        ActionHelper multiFrom = ma.multiFrom;
+        ActionHelper multiTo = ma.multiTo;
+
+        if(!selected.isEmpty()) selected.forEach(o -> {
+            if(o.isNode())
+                ma.actionHolder.add(GroupManagement.applyGroup(multiFrom, (Node) o, node, multiTo));
+        });
+
+        if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
+        //Jeśli w objects nie było node'ów, nic się nie dzieje
+        return ma;
+    }
+
     public static Action applyToNode(ActionHelper undo, ArrayList<Selectable> selected, ActionHelper redo) {
         GroupManagement ma = new GroupManagement(redo, undo);
         ActionHelper multiFrom = ma.multiFrom;
@@ -155,7 +170,7 @@ public class GroupManagement extends MultiAction {
                 type = ActionType.ToGroup;
                 break;
             }
-
         }
+        node.getObject().forceProjectDraw();
     }
 }

@@ -43,16 +43,7 @@
                <content>
                   <ScrollPane fitToHeight="true" fitToWidth="true" maxWidth="320.0">
                      <content>
-                        <Accordion fx:id="nodeLibraryAccordion" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="0.0" style="-fx-background-color: #FDF5E6;">
-                           <contextMenu>
-                              <ContextMenu>
-                                <items>
-                                <MenuItem mnemonicParsing="false" onAction="#addNodeToActiveLibrary" text="Dodaj obraz węzła" />
-                                    <MenuItem mnemonicParsing="false" onAction="#addNodeLibrary" text="Dodaj bibliotekę węzłów" />
-                                </items>
-                              </ContextMenu>
-                           </contextMenu>
-                        </Accordion>
+                        <Accordion fx:id="nodeLibraryAccordion" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="0.0" style="-fx-background-color: #FDF5E6;" />
                      </content>
                   </ScrollPane>
                </content>

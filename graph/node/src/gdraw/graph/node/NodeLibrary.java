@@ -6,9 +6,11 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.FlowPane;
 
 import java.io.*;
@@ -42,8 +44,13 @@ public class NodeLibrary extends TitledPane {
         this.parent = parent;
         this.path = path;
         this.pane = pane;
+        this.setOnContextMenuRequested(controller::libraryContextMenu);
         ref = new NodeLibraryRef(this);
         show();
+    }
+
+    public void contextMenu(ContextMenu contextMenu){
+        if(selected != null) selected.contextMenu(contextMenu);
     }
 
     private void show() {

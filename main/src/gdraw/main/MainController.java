@@ -1,7 +1,6 @@
 package gdraw.main;
 
 import gdraw.graph.node.Node;
-import gdraw.graph.node.NodeDragModel;
 import gdraw.graph.util.*;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
@@ -19,6 +18,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
@@ -78,6 +78,8 @@ public class MainController {
     private ArrayList<Request> requestedVertices;
 
     public void initialize() {
+        nodeLibraryAccordion.setOnContextMenuRequested(this::libraryContextMenu);
+
         nodeLibraryAccordion.getPanes().add(
                 new NodeLibrary(new File("./libraries/OSTATNIE"), nodeLibraryAccordion, this, new LibraryPane())
         );
@@ -157,7 +159,11 @@ public class MainController {
 
     public Tab tabForProject(Project project){
 
-        ScrollPane scrollPane = new ScrollPane(project.getCanvas());
+        //żeby canvas był na środku
+        BorderPane borderPane = new BorderPane();
+        borderPane.setCenter(project.getCanvas());
+
+        ScrollPane scrollPane = new ScrollPane(borderPane);
         scrollPane.setStyle("-fx-background-color: #FDF5E6; " +
                 "-fx-border-color: #FDF5E6;");
         project.getCanvas().setStyle("-fx-background-color: #FDF5E6; " +
@@ -552,7 +558,7 @@ public class MainController {
 
     public void contextMenu(ContextMenuEvent contextMenuEvent) {
         if(activeProject == null) return;
-        activeProject.setDragModel(NodeDragModel.Standard);
+        activeProject.setDragModel(DragModel.Standard);
 
         ContextMenu contextMenu = new ContextMenu();
 
@@ -589,5 +595,34 @@ public class MainController {
 
     public void forceDraw() {
         if(activeProject != null) activeProject.draw();
+    }
+
+    public void libraryContextMenu(ContextMenuEvent event) {
+        ContextMenu contextMenu = new ContextMenu();
+
+        NodeLibrary active = (NodeLibrary) nodeLibraryAccordion.getExpandedPane();
+        if(active != null) active.contextMenu(contextMenu);
+
+        MenuItem addNodeToActiveLibrary = new MenuItem("Dodaj obraz węzła");
+        addNodeToActiveLibrary.setOnAction(e -> {
+            try {
+                addNodeToActiveLibrary(e);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        MenuItem addNodeLibrary = new MenuItem("Dodaj bibliotekę węzłów");
+        addNodeLibrary.setOnAction(actionEvent -> {
+            try {
+                addNodeLibrary(actionEvent);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+        });
+
+        contextMenu.getItems().addAll(addNodeToActiveLibrary, addNodeLibrary);
+
+        contextMenu.show(nodeLibraryAccordion, event.getScreenX(), event.getScreenY());
     }
 }
