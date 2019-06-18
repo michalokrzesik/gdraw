@@ -171,6 +171,5 @@ public class GroupManagement extends MultiAction {
                 break;
             }
         }
-        node.getObject().forceProjectDraw();
     }
 }

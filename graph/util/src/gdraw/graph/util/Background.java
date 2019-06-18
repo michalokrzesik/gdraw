@@ -30,6 +30,11 @@ public class Background extends Node {
         makeImageView();
     }
 
+    @Override
+    protected Node parentForIsCloserThan(){
+        return this;
+    }
+
     private void makeImageView(){
 //        imageView = new ImageView(image);
 //        imageView.setFitWidth(width);
@@ -73,7 +78,7 @@ public class Background extends Node {
     }
 
     private Background(Point2D center, Image image, Canvas canvas, MainController mainController) {
-        super(center, image, canvas, null, mainController, false);
+        super(center, image, canvas, mainController, false);
         setCreationListener(new SelectableCreationListener(this));
     }
 
@@ -91,8 +96,7 @@ public class Background extends Node {
         gc.drawImage(image, 0, 0, width, height);
         selection = null;
 
-        if(treeItem.getChildren() != null)
-            treeItem.getChildren().forEach(c -> c.getValue().draw(canvas));
+        if(!subNodes.isEmpty()) subNodes.forEach(Node::draw);
     }
 
     public void setImage(Image newImage){

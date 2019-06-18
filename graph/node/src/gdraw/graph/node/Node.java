@@ -42,11 +42,11 @@ public class Node extends Selectable {
 
     protected transient TreeItem<Node> treeItem;
 
-    public Node(Point2D center, Image image, Canvas canvas, TreeItem<Node> parent, MainController mainController){
-        this(center, image, canvas, parent, mainController, true);
+    public Node(Point2D center, Image image, Canvas canvas, MainController mainController){
+        this(center, image, canvas, mainController, true);
     }
 
-    public Node(Point2D center, Image image, Canvas canvas, TreeItem<Node> parent, MainController mainController, boolean isNode){
+    public Node(Point2D center, Image image, Canvas canvas, MainController mainController, boolean isNode){
         controller = mainController;
         this.center = center;
         this.image = image;
@@ -68,12 +68,11 @@ public class Node extends Selectable {
             //makeImageView();
             setSelected();
             setCircles();
-            parent.getChildren().add(treeItem);
+
             ImageView graphic = new ImageView(image);
             graphic.setFitHeight(10);
             graphic.setFitWidth(10);
             treeItem.setGraphic(graphic);
-            draw();
         }
 
     }
@@ -110,7 +109,7 @@ public class Node extends Selectable {
         setCircles();
     }
 
-    private void setCircles() {
+    private void setCircles() { //TODO On drag!!
         double w = getWidth(), h = getHeight();
         double x = center.getX() - w/2, y = center.getY() - h/2;
         circles = new Circle[8];
@@ -126,16 +125,21 @@ public class Node extends Selectable {
 
     }
 
-    public Node(Point2D center, Image image, Canvas canvas, boolean isGroupNodes, TreeItem<Node> parent, MainController mainController){
-        this(center, image, canvas, parent, mainController);
+    public Node(Point2D center, Image image, Canvas canvas, boolean isGroupNodes, MainController mainController){
+        this(center, image, canvas, mainController);
         this.isGroupNodes = isGroupNodes;
         subNodes = new ArrayList<>();
     }
 
     public void setSelected(boolean selected) {
-        controller.getProject().setDragModel(DragModel.Standard);
+        Project project = controller.getProject();
+        project.setDragModel(DragModel.Standard);
+        ArrayList<Selectable> selectables = project.getSelected();
+        boolean contains = selectables.contains(this);
+        if(selected)
+            if(!contains) selectables.add(this);
+        else if(contains) selectables.remove(this);
         this.selected = selected;
-        draw();
     }
 
     public void setLabel(String newLabel){
@@ -192,19 +196,16 @@ public class Node extends Selectable {
             else controller.groupsToNodes(e);
         });
 
-        double finalXmax = xmax;
-        double finalXmin = xmin;
-        double finalYmax = ymax;
-        double finalYmin = ymin;
+        double finalXmax = xmax, finalXmin = xmin, finalYmax = ymax, finalYmin = ymin;
         btn.setOnAction(e -> {
-            if(!selected.isEmpty()) selected.forEach(s -> s.setLabel(labelField.getText()));
+            if(!selected.isEmpty() && !labelField.getText().isEmpty()) selected.forEach(s -> s.setLabel(labelField.getText()));
             double x = (finalXmax + finalXmin)/2, y = (finalYmax + finalYmin)/2, w, h;
             try{
                 x = Double.parseDouble(xField.getText()) - x;
-            } catch(Exception e1) { x = (finalXmax + finalXmin)/2; }
+            } catch(Exception e1) { x = (finalXmax + finalXmin)/2 - x; }
             try{
                 y = Double.parseDouble(yField.getText()) - y;
-            } catch(Exception e1) { y = (finalYmax + finalYmin)/2; }
+            } catch(Exception e1) { y = (finalYmax + finalYmin)/2 - y; }
             try{
                 w = Double.parseDouble(widthField.getText());
             } catch(Exception e1) { w = -1; }
@@ -217,8 +218,9 @@ public class Node extends Selectable {
         });
     }
 
-    public Node copy(TreeItem<Node> parent){
-        Node ret = new Node(new Point2D(center.getX() + 5, center.getY() + 5), image, canvas, isGroupNodes, parent, controller);
+    private void copy(TreeItem<Node> parent){
+        Node ret = new Node(new Point2D(center.getX() + 5, center.getY() + 5), image, canvas, isGroupNodes, controller);
+        if(parent != null) parent.getValue().groupNodes(ret);
         if(this.isGroupNodes && !this.subNodes.isEmpty())
             for(Node node : subNodes)
                 node.copy(ret.getTreeItem());
@@ -226,7 +228,6 @@ public class Node extends Selectable {
             vertex.copy();
             controller.request(vertex.getFromNode() == this, ret, vertex, this);
         });
-        return ret;
     }
 
     public TreeItem<Node> getTreeItem() {
@@ -264,8 +265,10 @@ public class Node extends Selectable {
 
     public void groupNodes(Node node){
         TreeItem<Node> nodeTI = node.getTreeItem(), parent = nodeTI.getParent();
-        parent.getChildren().remove(nodeTI);
-        parent.getValue().removeSubNode(node);
+        if(parent != null) {
+            parent.getChildren().remove(nodeTI);
+            parent.getValue().removeSubNode(node);
+        }
         treeItem.getChildren().add(nodeTI);
         subNodes.add(node);
         expandIfNeeded();
@@ -305,9 +308,11 @@ public class Node extends Selectable {
         if(getHeight() > ph) setHeight(ph);
         double w = getWidth(), h = getHeight();
 
-        double dx = (x - w/2) - (px - pw/2), dy = (y - h/2) - (py - ph/2);
-        dx = (dx > 0 ? dx : (x + w/2) - (px + pw/2));
-        dy = (dy > 0 ? dy : (y + h/2) - (py + ph/2));
+        double dx = Double.max((px - pw/2) - (x - w/2), (x + w/2) - (px + pw/2)),
+                dy = Double.max((py - ph/2) - (y - h/2), (y + h/2) - (py + ph/2));
+
+        dx = dx > 0 ? dx : 0;
+        dy = dy > 0 ? dy : 0;
 
         translate(dx, dy, false);
     }
@@ -433,6 +438,7 @@ public class Node extends Selectable {
             if (!vertices.isEmpty())
                 vertices.forEach(v -> v.translateNode(this, dx, dy));
             if (isGroupNodes && !subNodes.isEmpty()) subNodes.forEach(n -> n.translate(dx, dy));
+            if (label != null) label.setUpperLeft(new Point2D(center.getX() - 10, center.getY() - 10));
         }
     }
 

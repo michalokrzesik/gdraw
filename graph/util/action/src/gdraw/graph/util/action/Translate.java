@@ -10,9 +10,8 @@ public class Translate extends Action {
         this.from = to;
         this.to = from;
         listener = object.getCreationListener();
-        this.dx = -dx;
-        this.dy = -dy;
-        to.push(this);
+        this.dx = dx;
+        this.dy = dy;
     }
 
     public static Action applyTranslate(ActionHelper undo, Selectable object, double dx, double dy, ActionHelper redo) {
@@ -27,7 +26,6 @@ public class Translate extends Action {
         dx = -dx;
         dy = -dy;
         changeStacks();
-        listener.getObject().forceProjectDraw();
     }
 
 }

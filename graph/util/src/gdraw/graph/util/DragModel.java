@@ -29,6 +29,7 @@ public enum DragModel implements Serializable {
         @Override
         public void pressed(Project project, MouseEvent e, Selectable item) {
             if(project.getSelected().contains(item)){
+                actionHolder = new ArrayList<>();
                 double ex = e.getX(), ey = e.getY();
                 Point2D point = item.isNode() ? ((Node) item).getCenter() : new Point2D(ex, ey);
                 x = point.getX();

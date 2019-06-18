@@ -110,7 +110,6 @@ public class VertexCreation extends Action {
                 break;
         }
         changeStacks();
-        fromNode.getObject().forceProjectDraw();
     }
 
 

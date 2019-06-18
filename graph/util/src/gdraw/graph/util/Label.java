@@ -3,7 +3,11 @@ package gdraw.graph.util;
 import javafx.geometry.Point2D;
 
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+
 import java.io.Serializable;
+import java.util.Collections;
 
 public class Label implements Serializable {
     private String label;
@@ -28,7 +32,9 @@ public class Label implements Serializable {
     public void draw() {
 //        if(!pane.getChildren().contains(object)) pane.getChildren().add(object);
 //        object.toFront();
-        canvas.getGraphicsContext2D().strokeText(label, upperLeft.getX(), upperLeft.getY());
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setStroke(Color.BLACK);
+        gc.strokeText(label, upperLeft.getX(), upperLeft.getY());
     }
 
     public void setLabel(String newLabel) {

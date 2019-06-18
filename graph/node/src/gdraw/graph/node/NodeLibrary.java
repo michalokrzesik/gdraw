@@ -3,31 +3,19 @@ package gdraw.graph.node;
 import gdraw.graph.util.LibraryPane;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
-import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.layout.FlowPane;
 
 import java.io.*;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
 import gdraw.main.MainController;
-import gdraw.main.Main;
 
 public class NodeLibrary extends TitledPane {
     private MainController controller;
@@ -43,6 +31,7 @@ public class NodeLibrary extends TitledPane {
         this.controller = controller;
         this.parent = parent;
         this.path = path;
+        if(!path.exists()) path.mkdir();
         this.pane = pane;
         this.setOnContextMenuRequested(controller::libraryContextMenu);
         ref = new NodeLibraryRef(this);
@@ -191,7 +180,7 @@ public class NodeLibrary extends TitledPane {
         return ret;
     }
 
-    public void toGraph(){ selected.addToGraph(); }
+    public void toGraph(){ if(selected != null) selected.addToGraph(); }
 
     public void toGraph(Image image) {
         controller.addNode(image);

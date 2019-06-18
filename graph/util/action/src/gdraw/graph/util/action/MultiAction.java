@@ -21,7 +21,7 @@ public class MultiAction extends Action {
 
     @Override
     public void action() {
-        while(!from.isEmpty()) from.pop();
+        while(!multiFrom.isEmpty()) multiFrom.pop();
         changeMultiStacks();
         changeStacks();
     }

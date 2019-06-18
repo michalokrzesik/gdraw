@@ -93,11 +93,10 @@ public class NodeCreation extends MultiAction {
     public void action() {
         switch (type){
             case Create:
-                Node object = new Node(center, image, canvas, isGroupNodes, ((Node) parent.getObject()).getTreeItem(), controller);
+                Node object = new Node(center, image, canvas, isGroupNodes, controller);
                 object.setWH(width, height, widthCollapsed, heightCollapsed);
                 object.setCollapsed(isCollapsed);
                 object.setLabel(label);
-                controller.getProject().newObject(object);
                 ((Node) parent.getObject()).groupNodes(object);
 
                 if(node == null) node = new SelectableCreationListener(object);
@@ -106,7 +105,7 @@ public class NodeCreation extends MultiAction {
                 super.action();
 
                 type = ActionType.Delete;
-                break;
+                return;
             case Delete:
                 Node objectToDelete = (Node) node.getObject();
 
@@ -125,10 +124,9 @@ public class NodeCreation extends MultiAction {
                 node.setObject(null);
 
                 type = ActionType.Create;
-                break;
+                changeStacks();
+                return;
         }
-        changeStacks();
-        controller.forceDraw();
     }
 
     private void getInfoFromNode(Node object) {

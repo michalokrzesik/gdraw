@@ -134,7 +134,7 @@ public abstract class Selectable implements Serializable {
         return pane;
     }
 
-    private Node parentForIsCloserThan(){
+    protected Node parentForIsCloserThan(){
         if(!isNode()){
             Vertex vThis = (Vertex) this;
             Node vThisFrom = vThis.getFromNode(), vThisTo = vThis.getToNode();

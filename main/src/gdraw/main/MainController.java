@@ -146,7 +146,7 @@ public class MainController {
     }
 
     public void clearSelected() {
-        if(activeProject != null) activeProject.clearSelected();
+        if(activeProject != null) activeProject.clearSelected(null);
     }
 
     public void select(Rectangle selection) {
@@ -204,9 +204,9 @@ public class MainController {
      * @param project projekt z którego ma być utworzona nowa zakładka
      */
     private void newProject(Project project, File file) {
-        Tab tab = tabForProject(project);
+        project.refresh(file, this, hierarchy, properties, undo, redo);
 
-        project.refresh(file, this, tab, hierarchy, properties, undo, redo);
+        Tab tab = tabForProject(project);
 
         project.setTab(tab);//zmiana zakładki
         projects.add(project);

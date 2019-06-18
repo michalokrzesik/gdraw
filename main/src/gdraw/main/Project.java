@@ -11,7 +11,6 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
-import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
@@ -64,9 +63,7 @@ public class Project implements Serializable {
 
         canvas = setCanvas(w, h);
 
-        double width = w,
-        height = h;
-        background = new Background(controller, new Image(new File("./libraries/default_bck.png").toURI().toString()), canvas, width, height);
+        background = new Background(controller, new Image(new File("./libraries/default_bck.png").toURI().toString()), canvas, w, h);
         setNodes();
     }
 
@@ -93,29 +90,28 @@ public class Project implements Serializable {
         return found;
     }
 
-    public void refresh(File file, MainController mainController, Tab tab,
+    public void refresh(File file, MainController mainController,
                         ScrollPane hScrollPane, ScrollPane pScrollPane,
                         MIandButtonPair undoFXML, MIandButtonPair redoFXML) {
         controller = mainController;
         undo = new ActionHelper(undoFXML);
         redo = new ActionHelper(redoFXML);
-        this.tab = tab;
         properties = pScrollPane;
         hierarchy = hScrollPane;
         selected = new ArrayList<>();
         this.file = file;
+        canvas = setCanvas(background.getWidth(), background.getHeight());
         background.refresh(this);
-        canvas = background.getProjectCanvas();
+
         setNodes();
     }
 
     private void setNodes() {
         nodes = new Hierarchy();
+        nodes.setEditable(true);
         nodes.setRoot(background.getTreeItem());
-        nodes.getSelectionModel().selectedItemProperty().addListener((observableValue, oldTreeItem, newTreeItem) -> {
-            if(oldTreeItem != null) oldTreeItem.getValue().setSelected(false);
-            newTreeItem.getValue().setSelected(true);
-        });
+        nodes.getSelectionModel().selectedItemProperty()
+                .addListener((observableValue, oldTreeItem, newTreeItem) -> checkSelect());
         nodes.setOnContextMenuRequested(e -> {
             ObservableList<TreeItem<Node>> selectedTI = nodes.getSelectionModel().getSelectedItems();
             if(selectedTI.size() > 0) {
@@ -127,6 +123,14 @@ public class Project implements Serializable {
         hierarchy.setContent(nodes);
     }
 
+    private void checkSelect() {
+        ObservableList<TreeItem<Node>> selectedTI = nodes.getSelectionModel().getSelectedItems();
+        clearSelected(null);
+        if(selectedTI.size() > 0){
+            selectedTI.forEach(ti -> select(ti.getValue(), true));
+        }
+    }
+
     public DragModel getDragModel() { return dragModel; }
 
     public void setDragModel(DragModel model) { dragModel = model; }
@@ -135,9 +139,12 @@ public class Project implements Serializable {
         if(!graphObjects.isEmpty()) graphObjects.forEach(s -> s.checkSelect(selection));
     }
 
-    public void clearSelected() {
-        if(!selected.isEmpty()) selected.forEach(s -> s.setSelected(false));
+    public void clearSelected(Selectable item) {
+        if(!selected.isEmpty()) selected.forEach(s -> {
+            if(s != item) s.setSelected(false);
+        });
         selected.clear();
+        if(item != null) selected.add(item);
         setProperties();
     }
 
@@ -166,7 +173,11 @@ public class Project implements Serializable {
     }
 
     public void draw() {
+        nodes.refresh();
         background.draw();
+//        if(!graphObjects.isEmpty()) graphObjects.forEach(o -> {
+//            if(o.isNode()) ((Node) o).draw();
+//        });
     }
 
     public WritableImage snapshot() {
@@ -174,19 +185,13 @@ public class Project implements Serializable {
     }
 
     public void select(Selectable item, boolean ctrlPressed) {
-        boolean select = true, contains = selected.contains(item);
-        if(!ctrlPressed) {
-            clearSelected();
+        if(item == background) return;
+        if(!ctrlPressed)
+            clearSelected(item);
+        else {
+            item.setSelected(!selected.contains(item));
+            setProperties();
         }
-        else if(contains) {
-            select = false;
-        }
-        if(select && !contains){
-            selected.add(item);
-        }
-        else selected.remove(item);
-        item.setSelected(select);
-        setProperties();
     }
 
     public void onMousePressed(MouseEvent e, Selectable item) {
@@ -224,7 +229,8 @@ public class Project implements Serializable {
                 TextField labelField = new TextField();
                 Button btn = new Button("Zatwierdź");
                 btn.setOnAction(e -> {
-                    if(!selected.isEmpty()) selected.forEach(s -> s.setLabel(labelField.getText()));
+                    if(!selected.isEmpty() && !labelField.getText().isEmpty())
+                        selected.forEach(s -> s.setLabel(labelField.getText()));
                 });
 
                 GridPane pane = new GridPane();
@@ -313,7 +319,8 @@ public class Project implements Serializable {
         Node groupNode = new Node(
                 new Point2D((minMaxs.get(0) + minMaxs.get(1))/2, (minMaxs.get(2) + minMaxs.get(3))/2),
                 new Image("standardGroup.png"),
-                canvas, true, parent, controller);
+                canvas, true, controller);
+        parent.getValue().groupNodes(groupNode);
         groupNode.setCreationListener(new SelectableCreationListener(groupNode));
 
         actionHolder.add(GroupManagement.applyGroup(undo, groupNode, parent, nodes, redo));

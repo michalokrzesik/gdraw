@@ -323,7 +323,7 @@ public class Vertex extends Selectable {
         });
 
         btn.setOnAction(e -> {
-            if(!selected.isEmpty())
+            if(!selected.isEmpty() && !labelField.getText().isEmpty())
                 selected.forEach(s -> s.setLabel(labelField.getText()));
 
             controller.getProject().getActionHolder().add(MultiAction.applyVertexPropertiesChange(controller.getProject(), lineTypeChoiceBox, arrowTypeChoiceBox, widthField, colorPicker, valueField));
