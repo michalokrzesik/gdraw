@@ -29,9 +29,9 @@ public enum DragModel implements Serializable {
         @Override
         public void pressed(Project project, MouseEvent e, Selectable item) {
             if(project.getSelected().contains(item)){
-                actionHolder = new ArrayList<>();
                 double ex = e.getX(), ey = e.getY();
-                Point2D point = item.isNode() ? ((Node) item).getCenter() : new Point2D(ex, ey);
+                Point2D point = //item.isNode() ? ((Node) item).getCenter() :
+                         new Point2D(ex, ey);
                 x = point.getX();
                 y = point.getY();
                 dx = ex - x;
@@ -111,6 +111,7 @@ public enum DragModel implements Serializable {
                         from, start.getPoint(), stop.getPoint(), to, arrowType, lineType, duplex, curved, width, 1, color,
                         project.getRedo()));
             }
+            else project.draw();
         }
     },
     Grouping{
@@ -122,15 +123,23 @@ public enum DragModel implements Serializable {
         @Override
         public void dragged(Project project, MouseEvent e, Selectable item) {
             ArrayList<Selectable> selected = project.getSelected();
-            if(!selected.isEmpty())
+            project.draw();
+            if(!selected.isEmpty()) {
+                VertexPoint end = new VertexPoint(e.getX(), e.getY());
                 selected.forEach(o -> {
-                    if(o.isNode()) DragModel.Vertex.dragged(project, e, o);
+                    if (o.isNode()) {
+                        Node node = (Node) o;
+                        gdraw.graph.vertex.Vertex.draw(node, new VertexPoint(node.getCenter()), end, null, node.getProjectCanvas());
+                    }
                 });
+            }
         }
 
         @Override
         public void released(Project project, MouseEvent e, Selectable item) {
-            actionHolder.add(GroupManagement.applyGroup(project.getUndo(), from, project.getSelected(), project.getRedo()));
+            if(!item.isNode()) item = project.getBackground();
+            actionHolder.add(GroupManagement.applyGroup(project.getUndo(), (Node) item, project.getSelected(), project.getRedo()));
+            ((Node) item).getController().setDragModel(DragModel.Standard);
         }
     },
     Select{
@@ -172,7 +181,7 @@ public enum DragModel implements Serializable {
     VertexPoint start, stop;
     Node from, to;
     Canvas canvas;
-    ArrayList<Action> actionHolder;
+    ArrayList<Action> actionHolder = new ArrayList<>();
 
     public abstract void pressed(Project project, MouseEvent e, Selectable item);
     public abstract void dragged(Project project, MouseEvent e, Selectable item);
@@ -180,7 +189,6 @@ public enum DragModel implements Serializable {
 
 
     public void set(LineType lineType, ArrowType arrowType, Color color, boolean duplex, boolean curved, String width) {
-        actionHolder = new ArrayList<>();
         this.lineType = lineType; this.arrowType = arrowType; this.color = color; this.duplex = duplex; this.curved = curved;
         try {
             this.width = Double.parseDouble(width);

@@ -58,7 +58,7 @@ public class Vertex extends Selectable {
 
     public static void draw(Node from, VertexPoint begin, VertexPoint end, Node to, Canvas canvas) {
         begin.setPointBounded(from);
-        end.setPointBounded(to);
+        if(to != null) end.setPointBounded(to);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         double bx = begin.getX(), by = begin.getY(), ex = end.getX(), ey = end.getY();
 
@@ -66,16 +66,32 @@ public class Vertex extends Selectable {
             double x = (bx + ex)/2, y = (by + ey)/2, w = from.getWidth(), h = from.getHeight();
             Point2D center = from.getCenter();
             double cx = center.getX(), cy = center.getY();
-            x = cx + (cx > x ? -3*w/2 : 3*w/2);
-            y = cy + (cy > y ? -3*h/2 : 3*h/2);
-            double[] points = ArrowType.arrowPoints(new VertexPoint(center), new VertexPoint(x, y), (w + h)/4);
+            x = cx + (cx > x ? -w : w);
+            y = cy + (cy > y ? -h : h);
+            double[] points = ArrowType.arrowPoints(new VertexPoint(center), new VertexPoint(x, y), (w + h)/8);
 
             gc.beginPath();
             gc.moveTo(cx, cy);
-            gc.quadraticCurveTo(points[0], points[1], (cx + points[0])/2, (cy + points[1])/2);
-            gc.quadraticCurveTo(points[2], points[3], (points[2] + points[0])/2, (points[3] + points[1])/2);
-            gc.quadraticCurveTo(points[4], points[5], (points[2] + points[4])/2, (points[3] + points[5])/2);
-            gc.quadraticCurveTo(cx, cy, (cx + points[4])/2, (cy + points[5])/2);
+            VertexType type = VertexType.Curved;
+            VertexPoint a = new VertexPoint(cx, cy),
+                    b = new VertexPoint(points[0], points[1]),
+                    c = new VertexPoint(points[2], points[3]),
+                    d = new VertexPoint(points[4], points[5]);
+            if(Math.abs(points[1] - cy) < Math.abs(points[5] - cy)){
+                b.setOrientation(VertexPointOrientation.VERTICAL);
+                d.setOrientation(VertexPointOrientation.HORIZONTAL);
+            }
+            else {
+                b.setOrientation(VertexPointOrientation.HORIZONTAL);
+                d.setOrientation(VertexPointOrientation.VERTICAL);
+            }
+            type.newElement(gc, a, b);
+            type.newElement(gc, b, d);
+            type.newElement(gc, d, a);
+//            gc.quadraticCurveTo(points[0], points[1], (cx + points[0])/2, (cy + points[1])/2);
+//            gc.quadraticCurveTo(points[2], points[3], (points[2] + points[0])/2, (points[3] + points[1])/2);
+//            gc.quadraticCurveTo(points[4], points[5], (points[2] + points[4])/2, (points[3] + points[5])/2);
+//            gc.quadraticCurveTo(cx, cy, (cx + points[4])/2, (cy + points[5])/2);
             gc.stroke();
         }
         else gc.strokeLine(bx, by, ex, ey);

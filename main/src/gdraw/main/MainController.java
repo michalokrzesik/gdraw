@@ -625,4 +625,8 @@ public class MainController {
 
         contextMenu.show(nodeLibraryAccordion, event.getScreenX(), event.getScreenY());
     }
+
+    public void setDragModel(DragModel model) {
+        if(activeProject != null) activeProject.setDragModel(model);
+    }
 }

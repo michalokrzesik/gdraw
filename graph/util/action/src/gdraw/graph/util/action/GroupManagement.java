@@ -97,10 +97,10 @@ public class GroupManagement extends MultiAction {
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
 
-        if(!selected.isEmpty()) selected.forEach(o -> {
+        if(!selected.isEmpty()) for(Selectable o : selected) {
             if(o.isNode())
                 ma.actionHolder.add(GroupManagement.applyGroup(multiFrom, (Node) o, node, multiTo));
-        });
+        }
 
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
         //Jeśli w objects nie było node'ów, nic się nie dzieje
@@ -171,5 +171,6 @@ public class GroupManagement extends MultiAction {
                 break;
             }
         }
+        if(type != ActionType.Multi) changeStacks();
     }
 }

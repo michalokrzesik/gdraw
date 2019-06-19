@@ -36,8 +36,18 @@ public enum VertexType implements Serializable {
     },
     Curved{
         private Point2D controlPoint(VertexPoint a, VertexPoint b){
-            if(a.getOrientation() == VertexPointOrientation.HORIZONTAL) return new Point2D(b.getX(), a.getY());
-            return new Point2D(a.getX(), b.getY());
+            switch (a.getOrientation()){
+                case HORIZONTAL:
+                    return new Point2D(b.getX(), a.getY());
+                case VERTICAL:
+                    return new Point2D(a.getX(), b.getY());
+                case NONE:
+                    if (b.getOrientation() == VertexPointOrientation.HORIZONTAL)
+                            return new Point2D(a.getX(), b.getY());
+                    else
+                        return new Point2D(b.getX(), a.getY());
+            }
+            return null;
         }
 
         @Override

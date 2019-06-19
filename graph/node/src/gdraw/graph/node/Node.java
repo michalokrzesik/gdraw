@@ -214,7 +214,6 @@ public class Node extends Selectable {
             } catch(Exception e1) { h = -1; }
 
             controller.getProject().getActionHolder().add(MultiAction.applyNodePropertiesChange(controller.getProject(), x, y, w, h));
-            controller.getProject().draw();
         });
     }
 
@@ -264,6 +263,7 @@ public class Node extends Selectable {
     }
 
     public void groupNodes(Node node){
+        groupNodes();
         TreeItem<Node> nodeTI = node.getTreeItem(), parent = nodeTI.getParent();
         if(parent != null) {
             parent.getChildren().remove(nodeTI);
@@ -280,16 +280,17 @@ public class Node extends Selectable {
         double xmin = Double.MAX_VALUE, xmax = 0, ymin = xmin, ymax = 0;
 
         for (Node node : subNodes){
-            double x = node.getCenter().getX() - node.getWidth()/2, y = node.getCenter().getY() - node.getHeight()/2;
+            double w = node.getWidth()/2, h = node.getHeight()/2, x = node.getCenter().getX(), y = node.getCenter().getY();
+            double xul = x - w, xbr = x + w, yul = y - h, ybr = y + h;
 
-            xmin = x < xmin ? x : xmin;
-            xmax = x > xmax ? x : xmax;
-            ymin = y < ymin ? y : ymin;
-            ymax = y > ymax ? y : ymax;
+            xmin = xul < xmin ? xul : xmin;
+            xmax = xbr > xmax ? xbr : xmax;
+            ymin = yul < ymin ? yul : ymin;
+            ymax = ybr > ymax ? ybr : ymax;
         }
 
-        neededW += xmax - xmin;
-        neededH += ymax - ymin;
+        neededW += xmax - xmin + 5;
+        neededH += ymax - ymin + 5;
 
         if(getWidth() < neededW) setWidth(neededW);
         if(getHeight() < neededH) setHeight(neededH);
@@ -308,11 +309,20 @@ public class Node extends Selectable {
         if(getHeight() > ph) setHeight(ph);
         double w = getWidth(), h = getHeight();
 
-        double dx = Double.max((px - pw/2) - (x - w/2), (x + w/2) - (px + pw/2)),
-                dy = Double.max((py - ph/2) - (y - h/2), (y + h/2) - (py + ph/2));
+        double dxl = (px - pw/2) - (x - w/2),
+                dyu = (py - ph/2) - (y - h/2),
+                dxr = (px + pw/2) -(x + w/2),
+                dyd = (py + ph/2) - (y + h/2),
+                dx, dy;
 
-        dx = dx > 0 ? dx : 0;
-        dy = dy > 0 ? dy : 0;
+        dxl = dxl > 0 ? dxl : 0;
+        dyu = dyu > 0 ? dyu : 0;
+
+        dxr = dxr < 0 ? dxr : 0;
+        dyd = dyd < 0 ? dyd : 0;
+
+        dx = dxl > 0 ? dxl : dxr;
+        dy = dyu > 0 ? dyu : dyd;
 
         translate(dx, dy, false);
     }
@@ -552,7 +562,7 @@ public class Node extends Selectable {
 
         SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
 
-        Menu grouping = new Menu();
+        Menu grouping = new Menu("Grupowanie");
         contextMenu.getItems().addAll(separatorMenuItem, grouping);
 
         MenuItem group = new MenuItem("Grupuj zaznaczone");
@@ -567,6 +577,9 @@ public class Node extends Selectable {
         MenuItem groupsToNodes = new MenuItem("Zamień zaznaczone w zwykłe węzły (oddziel zawartość)");
         groupsToNodes.setOnAction(controller::groupsToNodes);
 
+        MenuItem toGroup = new MenuItem("Dodaj zaznaczone do wskazanej grupy");
+        toGroup.setOnAction(controller::moveToGroup);
+
         SeparatorMenuItem separatorMenuItem1 = new SeparatorMenuItem();
 
         MenuItem collapse = new MenuItem("Zwiń");
@@ -575,7 +588,7 @@ public class Node extends Selectable {
         MenuItem extend = new MenuItem("Rozwiń");
         extend.setOnAction(controller::extend);
 
-        grouping.getItems().addAll(group, ungroup, nodesToGroups, groupsToNodes, separatorMenuItem1, collapse, extend);
+        grouping.getItems().addAll(group, ungroup, nodesToGroups, groupsToNodes, toGroup, separatorMenuItem1, collapse, extend);
     }
 
     protected void superRefresh(Project project) {
