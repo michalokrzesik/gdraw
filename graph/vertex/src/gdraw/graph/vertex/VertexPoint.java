@@ -104,7 +104,7 @@ public class VertexPoint implements Serializable {
 
 
     public void setPointBounded(Point2D newPoint, Node node) {
-        double x = newPoint.getX(), y = newPoint.getY();
+        double x = newPoint.getX(), y = newPoint.getY(), newX, newY;
         double xcenter = node.getCenter().getX(), ycenter = node.getCenter().getY();
         double halfWidth = node.getWidth()/2; double halfHeight = node.getHeight()/2;
 
@@ -113,7 +113,15 @@ public class VertexPoint implements Serializable {
         y = Math.max(y, ycenter - halfHeight);
         y = Math.min(y, ycenter + halfHeight);
 
-        setPoint(new Point2D(x, y));
+        newX = xcenter + (x - (xcenter - halfWidth) < (xcenter + halfWidth) - x ? -halfWidth : halfWidth);
+        newY = ycenter + (y - (ycenter - halfHeight) < (ycenter + halfHeight) - y ? -halfHeight : halfHeight);
+
+        if(Math.abs(x - newX) < Math.abs(y - newY))
+            newY = y;
+        else
+            newX = x;
+
+        setPoint(new Point2D(newX, newY));
     }
 
     public void draw(GraphicsContext gc, double width, boolean isSelected) {

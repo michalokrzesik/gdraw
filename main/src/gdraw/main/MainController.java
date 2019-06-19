@@ -80,9 +80,11 @@ public class MainController {
     public void initialize() {
         nodeLibraryAccordion.setOnContextMenuRequested(this::libraryContextMenu);
 
-        nodeLibraryAccordion.getPanes().add(
-                new NodeLibrary(new File("./libraries/OSTATNIE"), nodeLibraryAccordion, this, new LibraryPane())
-        );
+        NodeLibrary recent = new NodeLibrary(
+                new File("./libraries/OSTATNIE"), nodeLibraryAccordion, this, new LibraryPane());
+        nodeLibraryAccordion.getPanes().add(recent);
+
+        nodeLibraryAccordion.setExpandedPane(recent);
 
         for(File library : Objects.requireNonNull(new File("./libraries").listFiles(File::isDirectory)))
             if(!library.getName().equals("OSTATNIE"))

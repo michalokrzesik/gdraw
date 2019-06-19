@@ -98,7 +98,8 @@ public class VertexCreation extends Action {
     public void action() {
         switch (type){
             case Create:
-                Vertex object = ((Node) fromNode.getObject()).newVertex(fromPoint, toPoint, (Node) toNode.getObject(), arrowType, lineType, duplex, curved, width, value, color);
+                Vertex object = ((Node) fromNode.getObject()).newVertex(fromPoint, toPoint, (Node) toNode.getObject(),
+                        arrowType, lineType, duplex, curved, width, value, color);
                 if(vertex == null) vertex = new SelectableCreationListener(object);
                 else vertex.setObject(object);
                 type = ActionType.Delete;

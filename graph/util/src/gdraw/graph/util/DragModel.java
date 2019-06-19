@@ -39,6 +39,7 @@ public enum DragModel implements Serializable {
                 canvas = project.getCanvas();
                 draw(project);
             }
+            else item.setSelected();
         }
 
         private void draw(Project project) {

@@ -158,4 +158,8 @@ public abstract class Selectable implements Serializable {
     public void forceProjectDraw() {
         controller.forceDraw();
     }
+
+    public void setController(MainController controller) {
+        this.controller = controller;
+    }
 }

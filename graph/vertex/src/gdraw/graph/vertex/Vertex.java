@@ -41,7 +41,9 @@ public class Vertex extends Selectable {
 
     private double value;
 
-    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint, Canvas canvas, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double w, Color c, MainController mainController){
+    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint,
+                  Canvas canvas, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved,
+                  double w, Color c, MainController mainController){
         controller = mainController;
         fromNode = from;
         toNode = to;
@@ -53,7 +55,7 @@ public class Vertex extends Selectable {
         width = w;
         makePath();
         value = 1.0;
-        draw();
+//        draw();
     }
 
     public static void draw(Node from, VertexPoint begin, VertexPoint end, Node to, Canvas canvas) {
@@ -147,7 +149,7 @@ public class Vertex extends Selectable {
         value = vertex.value;
         color = vertex.color;
         width = vertex.width;
-        makePath();
+//        makePath();
 
         copyPoints(vertex);
     }
@@ -205,7 +207,7 @@ public class Vertex extends Selectable {
     private void draw() {
 //        pane.getChildren().removeAll(arrows);
 //        pane.getChildren().remove(path);
-        makePath();
+//        makePath();
 //        if(!pane.getChildren().contains(path))
 //            pane.getChildren().add(path);
 //        path.toFront();
@@ -214,17 +216,18 @@ public class Vertex extends Selectable {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Iterator<VertexPoint> it = points.listIterator();
         VertexPoint prev = null, now = null;
-        if (it.hasNext()) prev = it.next();
+        if (it.hasNext()) now = it.next();
         lineType.set(gc, width);
         gc.beginPath();
         gc.moveTo(/*);
-        path.getElements().add(new MoveTo(*/prev.getX(), prev.getY());
+        path.getElements().add(new MoveTo(*/now.getX(), now.getY());
         while (it.hasNext()) {
+            prev = now;
             now = it.next();
-            vertexType.createMid(this, points, prev, now);
-
-            it = points.listIterator(points.indexOf(prev));
-            now = it.next();
+            if(vertexType.createMid(this, points, prev, now)) {
+                it = points.listIterator(points.indexOf(prev));
+                now = it.next();
+            }
 
             /*path.getElements().add(*/vertexType.newElement(gc, prev, now);
             //if (selected) drawSelect(prev);

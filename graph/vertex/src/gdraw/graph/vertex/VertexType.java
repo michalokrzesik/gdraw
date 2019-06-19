@@ -17,11 +17,13 @@ public enum VertexType implements Serializable {
         }
 
         @Override
-        public void createMid(Vertex vertex, LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now) {
+        public boolean createMid(Vertex vertex, LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now) {
             if (prev.isHardPoint() && now.isHardPoint()) {
                 VertexPoint mid = new VertexPoint(prev.getPoint().midpoint(now.getPoint()), vertex, false);
                 points.add(points.indexOf(now), mid);
+                return true;
             }
+            return false;
         }
 
         @Override
@@ -57,7 +59,7 @@ public enum VertexType implements Serializable {
         }
 
         @Override
-        public void createMid(Vertex vertex, LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now) {
+        public boolean createMid(Vertex vertex, LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now) {
             if(prev.getOrientation() == now.getOrientation()){
                 boolean sameX = prev.getX() == now.getX(), sameY = prev.getY() == now.getY();
                 if(sameX || sameY) {
@@ -99,7 +101,9 @@ public enum VertexType implements Serializable {
                     mid.setOrientation((prev.getOrientation() == VertexPointOrientation.HORIZONTAL ? VertexPointOrientation.VERTICAL : VertexPointOrientation.HORIZONTAL));
                     points.add(points.indexOf(now), mid);
                 }
+                return true;
             }
+            return false;
         }
 
         @Override
@@ -117,7 +121,7 @@ public enum VertexType implements Serializable {
 
     abstract public void newElement(GraphicsContext gc, VertexPoint a, VertexPoint b);
 
-    public abstract void createMid(Vertex vertex, LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now);
+    public abstract boolean createMid(Vertex vertex, LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now);
 
     public abstract void center(VertexPoint prev, VertexPoint mid, VertexPoint next);
 }

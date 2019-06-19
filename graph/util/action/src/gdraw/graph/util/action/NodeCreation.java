@@ -22,7 +22,9 @@ public class NodeCreation extends MultiAction {
 
     private NodeCreation(ActionHelper from, Node object, MultiAction requestManager, ActionHelper to) {
         super(from, to);
+        parent = from.getController().getProject().getBackground().getCreationListener();
         getInfoFromNode(object);
+        canvas = from.getController().getProject().getCanvas();
         type = ActionType.Create;
     }
 
@@ -134,11 +136,11 @@ public class NodeCreation extends MultiAction {
         image = object.getImage();
         canvas = object.getProjectCanvas();
         isGroupNodes = object.isGroupNodes(); isCollapsed = object.isCollapsed();
-        object.setCollapsed(false); width = object.getWidth(); height = object.getHeight();
-        object.setCollapsed(true); widthCollapsed = object.getWidth(); heightCollapsed = object.getHeight();
-        object.setCollapsed(isCollapsed);
+        width = object.getWidth(false); height = object.getHeight(false);
+        widthCollapsed = object.getWidth(true); heightCollapsed = object.getHeight(true);
         label = object.getLabel();
-        parent = object.getTreeItem().getParent().getValue().getCreationListener();
+        if(parent == null)
+            parent = object.getTreeItem().getParent().getValue().getCreationListener();
         controller = object.getController();
     }
 

@@ -105,6 +105,8 @@ public class Node extends Selectable {
         isGroupNodes = node.isGroupNodes;
         isCollapsed = node.isCollapsed;
         treeItem = new TreeItem<>(this);
+        vertices = new ArrayList<>();
+        subNodes = new ArrayList<>();
 
         setCircles();
     }
@@ -245,7 +247,8 @@ public class Node extends Selectable {
         VertexPoint startVP = new VertexPoint(start), stopVP = new VertexPoint(stop);
         startVP.setPointBounded(start, this);
         stopVP.setPointBounded(stop, toNode);
-        Vertex vertex = new Vertex(this, toNode, startVP.getPoint(), stopVP.getPoint(), canvas, arrow, line, isDuplex, isCurved, width, color, controller);
+        Vertex vertex = new Vertex(this, toNode, startVP.getPoint(), stopVP.getPoint(),
+                canvas, arrow, line, isDuplex, isCurved, width, color, controller);
         vertex.setValue(value);
         vertices.add(vertex);
         return vertex;
@@ -350,6 +353,10 @@ public class Node extends Selectable {
     }
 
     public double getHeight() {
+        return getHeight(isCollapsed);
+    }
+
+    public double getHeight(boolean isCollapsed) {
         return isCollapsed ? heightCollapsed : height;
     }
 
@@ -366,7 +373,11 @@ public class Node extends Selectable {
         translate(0, dh);
     }
 
-    public double getWidth() {
+    public double getWidth(){
+        return getWidth(isCollapsed);
+    }
+
+    public double getWidth(boolean isCollapsed) {
         return isCollapsed ? widthCollapsed : width;
     }
 
@@ -389,6 +400,8 @@ public class Node extends Selectable {
     }
 
     public void draw(){
+        if(vertices == null) vertices = new ArrayList<>();
+        if(subNodes == null) subNodes = new ArrayList<>();
         //hide();
         if(!vertices.isEmpty())
             vertices.forEach((Vertex v) -> v.draw(this));
