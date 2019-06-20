@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="gdraw:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/gdraw_jar</output-path>
+    <root id="archive" name="gdraw.jar">
+      <element id="module-output" name="action" />
+      <element id="module-output" name="node" />
+      <element id="module-output" name="main" />
+      <element id="module-output" name="vertex" />
+      <element id="module-output" name="util" />
+    </root>
+  </artifact>
+</component>
