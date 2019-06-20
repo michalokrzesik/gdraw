@@ -23,23 +23,21 @@ import java.util.List;
 
 public enum DragModel implements Serializable {
     Standard{
+        private double sx, sy;
         private double x, y;
         private double dx, dy;
 
         @Override
         public void pressed(Project project, MouseEvent e, Selectable item) {
-            if(project.getSelected().contains(item)){
                 double ex = e.getX(), ey = e.getY();
                 Point2D point = //item.isNode() ? ((Node) item).getCenter() :
                          new Point2D(ex, ey);
                 x = point.getX();
                 y = point.getY();
+                sx = x; sy = y;
                 dx = ex - x;
                 dy = ey - y;
                 canvas = project.getCanvas();
-                draw(project);
-            }
-            else item.setSelected();
         }
 
         private void draw(Project project) {
@@ -51,7 +49,11 @@ public enum DragModel implements Serializable {
                         double x = node.getCenter().getX(), y = node.getCenter().getY();
                         project.getCanvas().getGraphicsContext2D().strokeLine(x, y, x + dx, y + dy);
                     }
-                    else project.getCanvas().getGraphicsContext2D().strokeLine(x, y, x + dx, y + dy);
+                    else {
+                        VertexPoint vp = ((gdraw.graph.vertex.Vertex) o).interactedPoint(sx, sy);
+                        if(vp != null)
+                            project.getCanvas().getGraphicsContext2D().strokeLine(sx, sy, sx + dx, sy + dy);
+                    }
                 });
         }
 
@@ -69,12 +71,14 @@ public enum DragModel implements Serializable {
 
         @Override
         public void released(Project project, MouseEvent e, Selectable item) {
+            if(e.getX() == sx && e.getY() == sy) return;
+
             List<Selectable> selected = project.getSelected();
             if(selected.isEmpty()) return;
             if(selected.size() > 1 || selected.get(0).isNode())
                 actionHolder.add(MultiAction.applyTranslate(project, dx, dy));
 
-            else ((gdraw.graph.vertex.Vertex) selected.get(0)).moveInteractedPoint(x, y, x + dx, y + dy);
+            else ((gdraw.graph.vertex.Vertex) selected.get(0)).moveInteractedPoint(sx, sy, x, y);
         }
 
 
@@ -160,6 +164,7 @@ public enum DragModel implements Serializable {
                     w = Math.abs(e.getX() - x), h = Math.abs(e.getY() - y);
             selection = new Rectangle(xmin, ymin, w, h);
             GraphicsContext gc = project.getCanvas().getGraphicsContext2D();
+            gc.setLineWidth(1);
             gc.setStroke(Color.BLANCHEDALMOND);
             gc.strokeRect(xmin, ymin, w, h);
         }

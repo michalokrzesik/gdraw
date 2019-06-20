@@ -9,6 +9,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -19,6 +20,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.ListIterator;
@@ -137,14 +140,20 @@ public class Project implements Serializable {
 
     public void checkSelect(Rectangle selection) {
         if(!graphObjects.isEmpty()) graphObjects.forEach(s -> s.checkSelect(selection));
+        setProperties();
     }
 
     public void clearSelected(Selectable item) {
-        if(!selected.isEmpty()) selected.forEach(s -> {
-            if(s != item) s.setSelected(false);
-        });
+        if(!selected.isEmpty()) {
+            Object[] aSelected = selected.toArray();
+            int size = aSelected.length;
+            for (int i = 0; i < size; i++)
+                if (aSelected[i] != item) ((Selectable) aSelected[i]).setSelected(false);
+        }
+
         selected.clear();
-        if(item != null) selected.add(item);
+        if(item != null)
+            item.setSelected(true);
         setProperties();
     }
 
@@ -195,8 +204,14 @@ public class Project implements Serializable {
     }
 
     public void onMousePressed(MouseEvent e, Selectable item) {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setLineDashes(null);
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(1);
+        if(!selected.contains(item)) select(item, e.isControlDown());
         if(item == background) dragModel = DragModel.Select;
         else if(!item.isNode()) dragModel = DragModel.Standard;
+
         dragModel.pressed(this, e, item);
     }
 
@@ -221,6 +236,7 @@ public class Project implements Serializable {
             for(Selectable s : selected) {
                 allNodes = allNodes && s.isNode();
                 allVertices = allVertices && !s.isNode();
+                if(!allNodes && !allVertices) break;
             }
             if(allNodes || allVertices)
                 selected.get(0).setProperties(properties, selected);
@@ -395,5 +411,26 @@ public class Project implements Serializable {
 
     public ArrayList<Action> getActionHolder() {
         return actionHolder;
+    }
+
+    public void exportToFile(File file, String extension) {
+        if(file.exists()) file.delete();
+        try {
+            FileWriter writer = new FileWriter(file);
+            if(graphObjects != null) graphObjects.forEach(o -> {
+                if(o.isNode()) ((Node) o).setParent();
+            });
+            boolean json = extension.equalsIgnoreCase("json");
+
+            writer.append(json ?
+                            ("{ \"" + name + "\": {\n") :
+                            ("< Graph name=\"" + name + "\" >\n"));
+
+            background.writeToFile(writer, json, 1);
+
+            writer.append(json ? "}}" : "< /Graph >");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

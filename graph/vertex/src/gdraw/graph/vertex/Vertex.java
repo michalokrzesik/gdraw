@@ -10,13 +10,12 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -35,9 +34,10 @@ public class Vertex extends Selectable {
     private VertexType vertexType;
     private transient Path path;
     private Label label;
-    private transient ArrayList<Shape> arrows;
     private Color color;
     private double width;
+
+    private double xl, xr, yu, yd;
 
     private double value;
 
@@ -47,6 +47,7 @@ public class Vertex extends Selectable {
         controller = mainController;
         fromNode = from;
         toNode = to;
+        toNode.addVertex(this);
         this.canvas = canvas;
         init(arrow, line, isDuplex, isCurved);
         points.addLast(new VertexPoint(toPoint, this));
@@ -55,6 +56,11 @@ public class Vertex extends Selectable {
         width = w;
         makePath();
         value = 1.0;
+        controller.addObject(this);
+
+        double fx = fromPoint.getX(), fy = fromPoint.getY(), tx = toPoint.getX(), ty = toPoint.getY();
+        xl = fx < tx ? fx : tx; xr = fx + tx - xl;
+        yu = fy < ty ? fy : ty; yd = fy + ty - yu;
 //        draw();
     }
 
@@ -117,7 +123,6 @@ public class Vertex extends Selectable {
         points = new LinkedList<>();
         duplex = isDuplex;
         vertexType = (isCurved ? VertexType.Curved : VertexType.Straight);
-        arrows = new ArrayList<>();
     }
 
     public Vertex(Node from, Node to, Vertex copy){
@@ -180,12 +185,6 @@ public class Vertex extends Selectable {
     public double getValue(){ return value; }
 
 
-
-    public void setSelected(boolean selected){
-        this.selected = selected;
-        if(!selected) points.forEach(point -> point.getCircle().toBack());
-    }
-
     @Override
     public void translate(double dx, double dy) {
         points.forEach(point -> point.setPoint(new Point2D(point.getX() + dx, point.getY() + dy)));
@@ -218,6 +217,7 @@ public class Vertex extends Selectable {
         VertexPoint prev = null, now = null;
         if (it.hasNext()) now = it.next();
         lineType.set(gc, width);
+        gc.setStroke(color);
         gc.beginPath();
         gc.moveTo(/*);
         path.getElements().add(new MoveTo(*/now.getX(), now.getY());
@@ -234,9 +234,10 @@ public class Vertex extends Selectable {
         }
         gc.stroke();
         if(selected) points.forEach(this::drawSelect);
+        else if(!controller.isToSnapshot()) points.forEach(p -> p.draw(gc, width, false));
 
-        arrowType.draw(gc, path.getStroke(), prev, now);
-        if (duplex) arrowType.draw(gc, path.getStroke(), points.get(1), points.getFirst());
+        arrowType.draw(gc, color, prev, now);
+        if (duplex) arrowType.draw(gc, color, points.get(1), points.getFirst());
 //        if(!arrows.isEmpty()) {
 ////            pane.getChildren().addAll(arrows);
 ////            arrows.forEach(javafx.scene.Node::toFront);
@@ -264,10 +265,12 @@ public class Vertex extends Selectable {
 
     public void move(VertexPoint point, Point2D newPoint){
         ListIterator it = points.listIterator(points.indexOf(point));
-        if(!it.hasPrevious()) point.setPointBounded(newPoint, fromNode);
+        if(!it.hasPrevious())
+            point.setPointBounded(newPoint, fromNode);
         else{
             it.next();
-            if(!it.hasNext()) point.setPointBounded(newPoint, toNode);
+            if(!it.hasNext())
+                point.setPointBounded(newPoint, toNode);
             else point.setPoint(newPoint);
             it.previous();
         }
@@ -279,8 +282,16 @@ public class Vertex extends Selectable {
         if(it.hasNext())
             decideOnCenter((VertexPoint) it.next());
         int centerPointI = points.size()/2, pointI = points.indexOf(point);
-        if(pointI == centerPointI || pointI == centerPointI + 1)
+        if(label != null && (pointI == centerPointI || pointI == centerPointI + 1))
             label.setUpperLeft(getCenterForLabel());
+
+        point.setHardPoint(true);
+
+        xl = xl < point.getX() ? xl : point.getX();
+        xr = xr > point.getX() ? xr : point.getX();
+        yu = yu < point.getY() ? yu : point.getY();
+        yd = yd < point.getY() ? yd : point.getY();
+
         draw();
     }
 
@@ -326,8 +337,12 @@ public class Vertex extends Selectable {
 
         CheckBox duplexBox = new CheckBox(); duplexBox.selectedProperty().setValue(isDuplex);
 
-        ChoiceBox<LineType> lineTypeChoiceBox = new ChoiceBox<>(); lineTypeChoiceBox.getSelectionModel().select(LineType.valueOf(lt));
-        ChoiceBox<ArrowType> arrowTypeChoiceBox = new ChoiceBox<>(); arrowTypeChoiceBox.getSelectionModel().select(ArrowType.valueOf(at));
+        ChoiceBox<LineType> lineTypeChoiceBox = new ChoiceBox<>();
+        lineTypeChoiceBox.getItems().addAll(LineType.values());
+        lineTypeChoiceBox.getSelectionModel().select(LineType.getValueOf(lt));
+        ChoiceBox<ArrowType> arrowTypeChoiceBox = new ChoiceBox<>();
+        arrowTypeChoiceBox.getItems().addAll(ArrowType.values());
+        arrowTypeChoiceBox.getSelectionModel().select(ArrowType.getValueOf(at));
 
         Button btn = new Button("Zatwierdź");
 
@@ -348,6 +363,19 @@ public class Vertex extends Selectable {
             controller.getProject().getActionHolder().add(MultiAction.applyVertexPropertiesChange(controller.getProject(), lineTypeChoiceBox, arrowTypeChoiceBox, widthField, colorPicker, valueField));
             controller.getProject().draw();
         });
+
+
+    }
+
+    public void writeToFile(FileWriter writer, boolean json, int indent) throws IOException {
+        String ind = indent(indent), ind1 = ind + "  ";
+        super.writeToFile(writer, json, indent, "Vertex");
+        int codeFrom = fromNode.hashCode(), codeTo = toNode.hashCode();
+
+        writer.append(ind1 + (json ? "\"from-id\": \"" + codeFrom + "\"\n" +
+                ind1 + "\"to-id\": " + codeTo + "\"\n" + ind1 + "\"is-duplex\": \"" + duplex + "\"\n" + ind + "}\n" :
+                "from-id=\"" + codeFrom + "\" to-id=\"" + codeTo + "\" is-duplex=\"" + duplex + "\" />"
+                ));
     }
 
     private void setDuplex(boolean isDuplex) {
@@ -384,16 +412,13 @@ public class Vertex extends Selectable {
 
     @Override
     public void checkSelect(Rectangle rectangle) {
-        ListIterator<VertexPoint> it = points.listIterator();
-        boolean all = it.hasNext();                                 //Zabezpieczenie przed pustym vertexem
-        while(it.hasNext())
-            all = all && rectangle.contains(it.next().getPoint());
-        setSelected(all);
+        setSelected(rectangle.contains(xl, yu) && rectangle.contains(xr, yd));
     }
 
-    private VertexPoint interactedPoint(double x, double y){
+    public VertexPoint interactedPoint(double x, double y){
         for(VertexPoint point : points)
-            if(point.getCircle().contains(x, y)) return point;
+            if(point.contains(x, y))
+                return point;
         return null;
     }
 
@@ -494,5 +519,6 @@ public class Vertex extends Selectable {
 
     public void moveInteractedPoint(double x, double y, double nx, double ny) {
         move(interactedPoint(x, y), new Point2D(nx, ny));
+        forceProjectDraw();
     }
 }

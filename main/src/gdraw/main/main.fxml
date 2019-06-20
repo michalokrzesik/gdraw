@@ -241,7 +241,8 @@
                         <MenuItem mnemonicParsing="false" onAction="#openProject" text="Otwórz" />
                         <MenuItem mnemonicParsing="false" onAction="#saveProject" text="Zapisz" />
                         <MenuItem mnemonicParsing="false" onAction="#saveProjectAs" text="Zapisz jako" />
-                        <MenuItem mnemonicParsing="false" onAction="#exportGraph" text="Eksportuj" />
+                        <MenuItem mnemonicParsing="false" onAction="#exportToImage" text="Eksportuj do pliku graficznego" />
+                        <MenuItem mnemonicParsing="false" onAction="#exportToObject" text="Eksportuj do obiektu" />
                         <MenuItem mnemonicParsing="false" onAction="#closeProject" text="Zamknij projekt" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem mnemonicParsing="false" onAction="#closeProgram" text="Zamknij program" />

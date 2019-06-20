@@ -70,4 +70,14 @@ public enum LineType implements Serializable {
 
     abstract public void set(GraphicsContext gc, double width);
 
+    public static LineType getValueOf(String name){
+        switch(name){
+            case "• –– • –– •": return DotDash;
+            case "––– –––": return ThreeLength;
+            case "–– –– ––": return TwoLength;
+            case "• • • • •": return Dot;
+            default: return Straight;
+        }
+    }
+
 }

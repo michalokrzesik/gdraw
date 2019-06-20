@@ -20,6 +20,7 @@ import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 
@@ -76,6 +77,7 @@ public class MainController {
     private ArrayList<Selectable> clipboard;
     private ArrayList<Request> requestedNodes;
     private ArrayList<Request> requestedVertices;
+    private boolean toSnapshot;
 
     public void initialize() {
         nodeLibraryAccordion.setOnContextMenuRequested(this::libraryContextMenu);
@@ -105,6 +107,7 @@ public class MainController {
         lineType.setValue(LineType.Straight);
         arrowType.getItems().addAll(ArrowType.values());
         arrowType.setValue(ArrowType.None);
+        vertexColor.setValue(Color.BLACK);
     }
 
     public void addNodeToActiveLibrary(ActionEvent actionEvent) throws IOException {
@@ -405,18 +408,38 @@ public class MainController {
         System.exit(0);
     }
 
-    public void exportGraph(ActionEvent actionEvent) {
+    public void exportToImage(ActionEvent actionEvent) {
         if(activeProject == null) return;;
         File file = ImageFileChooser("Eksportuj graf", activeProject.getName()).showSaveDialog(null);
         if(file != null) {
-            String extension = file.getName().split(".")[1];
+            String extension = file.getName().substring(file.getName().lastIndexOf("."));
+            toSnapshot = true;
+            activeProject.draw();
             WritableImage snapshot = activeProject.snapshot();
+            toSnapshot = false;
             try {
                 RenderedImage renderedImage = SwingFXUtils.fromFXImage(snapshot,null);
                 ImageIO.write(renderedImage, extension, file);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void exportToObject(ActionEvent actionEvent){
+        if(activeProject == null) return;;
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Eksportuj graf");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Plik JSON", "*.json"),
+                new FileChooser.ExtensionFilter("Plik dedykowanego XML", "*.gdml")
+        );
+        fileChooser.setSelectedExtensionFilter(fileChooser.getExtensionFilters().get(0));
+        fileChooser.setInitialFileName(activeProject.getName());
+        File file = fileChooser.showSaveDialog(null);
+        if(file != null) {
+            String extension = file.getName().substring(file.getName().lastIndexOf("."));
+            activeProject.exportToFile(file, extension);
         }
     }
 
@@ -630,5 +653,9 @@ public class MainController {
 
     public void setDragModel(DragModel model) {
         if(activeProject != null) activeProject.setDragModel(model);
+    }
+
+    public boolean isToSnapshot() {
+        return toSnapshot;
     }
 }

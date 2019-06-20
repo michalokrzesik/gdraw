@@ -12,7 +12,7 @@ public class VertexPoint implements Serializable {
     private Point2D point;
     private VertexPointOrientation orientation;
     private boolean hardPoint;
-    private transient Circle circle;
+//    private transient Circle circle;
 
     public VertexPoint(Point2D point, Vertex vertex){ this(point.getX(), point.getY(), vertex); }
 
@@ -26,12 +26,18 @@ public class VertexPoint implements Serializable {
     public VertexPoint(double x, double y, Vertex vertex, VertexPointOrientation orientation) {
         this(x,y);
         this.orientation = orientation;
-        setVertex(vertex);
+//        setVertex(vertex);
     }
 
-    private void setVertex(Vertex vertex) {
-        circle.setOnMouseDragged(e -> vertex.move(this, new Point2D(e.getX(), e.getY())));
+    public VertexPoint(Point2D point, Vertex vertex, VertexPointOrientation orientation) {
+        this(point);
+        this.orientation = orientation;
+//        setVertex(vertex);
     }
+
+//    private void setVertex(Vertex vertex) {
+//        circle.setOnMouseDragged(e -> vertex.move(this, new Point2D(e.getX(), e.getY())));
+//    }
 
     public VertexPoint(Vertex vertex, VertexPoint copy){
         this(copy.getX() + 5, copy.getY() + 5, vertex, copy.getOrientation());
@@ -46,20 +52,20 @@ public class VertexPoint implements Serializable {
         point = new Point2D(x, y);
         this.orientation = VertexPointOrientation.NONE;
         hardPoint = true;
-        setCircle();
+//        setCircle();
     }
 
-    private void setCircle() {
-        circle = new Circle();
-        circle.setCenterX(point.getX());
-        circle.setCenterY(point.getY());
-        circle.setRadius(3);
-        circle.setFill(Color.BLUE);
-    }
+//    private void setCircle() {
+//        circle = new Circle();
+//        circle.setCenterX(point.getX());
+//        circle.setCenterY(point.getY());
+//        circle.setRadius(5);
+//        circle.setFill(Color.BLUE);
+//    }
 
     public void refresh(Vertex vertex){
-        setCircle();
-        setVertex(vertex);
+//        setCircle();
+//        setVertex(vertex);
     }
 
     public double getX(){
@@ -71,8 +77,8 @@ public class VertexPoint implements Serializable {
     }
 
     public void setPoint(Point2D newPoint){
-        circle.setCenterX(newPoint.getX());
-        circle.setCenterY(newPoint.getY());
+//        circle.setCenterX(newPoint.getX());
+//        circle.setCenterY(newPoint.getY());
         point = newPoint;
     }
 
@@ -95,12 +101,12 @@ public class VertexPoint implements Serializable {
 
     public void setHardPoint(boolean hp){
         hardPoint = hp;
-        circle.setFill((hardPoint ? Color.BLUE : Color.AQUA));
+//        circle.setFill((hardPoint ? Color.BLUE : Color.AQUA));
     }
 
-    public Circle getCircle(){
-        return circle;
-    }
+//    public Circle getCircle(){
+//        return circle;
+//    }
 
 
     public void setPointBounded(Point2D newPoint, Node node) {
@@ -125,17 +131,16 @@ public class VertexPoint implements Serializable {
     }
 
     public void draw(GraphicsContext gc, double width, boolean isSelected) {
-        if(isSelected){
-            gc.setFill(isHardPoint() ? Color.BLUE: Color.BLANCHEDALMOND);
-            gc.fillOval(getX() - width/2 - 1, getY() - width/2 - 1, width + 2, width + 2);
-        }
-        else {
-            gc.setFill(Color.GRAY);
-            gc.fillOval(getX() - width/2, getY() - width/2, width, width);
-        }
+            gc.setFill(isSelected ? (hardPoint ? Color.BLUE : Color.AQUA) : Color.GRAY);
+            gc.fillOval(getX() - 2.5, getY() - 2.5, 5, 5);
     }
 
     public void setPointBounded(Node node) {
         setPointBounded(point, node);
+    }
+
+    public boolean contains(double x, double y) {
+        double xc = point.getX(), yc = point.getY();
+        return (xc - 3 <= x) && (xc + 3 >= x) && (yc - 3 <= y) && (yc + 3 >= y);
     }
 }

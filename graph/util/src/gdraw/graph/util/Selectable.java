@@ -11,6 +11,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.shape.Rectangle;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -25,7 +27,16 @@ public abstract class Selectable implements Serializable {
 
     public abstract boolean checkSelect(double x, double y);
 
-    public abstract void setSelected(boolean b);
+    public void setSelected(boolean selected) {
+        Project project = controller.getProject();
+        ArrayList<Selectable> selectables = project.getSelected();
+        boolean contains = selectables.contains(this);
+        if(selected) {
+            if (!contains) selectables.add(this);
+        }
+        else if(contains) selectables.remove(this);
+        this.selected = selected;
+    }
 
     public abstract void translate(double dx, double dy);
 
@@ -161,5 +172,20 @@ public abstract class Selectable implements Serializable {
 
     public void setController(MainController controller) {
         this.controller = controller;
+    }
+
+    public void writeToFile(FileWriter writer, boolean json, int indent, String objectName) throws IOException {
+        int code = this.hashCode();
+        String ind = indent(indent), ind1 = ind + "  ";
+        writer.append(ind + (json ?
+                "{\n" + ind1 + "\"id\": \"" + code + "\"\n" + ind1 + "\"label\": \"" + this.label.getLabel() + "\"\n" :
+                "< " + objectName + " " + "id=\"" + code + "\" " + "label=\"" + this.label.getLabel() + "\" >" ));
+    }
+
+    public String indent(int indent){
+        String res = "";
+        for(int i = 0; i < indent; i++)
+            res = res.concat("  ");
+        return res;
     }
 }

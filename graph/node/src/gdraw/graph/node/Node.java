@@ -14,6 +14,9 @@ import javafx.scene.control.*;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.geometry.Point2D;
+
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javafx.scene.image.ImageView;
@@ -133,17 +136,6 @@ public class Node extends Selectable {
         subNodes = new ArrayList<>();
     }
 
-    public void setSelected(boolean selected) {
-        Project project = controller.getProject();
-        project.setDragModel(DragModel.Standard);
-        ArrayList<Selectable> selectables = project.getSelected();
-        boolean contains = selectables.contains(this);
-        if(selected)
-            if(!contains) selectables.add(this);
-        else if(contains) selectables.remove(this);
-        this.selected = selected;
-    }
-
     public void setLabel(String newLabel){
         if(label == null){
             label = new Label(
@@ -217,6 +209,38 @@ public class Node extends Selectable {
 
             controller.getProject().getActionHolder().add(MultiAction.applyNodePropertiesChange(controller.getProject(), x, y, w, h));
         });
+    }
+
+    public void writeToFile(FileWriter writer, boolean json, int indent) throws IOException {
+        String ind = indent(indent), ind1 = ind + "  ";
+        super.writeToFile(writer, json, indent, "Node");
+
+        if(subNodes != null && !subNodes.isEmpty()){
+            writer.append(ind1 + (json ? "\"subnodes\": [\n" : "< Subnodes >\n"));
+            subNodes.forEach(node -> {
+                try {
+                    node.writeToFile(writer, json, indent + 2);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            writer.append(ind1 + (json ? "]\n" : "< /Subnodes>\n"));
+        }
+
+        if(vertices != null && !vertices.isEmpty()){
+            writer.append(ind1 + (json ? "\"vertices\": [\n" : "< Vertices >\n"));
+            vertices.forEach(vertex -> {
+                if(vertex.isDuplex() || vertex.getFromNode() == this)
+                try {
+                    vertex.writeToFile(writer, json, indent + 2);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            writer.append(ind1 + (json ? "]\n" : "< /Vertices>\n"));
+        }
+
+        writer.append(ind + (json ? "}\n" : "< /Node >\n"));
     }
 
     private void copy(TreeItem<Node> parent){
@@ -421,7 +445,7 @@ public class Node extends Selectable {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.setGlobalBlendMode(BlendMode.SRC_OVER);
         gc.drawImage(image, x, y, w, h);
-        if(selected) {
+        if(selected && !controller.isToSnapshot()) {
             setCircles();
             gc.setStroke(Color.BLUE);
             gc.setFill(Color.BLUE);
@@ -523,7 +547,7 @@ public class Node extends Selectable {
 
     @Override
     public boolean checkSelect(double x, double y) {
-        double xc = center.getX(), yc = center.getY(), w = getWidth(), h = getHeight();
+        double xc = center.getX(), yc = center.getY(), w = getWidth()/2, h = getHeight()/2;
         return (xc - w <= x) && (xc + w >= x) && (yc - h <= y) && (yc + h >= y);
     }
 

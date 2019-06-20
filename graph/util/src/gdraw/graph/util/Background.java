@@ -16,6 +16,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class Background extends Node {
     private double x, y;
     private transient Rectangle selection;
@@ -121,5 +124,19 @@ public class Background extends Node {
         makeImageView();
         if(!subNodes.isEmpty())
             subNodes.forEach(n -> n.refresh(project));
+    }
+
+    @Override
+    public void writeToFile(FileWriter writer, boolean json, int indent) throws IOException {
+        String ind = indent(indent);
+        writer.append(ind + (json ? "\"nodes\": [\n" : "< Nodes >\n"));
+        if(!subNodes.isEmpty()) subNodes.forEach(node -> {
+            try {
+                node.writeToFile(writer, json, indent + 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        writer.append(ind + (json ? "]\n" : "< /Nodes >\n"));
     }
 }
