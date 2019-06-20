@@ -1,6 +1,6 @@
 Michał Okrzesik
 
-gDraw
+GraphDRAW
 
 Praca licencjacka
 
