@@ -90,10 +90,12 @@ public class MultiAction extends Action {
         MultiAction ma = new MultiAction(redo, undo);
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
-        if(!selected.isEmpty()) selected.forEach(o -> {
+        Selectable[] objects = (Selectable[]) selected.toArray();
+        for(int i = 0; i < objects.length; i++){
+            Selectable o = objects[i];
             if(o.isNode()) ma.actionHolder.add(NodeCreation.applyDelete(multiFrom, (Node) o, multiTo));
             else ma.actionHolder.add(VertexCreation.applyDelete(multiFrom, (Vertex) o, multiTo));
-        });
+        }
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
         //Jeśli w objects nie było node'ów, nic się nie dzieje
         return ma;
