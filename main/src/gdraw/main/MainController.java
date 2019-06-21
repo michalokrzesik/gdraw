@@ -672,4 +672,40 @@ public class MainController {
     public boolean isToSnapshot() {
         return toSnapshot;
     }
+
+    public void about(ActionEvent actionEvent) {
+        Stage window = new Stage();
+        window.initModality(Modality.APPLICATION_MODAL);
+        window.setTitle("O programie...");
+
+        //layout
+        Label label = new Label(String.format("Michał Okrzesik\n" +
+                "GraphDRAW\n" +
+                "Praca licencjacka\n" +
+                "Uniwersytet Jagielloński\n" +
+                "Wydział Fizyki, Astronomii i Informatyki Stosowanej\n" +
+                "Kierunek: Informatyka\n" +
+                "Tytuł pracy: Aplikacja do tworzenia i edycji grafów\n"));
+
+        Button cancel = new Button("Ok");
+
+        cancel.setOnAction(e -> window.close());
+
+        //layout
+        GridPane gridPane = new GridPane();
+        gridPane.setVgap(10);
+        gridPane.setHgap(10);
+        gridPane.setPadding(new Insets(10));
+
+        gridPane.getChildren().addAll(label, cancel);
+
+        GridPane.setConstraints(label, 0, 0, GridPane.REMAINING, 1);
+        GridPane.setConstraints(cancel, 10, 2, GridPane.REMAINING, 1);
+
+        gridPane.setAlignment(Pos.CENTER);
+
+        Scene scene = new Scene(gridPane);
+        window.setScene(scene);
+        window.showAndWait();
+    }
 }
