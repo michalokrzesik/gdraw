@@ -105,6 +105,7 @@ public class Project implements Serializable {
         this.file = file;
         canvas = setCanvas(background.getWidth(), background.getHeight());
         background.refresh(this);
+        actionHolder = new ArrayList<>();
 
 
         setNodes();

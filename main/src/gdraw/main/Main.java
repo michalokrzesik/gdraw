@@ -10,10 +10,14 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("main.fxml"));
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("main.fxml"));
+        Parent root = loader.load();
+        MainController controller = loader.getController();
         primaryStage.setTitle("GraphDRAW");
         primaryStage.setScene(new Scene(root, 1280, 700));
         primaryStage.show();
+        primaryStage.setOnCloseRequest(controller::closeProgram);
     }
 
 

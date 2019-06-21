@@ -157,7 +157,7 @@ public abstract class Selectable implements Serializable {
 
     public boolean isCloserThan(Selectable found){
         return depth(parentForIsCloserThan().getTreeItem())
-                >
+                >=
                 depth(found.parentForIsCloserThan().getTreeItem());
     }
 

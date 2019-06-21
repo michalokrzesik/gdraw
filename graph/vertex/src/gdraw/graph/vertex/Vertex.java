@@ -218,6 +218,40 @@ public class Vertex extends Selectable {
 //        arrows.clear();
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
+        if (fromNode == toNode) {
+            VertexPoint start = points.getFirst(), stop = points.getLast();
+            double x = (start.getX() + stop.getX()) / 2, y = (start.getY() + stop.getY()) / 2,
+                    w = fromNode.getWidth(), h = fromNode.getHeight();
+            Point2D.Double center = fromNode.getCenter();
+            double cx = center.getX(), cy = center.getY();
+            x = cx + (cx > x ? -w : w);
+            y = cy + (cy > y ? -h : h);
+            double[] points = ArrowType.arrowPoints(new VertexPoint(center), new VertexPoint(x, y), (w + h) / 8);
+
+            VertexPoint a = new VertexPoint(cx, cy),
+                    b = new VertexPoint(points[0], points[1]),
+                    c = new VertexPoint(points[2], points[3]),
+                    d = new VertexPoint(points[4], points[5]);
+            if (Math.abs(points[1] - cy) < Math.abs(points[5] - cy)) {
+                b.setOrientation(VertexPointOrientation.VERTICAL);
+                d.setOrientation(VertexPointOrientation.HORIZONTAL);
+            } else {
+                b.setOrientation(VertexPointOrientation.HORIZONTAL);
+                d.setOrientation(VertexPointOrientation.VERTICAL);
+            }
+
+            c.setPointBounded(fromNode);
+            stop = new VertexPoint(c.getX(), c.getY());
+            start = new VertexPoint(c.getX(), c.getY());
+
+            vertexType = VertexType.Curved;
+            this.points.clear();
+            this.points.addFirst(stop);
+            this.points.addFirst(d);
+            this.points.addFirst(b);
+            this.points.addFirst(start);
+        }
+
         Iterator<VertexPoint> it = points.listIterator();
         VertexPoint prev = null, now = null;
         if (it.hasNext()) now = it.next();
@@ -229,17 +263,18 @@ public class Vertex extends Selectable {
         while (it.hasNext()) {
             prev = now;
             now = it.next();
-            if(vertexType.createMid(this, points, prev, now)) {
+            if (vertexType.createMid(this, points, prev, now)) {
                 it = points.listIterator(points.indexOf(prev));
                 now = it.next();
             }
 
-            /*path.getElements().add(*/vertexType.newElement(gc, prev, now);
+            /*path.getElements().add(*/
+            vertexType.newElement(gc, prev, now);
             //if (selected) drawSelect(prev);
         }
         gc.stroke();
-        if(selected) points.forEach(this::drawSelect);
-        else if(!controller.isToSnapshot()) points.forEach(p -> p.draw(gc, width, false));
+        if (selected) points.forEach(this::drawSelect);
+        else if (!controller.isToSnapshot()) points.forEach(p -> p.draw(gc, width, false));
 
         arrowType.draw(gc, color, prev, now);
         if (duplex) arrowType.draw(gc, color, points.get(1), points.getFirst());
@@ -247,7 +282,7 @@ public class Vertex extends Selectable {
 ////            pane.getChildren().addAll(arrows);
 ////            arrows.forEach(javafx.scene.Node::toFront);
 //        }
-        if(label != null) label.draw();
+        if (label != null) label.draw();
 
     }
 

@@ -8,6 +8,7 @@ import gdraw.graph.vertex.Vertex;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -318,7 +319,7 @@ public class MainController {
      * Funkcja zamyka projekt.
      * @param event
      */
-    public void closeProject(ActionEvent event) {
+    public void closeProject(Event event) {
         if(activeProject != null)
             closeProjectAlert(activeProject);
     }
@@ -394,6 +395,7 @@ public class MainController {
     private void closeProject(Project project) {
         tabPane.getTabs().remove(project.getTab()); //usuwa z panelu
         projects.remove(project); //usuwa z listy
+        if(!projects.isEmpty()) setProject(projects.get(0));
     }
 
     public void saveProjectAs(ActionEvent actionEvent) {
@@ -408,7 +410,8 @@ public class MainController {
         project.setProperties();
     }
 
-    public void closeProgram(ActionEvent actionEvent) {
+    public void closeProgram(Event actionEvent) {
+        while(!projects.isEmpty()) closeProject(actionEvent);
         Platform.exit();
         System.exit(0);
     }

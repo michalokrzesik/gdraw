@@ -8,6 +8,7 @@ import gdraw.graph.vertex.VertexPoint;
 import gdraw.main.MainController;
 import gdraw.main.Project;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 import gdraw.graph.vertex.Vertex;
@@ -392,16 +394,16 @@ public class Node extends Selectable {
     }
 
     public void setHeight(double h){
-        double dh;
-        if(isCollapsed) {
-            dh = h - heightCollapsed;
+//        double dh;
+        if(isCollapsed) //{
+//            dh = h - heightCollapsed;
             heightCollapsed = h;
-        }
-        else {
-            dh = h - height;
+//        }
+        else //{
+//            dh = h - height;
             height = h;
-        }
-        translate(0, dh);
+//        }
+//        translate(0, dh);
     }
 
     public double getWidth(){
@@ -413,16 +415,16 @@ public class Node extends Selectable {
     }
 
     public void setWidth(double w){
-        double dw;
-        if(isCollapsed) {
-            dw = w - widthCollapsed;
+//        double dw;
+        if(isCollapsed) //{
+//            dw = w - widthCollapsed;
             widthCollapsed = w;
-        }
-        else {
-            dw = w - width;
+//        }
+        else //{
+//            dw = w - width;
             width = w;
-        }
-        translate(dw,0);
+//        }
+//        translate(dw,0);
     }
 
     public void draw(Canvas canvas){
@@ -449,9 +451,20 @@ public class Node extends Selectable {
 //        imageView.setLayoutX(x);
 //        imageView.setLayoutY(y);
 //        imageView.getGraphicsContext2D().drawImage(image, 0, 0, w, h);
+
+        ImageView view = new ImageView(image);
+        view.setPreserveRatio(false);
+        view.setSmooth(true);
+        view.setFitHeight(h);
+        view.setFitWidth(w);
+
+        Pane pane = new Pane(view);
+        Scene offScreenScene = new Scene(pane);
+        WritableImage croppedImage = view.snapshot(null, null);
+
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.setGlobalBlendMode(BlendMode.SRC_OVER);
-        gc.drawImage(image, x, y, w, h);
+        gc.drawImage(croppedImage, x, y, w, h);
         if(selected && !controller.isToSnapshot()) {
             setCircles();
             gc.setStroke(Color.BLUE);
@@ -518,6 +531,7 @@ public class Node extends Selectable {
         parent.getValue().removeSubNode(this);
         parent.getChildren().remove(treeItem);
         setSelected(false);
+        controller.removeObject(this);
 //        pane.getChildren().remove(imageView);
 //        if(label != null) label.hide();
     }

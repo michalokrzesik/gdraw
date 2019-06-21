@@ -7,8 +7,8 @@ public class NodeChangeSize extends Action {
     private double dw, dh;
 
     private NodeChangeSize(ActionHelper from, Node node, double dw, double dh, ActionHelper to) {
-        this.from = from;
-        this.to = to;
+        this.from = to;
+        this.to = from;
         this.listener = node.getCreationListener();
         this.dw = dw;
         this.dh = dh;

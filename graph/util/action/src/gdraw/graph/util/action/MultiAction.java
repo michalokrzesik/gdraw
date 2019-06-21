@@ -90,9 +90,9 @@ public class MultiAction extends Action {
         MultiAction ma = new MultiAction(redo, undo);
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
-        Selectable[] objects = (Selectable[]) selected.toArray();
+        Object[] objects = selected.toArray();
         for(int i = 0; i < objects.length; i++){
-            Selectable o = objects[i];
+            Selectable o = (Selectable) objects[i];
             if(o.isNode()) ma.actionHolder.add(NodeCreation.applyDelete(multiFrom, (Node) o, multiTo));
             else ma.actionHolder.add(VertexCreation.applyDelete(multiFrom, (Vertex) o, multiTo));
         }
@@ -142,10 +142,10 @@ public class MultiAction extends Action {
         ActionHelper multiTo = ma.multiTo;
         ArrayList<Selectable> selected = project.getSelected();
         if(!selected.isEmpty()) selected.forEach(o -> {
-            ma.actionHolder.add(Translate.applyTranslate(multiFrom, o, x, y, multiTo));
             double width = w > 0 ? w : ((Node) o).getWidth();
             double height = h > 0 ? h : ((Node) o).getHeight();
             ma.actionHolder.add(NodeChangeSize.apply(multiFrom, (Node) o, width, height, multiTo));
+            ma.actionHolder.add(Translate.applyTranslate(multiFrom, o, x, y, multiTo));
         });
 
         if(!multiTo.isEmpty()) ma.action();                         //Pierwsze action tylko wymieni miejscami stacki
