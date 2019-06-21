@@ -1,6 +1,5 @@
 package gdraw.graph.node;
 
-import gdraw.graph.util.DragModel;
 import gdraw.graph.util.Selectable;
 import gdraw.graph.util.action.MultiAction;
 import gdraw.graph.vertex.ArrowType;
@@ -8,18 +7,23 @@ import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.VertexPoint;
 import gdraw.main.MainController;
 import gdraw.main.Project;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
-import javafx.geometry.Point2D;
 
+
+import java.awt.geom.Point2D;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
 import gdraw.graph.vertex.Vertex;
@@ -27,12 +31,14 @@ import gdraw.graph.util.Label;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
+import javax.imageio.ImageIO;
+
 public class Node extends Selectable {
 //    protected transient Canvas imageView;
-    protected Point2D center;
+    protected Point2D.Double center;
     protected double width;
     protected double height;
-    protected Image image;
+    protected transient Image image;
     protected boolean isGroupNodes;
     protected ArrayList<Node> subNodes;
     protected ArrayList<Vertex> vertices;
@@ -45,11 +51,11 @@ public class Node extends Selectable {
 
     protected transient TreeItem<Node> treeItem;
 
-    public Node(Point2D center, Image image, Canvas canvas, MainController mainController){
+    public Node(Point2D.Double center, Image image, Canvas canvas, MainController mainController){
         this(center, image, canvas, mainController, true);
     }
 
-    public Node(Point2D center, Image image, Canvas canvas, MainController mainController, boolean isNode){
+    public Node(Point2D.Double center, Image image, Canvas canvas, MainController mainController, boolean isNode){
         controller = mainController;
         this.center = center;
         this.image = image;
@@ -130,7 +136,7 @@ public class Node extends Selectable {
 
     }
 
-    public Node(Point2D center, Image image, Canvas canvas, boolean isGroupNodes, MainController mainController){
+    public Node(Point2D.Double center, Image image, Canvas canvas, boolean isGroupNodes, MainController mainController){
         this(center, image, canvas, mainController);
         this.isGroupNodes = isGroupNodes;
         subNodes = new ArrayList<>();
@@ -140,7 +146,7 @@ public class Node extends Selectable {
         if(label == null){
             label = new Label(
                     newLabel, canvas,
-                    new Point2D(center.getX() - 10, center.getY() - 10)
+                    new Point2D.Double(center.getX() - 10, center.getY() - 10)
             );
         }
         else label.setLabel(newLabel);
@@ -214,9 +220,10 @@ public class Node extends Selectable {
     public void writeToFile(FileWriter writer, boolean json, int indent) throws IOException {
         String ind = indent(indent), ind1 = ind + "  ";
         super.writeToFile(writer, json, indent, "Node");
+        if(!json) writer.append(">\n");
 
         if(subNodes != null && !subNodes.isEmpty()){
-            writer.append(ind1 + (json ? "\"subnodes\": [\n" : "< Subnodes >\n"));
+            writer.append((json ? ",\n" + ind1 + "\"subnodes\": [\n" : ind1 + "< Subnodes >\n"));
             subNodes.forEach(node -> {
                 try {
                     node.writeToFile(writer, json, indent + 2);
@@ -228,7 +235,7 @@ public class Node extends Selectable {
         }
 
         if(vertices != null && !vertices.isEmpty()){
-            writer.append(ind1 + (json ? "\"vertices\": [\n" : "< Vertices >\n"));
+            writer.append((json ? ",\n" + ind1 + "\"vertices\": [\n" : ind1 + "< Vertices >\n"));
             vertices.forEach(vertex -> {
                 if(vertex.isDuplex() || vertex.getFromNode() == this)
                 try {
@@ -244,7 +251,7 @@ public class Node extends Selectable {
     }
 
     private void copy(TreeItem<Node> parent){
-        Node ret = new Node(new Point2D(center.getX() + 5, center.getY() + 5), image, canvas, isGroupNodes, controller);
+        Node ret = new Node(new Point2D.Double(center.getX() + 5, center.getY() + 5), image, canvas, isGroupNodes, controller);
         if(parent != null) parent.getValue().groupNodes(ret);
         if(this.isGroupNodes && !this.subNodes.isEmpty())
             for(Node node : subNodes)
@@ -267,7 +274,7 @@ public class Node extends Selectable {
         vertices.remove(vertex);
     }
 
-    public Vertex newVertex(Point2D start, Point2D stop, Node toNode, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double width, double value, Color color){
+    public Vertex newVertex(Point2D.Double start, Point2D.Double stop, Node toNode, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved, double width, double value, Color color){
         VertexPoint startVP = new VertexPoint(start), stopVP = new VertexPoint(stop);
         startVP.setPointBounded(start, this);
         stopVP.setPointBounded(stop, toNode);
@@ -372,7 +379,7 @@ public class Node extends Selectable {
     }
 
 
-    public Point2D getCenter() {
+    public Point2D.Double getCenter() {
         return center;
     }
 
@@ -475,7 +482,7 @@ public class Node extends Selectable {
 
     public void translate(double dx, double dy, boolean fit){
         double x = center.getX() + dx, y = center.getY() + dy;
-        center = new Point2D(x, y);
+        center = new Point2D.Double(x, y);
 //        imageView.setX(x);
 //        imageView.setY(y);
 //        imageView.setLayoutY(y);
@@ -485,7 +492,7 @@ public class Node extends Selectable {
             if (!vertices.isEmpty())
                 vertices.forEach(v -> v.translateNode(this, dx, dy));
             if (isGroupNodes && !subNodes.isEmpty()) subNodes.forEach(n -> n.translate(dx, dy));
-            if (label != null) label.setUpperLeft(new Point2D(center.getX() - 10, center.getY() - 10));
+            if (label != null) label.setUpperLeft(new Point2D.Double(center.getX() - 10, center.getY() - 10));
         }
     }
 
@@ -531,7 +538,6 @@ public class Node extends Selectable {
             subNodes.forEach(n -> n.refresh(project));
         if(!vertices.isEmpty())
             vertices.forEach(v -> v.refresh(project));
-        draw();
     }
 
     private void removeSubNode(Node node) {
@@ -630,5 +636,16 @@ public class Node extends Selectable {
 
     protected void superRefresh(Project project) {
         super.refresh(project);
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", out); // png is lossless
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        WritableImage img = null;
+        image = SwingFXUtils.toFXImage(ImageIO.read(in), img);
     }
 }

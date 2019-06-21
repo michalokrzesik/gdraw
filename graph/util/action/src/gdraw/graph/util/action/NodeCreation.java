@@ -5,9 +5,11 @@ import gdraw.graph.util.Selectable;
 import gdraw.graph.vertex.Vertex;
 import gdraw.main.MainController;
 import gdraw.main.Project;
-import javafx.geometry.Point2D;
+
 import javafx.scene.image.Image;
 import javafx.scene.canvas.Canvas;
+
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +34,7 @@ public class NodeCreation extends MultiAction {
         super(from, to);
         width = image.getWidth(); widthCollapsed = width;
         height = image.getHeight(); heightCollapsed = height;
-        center = new Point2D(width/2, height/2);
+        center = new Point2D.Double(width / 2, height / 2);
         this.image = image;
         canvas = project.getCanvas();
         isCollapsed = false; isGroupNodes = false;
@@ -49,7 +51,7 @@ public class NodeCreation extends MultiAction {
     }
 
     private SelectableCreationListener node;
-    private Point2D center;
+    private Point2D.Double center;
     private Image image;
     private Canvas canvas;
     private boolean isGroupNodes, isCollapsed;

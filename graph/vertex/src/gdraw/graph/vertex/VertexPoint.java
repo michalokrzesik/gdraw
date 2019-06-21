@@ -1,22 +1,21 @@
 package gdraw.graph.vertex;
 
 import gdraw.graph.node.Node;
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 
+import java.awt.geom.Point2D;
 import java.io.Serializable;
 
 public class VertexPoint implements Serializable {
-    private Point2D point;
+    private Point2D.Double point;
     private VertexPointOrientation orientation;
     private boolean hardPoint;
 //    private transient Circle circle;
 
-    public VertexPoint(Point2D point, Vertex vertex){ this(point.getX(), point.getY(), vertex); }
+    public VertexPoint(Point2D.Double point, Vertex vertex){ this(point.getX(), point.getY(), vertex); }
 
-    public VertexPoint(Point2D point, Vertex vertex, boolean hardPoint){
+    public VertexPoint(Point2D.Double point, Vertex vertex, boolean hardPoint){
         this(point.getX(), point.getY(), vertex);
         setHardPoint(hardPoint);
     }
@@ -29,7 +28,7 @@ public class VertexPoint implements Serializable {
 //        setVertex(vertex);
     }
 
-    public VertexPoint(Point2D point, Vertex vertex, VertexPointOrientation orientation) {
+    public VertexPoint(Point2D.Double point, Vertex vertex, VertexPointOrientation orientation) {
         this(point);
         this.orientation = orientation;
 //        setVertex(vertex);
@@ -44,12 +43,12 @@ public class VertexPoint implements Serializable {
         setHardPoint(copy.isHardPoint());
     }
 
-    public VertexPoint(Point2D point2D) {
+    public VertexPoint(Point2D.Double point2D) {
         this(point2D.getX(), point2D.getY());
     }
 
     public VertexPoint(double x, double y) {
-        point = new Point2D(x, y);
+        point = new Point2D.Double(x, y);
         this.orientation = VertexPointOrientation.NONE;
         hardPoint = true;
 //        setCircle();
@@ -76,13 +75,13 @@ public class VertexPoint implements Serializable {
         return point.getY();
     }
 
-    public void setPoint(Point2D newPoint){
+    public void setPoint(Point2D.Double newPoint){
 //        circle.setCenterX(newPoint.getX());
 //        circle.setCenterY(newPoint.getY());
         point = newPoint;
     }
 
-    public Point2D getPoint() {
+    public Point2D.Double getPoint() {
         return point;
     }
 
@@ -127,7 +126,7 @@ public class VertexPoint implements Serializable {
         else
             newX = x;
 
-        setPoint(new Point2D(newX, newY));
+        setPoint(new Point2D.Double(newX, newY));
     }
 
     public void draw(GraphicsContext gc, double width, boolean isSelected) {

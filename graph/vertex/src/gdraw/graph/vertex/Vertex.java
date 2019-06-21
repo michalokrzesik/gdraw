@@ -6,7 +6,6 @@ import gdraw.graph.util.action.MultiAction;
 import gdraw.graph.util.action.VertexCreation;
 import gdraw.main.MainController;
 import gdraw.main.Project;
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
@@ -14,6 +13,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 
+import java.awt.geom.Point2D;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,14 +34,15 @@ public class Vertex extends Selectable {
     private VertexType vertexType;
     private transient Path path;
     private Label label;
-    private Color color;
+    private transient Color color;
+    private int colorInt;
     private double width;
 
     private double xl, xr, yu, yd;
 
     private double value;
 
-    public Vertex(Node from, Node to, Point2D fromPoint, Point2D toPoint,
+    public Vertex(Node from, Node to, Point2D.Double fromPoint, Point2D.Double toPoint,
                   Canvas canvas, ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved,
                   double w, Color c, MainController mainController){
         controller = mainController;
@@ -52,7 +53,7 @@ public class Vertex extends Selectable {
         init(arrow, line, isDuplex, isCurved);
         points.addLast(new VertexPoint(toPoint, this));
         points.addFirst(new VertexPoint(fromPoint, this));
-        color = c;
+        setColor(c);
         width = w;
         makePath();
         value = 1.0;
@@ -72,7 +73,7 @@ public class Vertex extends Selectable {
 
         if(from == to){
             double x = (bx + ex)/2, y = (by + ey)/2, w = from.getWidth(), h = from.getHeight();
-            Point2D center = from.getCenter();
+            Point2D.Double center = from.getCenter();
             double cx = center.getX(), cy = center.getY();
             x = cx + (cx > x ? -w : w);
             y = cy + (cy > y ? -h : h);
@@ -152,7 +153,7 @@ public class Vertex extends Selectable {
         controller = vertex.controller;
         init(vertex.arrowType, vertex.lineType, vertex.duplex, vertex.vertexType == VertexType.Curved);
         value = vertex.value;
-        color = vertex.color;
+        setColor(vertex.color);
         width = vertex.width;
 //        makePath();
 
@@ -165,7 +166,11 @@ public class Vertex extends Selectable {
 
     public void setColor(Color color){
         this.color = color;
-        path.setStroke(color);
+        colorInt = (int) (color.getRed() * 0xFF) |
+                ((int) (color.getGreen() * 0xFF)) << 010 |
+                ((int) (color.getBlue() * 0xFF)) << 020 |
+                ((int) (color.getOpacity() * 0xFF)) << 030;
+//        path.setStroke(color);
     }
 
     public Color getColor(){
@@ -187,7 +192,7 @@ public class Vertex extends Selectable {
 
     @Override
     public void translate(double dx, double dy) {
-        points.forEach(point -> point.setPoint(new Point2D(point.getX() + dx, point.getY() + dy)));
+        points.forEach(point -> point.setPoint(new Point2D.Double(point.getX() + dx, point.getY() + dy)));
         VertexPoint startVP = points.getFirst(), stopVP = points.getLast();
         startVP.setPointBounded(startVP.getPoint(), fromNode);
         stopVP.setPointBounded(stopVP.getPoint(), toNode);
@@ -263,7 +268,7 @@ public class Vertex extends Selectable {
         }
     }
 
-    public void move(VertexPoint point, Point2D newPoint){
+    public void move(VertexPoint point, Point2D.Double newPoint){
         ListIterator it = points.listIterator(points.indexOf(point));
         if(!it.hasPrevious())
             point.setPointBounded(newPoint, fromNode);
@@ -372,9 +377,9 @@ public class Vertex extends Selectable {
         super.writeToFile(writer, json, indent, "Vertex");
         int codeFrom = fromNode.hashCode(), codeTo = toNode.hashCode();
 
-        writer.append(ind1 + (json ? "\"from-id\": \"" + codeFrom + "\"\n" +
-                ind1 + "\"to-id\": " + codeTo + "\"\n" + ind1 + "\"is-duplex\": \"" + duplex + "\"\n" + ind + "}\n" :
-                "from-id=\"" + codeFrom + "\" to-id=\"" + codeTo + "\" is-duplex=\"" + duplex + "\" />"
+        writer.append((json ? ",\n" + ind1 + "\"from-id\": \"" + codeFrom + "\",\n" +
+                ind1 + "\"to-id\": \"" + codeTo + "\",\n" + ind1 + "\"is-duplex\": \"" + duplex + "\"\n" + ind + "}\n" :
+                "from-id=\"" + codeFrom + "\" to-id=\"" + codeTo + "\" is-duplex=\"" + duplex + "\" />\n"
                 ));
     }
 
@@ -383,7 +388,7 @@ public class Vertex extends Selectable {
         draw();
     }
 
-    private Point2D getCenterForLabel() {
+    private Point2D.Double getCenterForLabel() {
         int size = points.size();
         ListIterator it = points.listIterator(size/2);
         VertexPoint point = (VertexPoint) it.next();
@@ -397,12 +402,12 @@ public class Vertex extends Selectable {
         }
         x -= 10;
         y -= 10;
-        return new Point2D(x,y);
+        return new Point2D.Double(x, y);
     }
 
     public void translateNode(Node node, double dx, double dy) {
         VertexPoint point = (node == fromNode ? points.getFirst() : points.getLast());
-        Point2D newPoint = new Point2D(point.getX() + dx, point.getY() + dy);
+        Point2D.Double newPoint = new Point2D.Double(point.getX() + dx, point.getY() + dy);
         move(point, newPoint);
     }
 
@@ -468,8 +473,13 @@ public class Vertex extends Selectable {
     @Override
     public void refresh(Project project) {
         super.refresh(project);
-        points.forEach(p -> p.refresh(this));
-        draw();
+        color = Color.rgb(
+                colorInt & 0xFF,
+                (colorInt >>> 010) & 0xFF,
+                (colorInt >>> 020) & 0xFF,
+                (colorInt >>> 030) / 255d);
+////        points.forEach(p -> p.refresh(this));
+////        draw();
     }
 
     public void setFrom(Node node) {
@@ -480,11 +490,11 @@ public class Vertex extends Selectable {
         toNode = node;
     }
 
-    public Point2D getFromPoint() {
+    public Point2D.Double getFromPoint() {
         return points.getFirst().getPoint();
     }
 
-    public Point2D getToPoint() {
+    public Point2D.Double getToPoint() {
         return points.getLast().getPoint();
     }
 
@@ -518,7 +528,7 @@ public class Vertex extends Selectable {
     }
 
     public void moveInteractedPoint(double x, double y, double nx, double ny) {
-        move(interactedPoint(x, y), new Point2D(nx, ny));
+        move(interactedPoint(x, y), new Point2D.Double(nx, ny));
         forceProjectDraw();
     }
 }

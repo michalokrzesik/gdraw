@@ -5,8 +5,9 @@ import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.Vertex;
 import gdraw.graph.vertex.VertexType;
-import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
+
+import java.awt.geom.Point2D;
 
 public class VertexCreation extends Action {
 
@@ -15,7 +16,7 @@ public class VertexCreation extends Action {
         Delete
     }
 
-    private Point2D fromPoint, toPoint;
+    private Point2D.Double fromPoint, toPoint;
     private ArrowType arrowType;
     private LineType lineType;
     private boolean duplex, curved;
@@ -26,7 +27,7 @@ public class VertexCreation extends Action {
     private ActionType type;
 
     private VertexCreation(ActionHelper from,
-                     Node fromNode, Point2D fromPoint, Point2D toPoint, Node toNode,
+                     Node fromNode, Point2D.Double fromPoint, Point2D.Double toPoint, Node toNode,
                      ArrowType arrowType, LineType lineType, boolean duplex, boolean curved, double width, double value, Color color,
                      ActionHelper to) {
         this.from = from; this.to = to;
@@ -70,10 +71,10 @@ public class VertexCreation extends Action {
     }
 
     public static Action applyCreate(ActionHelper undo,
-                             Node fromNode, Point2D fromPoint, Point2D toPoint, Node toNode,
-                             ArrowType arrowType, LineType lineType, boolean duplex, boolean curved,
-                             double width, double value, Color color,
-                             ActionHelper redo) {
+                                     Node fromNode, Point2D.Double fromPoint, Point2D.Double toPoint, Node toNode,
+                                     ArrowType arrowType, LineType lineType, boolean duplex, boolean curved,
+                                     double width, double value, Color color,
+                                     ActionHelper redo) {
         Action action = new VertexCreation(redo,
                 fromNode, fromPoint, toPoint, toNode,
                 arrowType, lineType, duplex, curved, width, value, color,

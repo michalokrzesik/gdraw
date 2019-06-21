@@ -1,11 +1,8 @@
 package gdraw.graph.vertex;
 
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.PathElement;
-import javafx.scene.shape.QuadCurveTo;
 
+import java.awt.geom.Point2D;
 import java.io.Serializable;
 import java.util.LinkedList;
 
@@ -19,7 +16,8 @@ public enum VertexType implements Serializable {
         @Override
         public boolean createMid(Vertex vertex, LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now) {
             if (prev.isHardPoint() && now.isHardPoint()) {
-                VertexPoint mid = new VertexPoint(prev.getPoint().midpoint(now.getPoint()), vertex, false);
+                javafx.geometry.Point2D point = new javafx.geometry.Point2D(prev.getX(), prev.getY()).midpoint(now.getX(), now.getY());
+                VertexPoint mid = new VertexPoint(new Point2D.Double(point.getX(), point.getY()), vertex, false);
                 points.add(points.indexOf(now), mid);
                 return true;
             }
@@ -29,7 +27,7 @@ public enum VertexType implements Serializable {
         @Override
         public void center(VertexPoint prev, VertexPoint mid, VertexPoint next) {
             mid.setPoint(
-                    new Point2D(
+                    new Point2D.Double(
                             (prev.getX() + next.getX())/2,
                             (prev.getY() + next.getY())/2
                     )
@@ -37,17 +35,17 @@ public enum VertexType implements Serializable {
         }
     },
     Curved{
-        private Point2D controlPoint(VertexPoint a, VertexPoint b){
+        private Point2D.Double controlPoint(VertexPoint a, VertexPoint b){
             switch (a.getOrientation()){
                 case HORIZONTAL:
-                    return new Point2D(b.getX(), a.getY());
+                    return new Point2D.Double(b.getX(), a.getY());
                 case VERTICAL:
-                    return new Point2D(a.getX(), b.getY());
+                    return new Point2D.Double(a.getX(), b.getY());
                 case NONE:
                     if (b.getOrientation() == VertexPointOrientation.HORIZONTAL)
-                            return new Point2D(a.getX(), b.getY());
+                            return new Point2D.Double(a.getX(), b.getY());
                     else
-                        return new Point2D(b.getX(), a.getY());
+                        return new Point2D.Double(b.getX(), a.getY());
             }
             return null;
         }
@@ -69,21 +67,21 @@ public enum VertexType implements Serializable {
                         VertexPointOrientation orientation = (prev.getX() == now.getX() ? VertexPointOrientation.VERTICAL : VertexPointOrientation.HORIZONTAL);
                         points.addFirst(
                                 new VertexPoint(
-                                        new Point2D(
+                                        new Point2D.Double(
                                                 (sameX ? prev.getX() : now.getX() - distance/4),
                                                 (sameY ? prev.getY() : now.getY() - distance/4)),
                                         vertex,
                                         false).setOrientation(orientation));
                         points.addFirst(
                                 new VertexPoint(
-                                        new Point2D(
+                                        new Point2D.Double(
                                                 (sameX ? prev.getX() : now.getX() - distance/2),
                                                 (sameY ? prev.getY() : now.getY() - distance/2)),
                                         vertex,
                                         false).setOrientation(orientation));
                         points.addFirst(
                                 new VertexPoint(
-                                        new Point2D(
+                                        new Point2D.Double(
                                                 (sameX ? prev.getX() : prev.getX() + distance/4),
                                                 (sameY ? prev.getY() : prev.getY() + distance/4)),
                                         vertex,
@@ -91,13 +89,13 @@ public enum VertexType implements Serializable {
                         points.addFirst(prev);
                     }
                     else{
-                        prev.setPoint(new Point2D((prev.getX() + now.getX())/2, (prev.getY() + now.getY())/2));
+                        prev.setPoint(new Point2D.Double((prev.getX() + now.getX())/2, (prev.getY() + now.getY())/2));
                         points.remove(now);
                     }
                 }
                 else {
                     VertexPoint mid = new VertexPoint(
-                            new Point2D((prev.getX() + now.getX()) / 2, (prev.getY() + now.getY()) / 2), vertex);
+                            new Point2D.Double((prev.getX() + now.getX()) / 2, (prev.getY() + now.getY()) / 2), vertex);
                     mid.setOrientation((prev.getOrientation() == VertexPointOrientation.HORIZONTAL ? VertexPointOrientation.VERTICAL : VertexPointOrientation.HORIZONTAL));
                     points.add(points.indexOf(now), mid);
                 }
@@ -110,7 +108,7 @@ public enum VertexType implements Serializable {
         public void center(VertexPoint prev, VertexPoint mid, VertexPoint next) {
             boolean midHorizon = mid.getOrientation() == VertexPointOrientation.HORIZONTAL;
             mid.setPoint(
-                    new Point2D(
+                    new Point2D.Double(
                             (midHorizon ? (prev.getX() + next.getX())/2 : mid.getX()),
                             (midHorizon ? mid.getY() : (prev.getY() + next.getY())/2)
                     )

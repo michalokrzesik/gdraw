@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 public abstract class Selectable implements Serializable {
     protected transient MainController controller;
-    private SelectableCreationListener creationListener;
+    private transient SelectableCreationListener creationListener;
     protected transient Canvas canvas;
     protected transient boolean selected;
     protected Label label;
@@ -69,6 +69,7 @@ public abstract class Selectable implements Serializable {
     public void refresh(Project project){
         canvas = project.getCanvas();
         controller = project.getController();
+        if(label != null) label.refresh(project);
     }
 
     public void setCreationListener(SelectableCreationListener listener){
@@ -177,9 +178,10 @@ public abstract class Selectable implements Serializable {
     public void writeToFile(FileWriter writer, boolean json, int indent, String objectName) throws IOException {
         int code = this.hashCode();
         String ind = indent(indent), ind1 = ind + "  ";
-        writer.append(ind + (json ?
-                "{\n" + ind1 + "\"id\": \"" + code + "\"\n" + ind1 + "\"label\": \"" + this.label.getLabel() + "\"\n" :
-                "< " + objectName + " " + "id=\"" + code + "\" " + "label=\"" + this.label.getLabel() + "\" >" ));
+        String toAppend = ind + (json ?
+                "{\n" + ind1 + "\"id\": \"" + code + "\",\n" + ind1 + "\"label\": \"" + getLabel() + "\"" :
+                "< " + objectName + " " + "id=\"" + code + "\" " + "label=\"" + getLabel() + "\" " );
+        writer.append(toAppend);
     }
 
     public String indent(int indent){

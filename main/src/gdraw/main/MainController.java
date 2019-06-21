@@ -24,10 +24,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.awt.image.RenderedImage;
+import java.awt.image.WritableRaster;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Objects;
 
 import gdraw.graph.node.NodeLibrary;
@@ -125,7 +129,7 @@ public class MainController {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Wszystkie pliki", "*"));
         fileChooser.setSelectedExtensionFilter(fileChooser.getExtensionFilters().get(0));
         if(name != null)
-            fileChooser.setInitialFileName(name + fileChooser.getSelectedExtensionFilter().getExtensions().get(0));
+            fileChooser.setInitialFileName(name + fileChooser.getSelectedExtensionFilter().getExtensions().get(0).substring(1));
         return fileChooser;
     }
 
@@ -384,6 +388,7 @@ public class MainController {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("graphDRAW format","*.gdf"));
         fileChooser.setInitialFileName(name + ".gdf");
         project.setFile(fileChooser.showSaveDialog(null));
+        saveProject(project);
     }
 
     private void closeProject(Project project) {
@@ -408,18 +413,24 @@ public class MainController {
         System.exit(0);
     }
 
+
     public void exportToImage(ActionEvent actionEvent) {
         if(activeProject == null) return;;
         File file = ImageFileChooser("Eksportuj graf", activeProject.getName()).showSaveDialog(null);
         if(file != null) {
-            String extension = file.getName().substring(file.getName().lastIndexOf("."));
+            String extension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+            System.out.println("Exporting to file " + file.getName() + " with extension " + extension);
             toSnapshot = true;
             activeProject.draw();
             WritableImage snapshot = activeProject.snapshot();
             toSnapshot = false;
             try {
-                RenderedImage renderedImage = SwingFXUtils.fromFXImage(snapshot,null);
-                ImageIO.write(renderedImage, extension, file);
+                BufferedImage bufferedImage = new BufferedImage((int) snapshot.getWidth(), (int) snapshot.getHeight(),
+                        (extension.equalsIgnoreCase("jpg") || extension.equalsIgnoreCase("jpeg") ?
+                                BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB));
+                bufferedImage.getGraphics().drawImage(SwingFXUtils.fromFXImage(snapshot, null), 0, 0, null);
+
+                ImageIO.write(bufferedImage, extension, file);
             } catch (IOException e) {
                 e.printStackTrace();
             }

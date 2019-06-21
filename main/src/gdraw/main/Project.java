@@ -6,8 +6,7 @@ import gdraw.graph.util.action.*;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import javafx.collections.ObservableList;
-import javafx.geometry.Point2D;
-import javafx.scene.SnapshotParameters;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
@@ -19,6 +18,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class Project implements Serializable {
 //    private transient Pane pane;
     private transient Canvas canvas;
     private transient ScrollPane properties;
-    private DragModel dragModel;
+    private transient DragModel dragModel;
 
     private transient ActionHelper undo;
     private transient ActionHelper redo;
@@ -106,7 +106,9 @@ public class Project implements Serializable {
         canvas = setCanvas(background.getWidth(), background.getHeight());
         background.refresh(this);
 
+
         setNodes();
+        draw();
     }
 
     private void setNodes() {
@@ -190,7 +192,9 @@ public class Project implements Serializable {
     }
 
     public WritableImage snapshot() {
-        return canvas.snapshot(new SnapshotParameters(), null);
+        WritableImage image = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
+        canvas.snapshot(null, image);
+        return image;
     }
 
     public void select(Selectable item, boolean ctrlPressed) {
@@ -333,7 +337,7 @@ public class Project implements Serializable {
 
 
         Node groupNode = new Node(
-                new Point2D((minMaxs.get(0) + minMaxs.get(1))/2, (minMaxs.get(2) + minMaxs.get(3))/2),
+                new Point2D.Double((minMaxs.get(0) + minMaxs.get(1)) / 2, (minMaxs.get(2) + minMaxs.get(3)) / 2),
                 new Image("standardGroup.png"),
                 canvas, true, controller);
         parent.getValue().groupNodes(groupNode);
@@ -420,7 +424,7 @@ public class Project implements Serializable {
             if(graphObjects != null) graphObjects.forEach(o -> {
                 if(o.isNode()) ((Node) o).setParent();
             });
-            boolean json = extension.equalsIgnoreCase("json");
+            boolean json = extension.equalsIgnoreCase(".json");
 
             writer.append(json ?
                             ("{ \"" + name + "\": {\n") :
@@ -429,6 +433,9 @@ public class Project implements Serializable {
             background.writeToFile(writer, json, 1);
 
             writer.append(json ? "}}" : "< /Graph >");
+
+            writer.flush();
+            writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

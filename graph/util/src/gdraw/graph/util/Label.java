@@ -1,25 +1,24 @@
 package gdraw.graph.util;
 
-import javafx.geometry.Point2D;
-
+import gdraw.main.Project;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import java.awt.geom.Point2D;
 import java.io.Serializable;
-import java.util.Collections;
 
 public class Label implements Serializable {
     private String label;
-    private Point2D upperLeft;
-    private Canvas canvas;
+    private Point2D.Double upperLeft;
+    private transient Canvas canvas;
 //    private javafx.scene.control.Label object;
 
     public Label(String label, Canvas canvas){
-        this(label, canvas, new Point2D(0,0));
+        this(label, canvas, new Point2D.Double(0, 0));
     }
 
-    public Label(String label, Canvas canvas, Point2D point){
+    public Label(String label, Canvas canvas, Point2D.Double point){
         this.label = label;
         this.canvas = canvas;
         upperLeft = point;
@@ -45,12 +44,16 @@ public class Label implements Serializable {
         return label;
     }
 
-    public void setUpperLeft(Point2D point){
+    public void setUpperLeft(Point2D.Double point){
         upperLeft = point;
     }
 
-    public Point2D getUpperLeft(){
+    public Point2D.Double getUpperLeft(){
         return upperLeft;
+    }
+
+    public void refresh(Project project) {
+        canvas = project.getCanvas();
     }
 
 //    public void hide() {

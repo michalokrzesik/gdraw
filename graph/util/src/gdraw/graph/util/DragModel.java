@@ -9,7 +9,6 @@ import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.VertexPoint;
 import gdraw.main.Project;
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
@@ -17,6 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 
+import java.awt.geom.Point2D;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +30,8 @@ public enum DragModel implements Serializable {
         @Override
         public void pressed(Project project, MouseEvent e, Selectable item) {
                 double ex = e.getX(), ey = e.getY();
-                Point2D point = //item.isNode() ? ((Node) item).getCenter() :
-                         new Point2D(ex, ey);
+            Point2D.Double point = //item.isNode() ? ((Node) item).getCenter() :
+                         new Point2D.Double(ex, ey);
                 x = point.getX();
                 y = point.getY();
                 sx = x; sy = y;
@@ -98,7 +98,7 @@ public enum DragModel implements Serializable {
         @Override
         public void dragged(Project project, MouseEvent e, Selectable item) {
             project.draw();
-            stop.setPoint(new Point2D(e.getX(), e.getY()));
+            stop.setPoint(new Point2D.Double(e.getX(), e.getY()));
             if(item.isNode()) {
                 to = (Node) item;
                 gdraw.graph.vertex.Vertex.draw(from, start, stop, to, canvas);

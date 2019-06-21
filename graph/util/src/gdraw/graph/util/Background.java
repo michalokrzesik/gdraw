@@ -6,16 +6,15 @@ import gdraw.main.MainController;
 
 import gdraw.main.Project;
 import javafx.collections.ObservableList;
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.TreeItem;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+import java.awt.geom.Point2D;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -24,13 +23,14 @@ public class Background extends Node {
     private transient Rectangle selection;
 
     public Background(MainController mainController, Image image, Canvas canvas, double w, double h){
-        this(new Point2D(w/2, h/2), image, canvas, mainController);
+        this(new Point2D.Double(w/2, h/2), image, canvas, mainController);
         treeItem = new TreeItem<>(this);
         setCreationListener(new SelectableCreationListener(this));
         width = w;
         height = h;
         this.canvas = canvas;
         makeImageView();
+        draw();
     }
 
     @Override
@@ -68,8 +68,8 @@ public class Background extends Node {
 //        imageView.toBack();
 //        pane.setLayoutX(0);
 //        pane.setLayoutY(0);
-
-        draw();
+//
+//        draw();
         this.treeItem = new TreeItem<>(this);
         ImageView graphic = new ImageView(image);
         graphic.setFitWidth(10);
@@ -80,7 +80,7 @@ public class Background extends Node {
 
     }
 
-    private Background(Point2D center, Image image, Canvas canvas, MainController mainController) {
+    private Background(Point2D.Double center, Image image, Canvas canvas, MainController mainController) {
         super(center, image, canvas, mainController, false);
         setCreationListener(new SelectableCreationListener(this));
     }
