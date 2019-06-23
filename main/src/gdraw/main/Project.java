@@ -1,10 +1,12 @@
 package gdraw.main;
 
+import gdraw.graph.node.Background;
 import gdraw.graph.node.Node;
 import gdraw.graph.util.*;
 import gdraw.graph.util.action.*;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
+import gdraw.main.gui.Hierarchy;
 import javafx.collections.ObservableList;
 
 import javafx.scene.canvas.Canvas;
@@ -28,11 +30,14 @@ import java.util.ListIterator;
 
 public class Project implements Serializable {
 
+    /* Kod klasy */
+
+
     private transient File file;
     private transient Hierarchy nodes;
     private transient ScrollPane hierarchy;
     private Background background;
-    private ArrayList<Selectable> graphObjects;
+    private transient ArrayList<Selectable> graphObjects;
     private transient ArrayList<Selectable> selected;
     private transient Tab tab;
     private String name;
@@ -102,6 +107,7 @@ public class Project implements Serializable {
         properties = pScrollPane;
         hierarchy = hScrollPane;
         selected = new ArrayList<>();
+        graphObjects = new ArrayList<>();
         this.file = file;
         canvas = setCanvas(background.getWidth(), background.getHeight());
         background.refresh(this);
@@ -115,6 +121,7 @@ public class Project implements Serializable {
     private void setNodes() {
         nodes = new Hierarchy();
         nodes.setEditable(true);
+        nodes.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         nodes.setRoot(background.getTreeItem());
         nodes.getSelectionModel().selectedItemProperty()
                 .addListener((observableValue, oldTreeItem, newTreeItem) -> checkSelect());
@@ -342,7 +349,7 @@ public class Project implements Serializable {
                 new Image("standardGroup.png"),
                 canvas, true, controller);
         parent.getValue().groupNodes(groupNode);
-        groupNode.setCreationListener(new SelectableCreationListener(groupNode));
+        groupNode.setReference(new SelectableReference(groupNode));
 
         actionHolder.add(GroupManagement.applyGroup(undo, groupNode, parent, nodes, redo));
 

@@ -1,4 +1,4 @@
-package gdraw.graph.util;
+package gdraw.main.gui;
 
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;

@@ -18,13 +18,13 @@ public class NodeCreation extends MultiAction {
 
     private NodeCreation(ActionHelper from, Node object, ActionHelper to) {
         super(from, to);
-        node = object.getCreationListener();
+        node = object.getReference();
         type = ActionType.Delete;
     }
 
     private NodeCreation(ActionHelper from, Node object, MultiAction requestManager, ActionHelper to) {
         super(from, to);
-        parent = from.getController().getProject().getBackground().getCreationListener();
+        parent = from.getController().getProject().getBackground().getReference();
         getInfoFromNode(object);
         canvas = from.getController().getProject().getCanvas();
         type = ActionType.Create;
@@ -39,7 +39,7 @@ public class NodeCreation extends MultiAction {
         canvas = project.getCanvas();
         isCollapsed = false; isGroupNodes = false;
         label = "";
-        parent = project.getBackground().getCreationListener();
+        parent = project.getBackground().getReference();
         controller = project.getController();
         type = ActionType.Create;
         node = null;
@@ -50,14 +50,14 @@ public class NodeCreation extends MultiAction {
         Delete
     }
 
-    private SelectableCreationListener node;
+    private SelectableReference node;
     private Point2D.Double center;
     private Image image;
     private Canvas canvas;
-    private boolean isGroupNodes, isCollapsed;
+    private boolean isGroupNodes, isCollapsed, hidden;
     private double width, height, widthCollapsed, heightCollapsed;
     private String label;
-    private SelectableCreationListener parent;
+    private SelectableReference parent;
     private MainController controller;
 
     private ActionType type;
@@ -103,10 +103,12 @@ public class NodeCreation extends MultiAction {
                 object.setLabel(label);
                 ((Node) parent.getObject()).groupNodes(object);
 
-                if(node == null) node = new SelectableCreationListener(object);
+                if(node == null) node = new SelectableReference(object);
                 else node.setObject(object);
 
                 super.action();
+
+                object.hide(hidden);
 
                 type = ActionType.Delete;
                 return;
@@ -141,9 +143,9 @@ public class NodeCreation extends MultiAction {
         width = object.getWidth(false); height = object.getHeight(false);
         widthCollapsed = object.getWidth(true); heightCollapsed = object.getHeight(true);
         label = object.getLabel();
+        hidden = object.hidden;
         if(parent == null)
-            parent = object.getTreeItem().getParent().getValue().getCreationListener();
+            parent = object.getTreeItem().getParent().getValue().getReference();
         controller = object.getController();
     }
-
 }

@@ -11,5 +11,6 @@
     <orderEntry type="module" module-name="vertex" exported="" />
     <orderEntry type="module" module-name="util" exported="" />
     <orderEntry type="module" module-name="action" exported="" />
+    <orderEntry type="module" module-name="gui" />
   </component>
 </module>

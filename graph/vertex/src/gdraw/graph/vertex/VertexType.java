@@ -35,24 +35,9 @@ public enum VertexType implements Serializable {
         }
     },
     Curved{
-        private Point2D.Double controlPoint(VertexPoint a, VertexPoint b){
-            switch (a.getOrientation()){
-                case HORIZONTAL:
-                    return new Point2D.Double(b.getX(), a.getY());
-                case VERTICAL:
-                    return new Point2D.Double(a.getX(), b.getY());
-                case NONE:
-                    if (b.getOrientation() == VertexPointOrientation.HORIZONTAL)
-                            return new Point2D.Double(a.getX(), b.getY());
-                    else
-                        return new Point2D.Double(b.getX(), a.getY());
-            }
-            return null;
-        }
-
         @Override
         public void newElement(GraphicsContext gc, VertexPoint a, VertexPoint b) {
-            Point2D c = controlPoint(a, b);
+            Point2D c = VertexType.controlPoint(a, b);
             gc.quadraticCurveTo(c.getX(), c.getY(), b.getX(), b.getY());
         }
 
@@ -122,4 +107,18 @@ public enum VertexType implements Serializable {
     public abstract boolean createMid(Vertex vertex, LinkedList<VertexPoint> points, VertexPoint prev, VertexPoint now);
 
     public abstract void center(VertexPoint prev, VertexPoint mid, VertexPoint next);
+
+    public static Point2D.Double controlPoint(VertexPoint a, VertexPoint b) {
+        switch (a.getOrientation()){
+            case HORIZONTAL:
+                return new Point2D.Double(b.getX(), a.getY());
+            case VERTICAL:
+                return new Point2D.Double(a.getX(), b.getY());
+            default:
+                if (b.getOrientation() == VertexPointOrientation.HORIZONTAL)
+                    return new Point2D.Double(a.getX(), b.getY());
+                else
+                    return new Point2D.Double(b.getX(), a.getY());
+        }
+    }
 }

@@ -3,13 +3,13 @@ package gdraw.graph.util.action;
 import gdraw.graph.node.Node;
 
 public class NodeChangeSize extends Action {
-    private SelectableCreationListener listener;
+    private SelectableReference reference;
     private double dw, dh;
 
     private NodeChangeSize(ActionHelper from, Node node, double dw, double dh, ActionHelper to) {
         this.from = to;
         this.to = from;
-        this.listener = node.getCreationListener();
+        this.reference = node.getReference();
         this.dw = dw;
         this.dh = dh;
     }
@@ -22,7 +22,7 @@ public class NodeChangeSize extends Action {
 
     @Override
     public void action() {
-        Node node = (Node) listener.getObject();
+        Node node = (Node) reference.getObject();
         double w = node.getWidth() + dw, h = node.getHeight() + dh;
         dw *= -1;
         dh *= -1;

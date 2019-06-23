@@ -48,10 +48,12 @@ public class Node extends Selectable {
     protected double widthCollapsed;
     protected double heightCollapsed;
     private transient Circle[] circles;
-    private transient boolean hidden;
+    public transient boolean hidden;
     private Node parent;
 
     protected transient TreeItem<Node> treeItem;
+
+    /* Kod klasy */
 
     public Node(Point2D.Double center, Image image, Canvas canvas, MainController mainController){
         this(center, image, canvas, mainController, true);
@@ -219,9 +221,10 @@ public class Node extends Selectable {
         });
     }
 
+    @Override
     public void writeToFile(FileWriter writer, boolean json, int indent) throws IOException {
         String ind = indent(indent), ind1 = ind + "  ";
-        super.writeToFile(writer, json, indent, "Node");
+        super.writeToFile(writer, json, indent);
         if(!json) writer.append(">\n");
 
         if(subNodes != null && !subNodes.isEmpty()){
@@ -286,17 +289,17 @@ public class Node extends Selectable {
         vertices.add(vertex);
         return vertex;
     }
-
+{}
     public void groupNodes(){
         isGroupNodes = true;
         if(subNodes == null) subNodes = new ArrayList<>();
     }
 
-    public void groupNodes(ArrayList<Node> nodes){
-        groupNodes();
-        for(Node node : nodes)
-            groupNodes(node);
-    }
+//    public void groupNodes(ArrayList<Node> nodes){
+//        groupNodes();
+//        for(Node node : nodes)
+//            groupNodes(node);
+//    }
 
     public void groupNodes(Node node){
         groupNodes();
@@ -365,15 +368,13 @@ public class Node extends Selectable {
 
     public void changeGroupToNode() {
         unGroup(subNodes);
+        isCollapsed = false;
+        isGroupNodes = false;
     }
 
     public void unGroup(ArrayList<Node> nodes) {
         for (Node node : nodes)
             unGroup(node);
-        if (subNodes.isEmpty()) {
-            subNodes = null;
-            isGroupNodes = false;
-        }
     }
 
     public void unGroup(Node node) {
@@ -478,15 +479,15 @@ public class Node extends Selectable {
         if(label != null) label.draw();
     }
 
-//    private void hide() {
-//        if(!hidden) {
-//            if(label != null) label.hide();
-//            imageView.toBack();
-//            if(!subNodes.isEmpty())
-//                subNodes.forEach(Node::hide);
-//            hidden = true;
-//        }
-//    }
+    public void hide(boolean hide) {
+        if (label != null) label.hide(hide);
+        if (!subNodes.isEmpty())
+            subNodes.forEach(n -> n.hide(isCollapsed && hide));
+        if(!vertices.isEmpty())
+            vertices.forEach(v -> v.hide(hide));
+        hidden = hide;
+    }
+
 
     @Override
     public void translate(double dx, double dy){
@@ -544,6 +545,7 @@ public class Node extends Selectable {
     @Override
     public void refresh(Project project) {
         superRefresh(project);
+        project.newObject(this);
 //        makeImageView();
         selected = false;
         treeItem = new TreeItem<>(this);
@@ -567,6 +569,7 @@ public class Node extends Selectable {
 
     @Override
     public boolean checkSelect(double x, double y) {
+        if(hidden) return false;
         double xc = center.getX(), yc = center.getY(), w = getWidth()/2, h = getHeight()/2;
         return (xc - w <= x) && (xc + w >= x) && (yc - h <= y) && (yc + h >= y);
     }
@@ -582,6 +585,7 @@ public class Node extends Selectable {
 
     public void setCollapsed(boolean isCollapsed) {
         this.isCollapsed = isCollapsed;
+        if(subNodes != null && !subNodes.isEmpty()) subNodes.forEach(n -> n.hide(isCollapsed));
         draw();
     }
 

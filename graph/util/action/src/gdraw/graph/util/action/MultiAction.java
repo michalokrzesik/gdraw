@@ -1,8 +1,6 @@
 package gdraw.graph.util.action;
 
 import gdraw.graph.node.Node;
-import gdraw.graph.util.MIandButtonPair;
-import gdraw.graph.util.Request;
 import gdraw.graph.util.Selectable;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
@@ -21,7 +19,7 @@ public class MultiAction extends Action {
 
     @Override
     public void action() {
-        while(!multiFrom.isEmpty()) multiFrom.pop();
+        while (!multiFrom.isEmpty()) multiFrom.pop();
         changeMultiStacks();
         changeStacks();
     }
@@ -124,7 +122,7 @@ public class MultiAction extends Action {
     }
 
     public void request(boolean isFrom, Node node, Vertex vertex, Node oldNode) {
-       requestedVertices.add(new Request(null, isFrom, node, vertex));
+       requestedVertices.add(new Request(isFrom, node, vertex));
     }
 
     public Node request(boolean isFrom, Vertex vertex){

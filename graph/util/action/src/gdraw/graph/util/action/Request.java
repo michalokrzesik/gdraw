@@ -1,17 +1,16 @@
-package gdraw.graph.util;
+package gdraw.graph.util.action;
 
 import gdraw.graph.node.Node;
 import gdraw.graph.vertex.Vertex;
-import gdraw.main.Project;
 
 public class Request {
     private boolean isFrom;
     private Node node;
     private Vertex vertex;
-    private Project project;
+//    private Project project;
 
-    public Request(Project project, boolean isFrom, Node node, Vertex vertex){
-        this.project = project;
+    public Request(boolean isFrom, Node node, Vertex vertex){
+//        this.project = project;
         this.isFrom = isFrom;
         this.node = node;
         this.vertex = vertex;
@@ -46,9 +45,7 @@ public class Request {
         return vertex == oldVertex;
     }
 
-    public boolean checkProject(Project project) {
-        return this.project == project;
-    }
+//    public boolean checkProject(Project project) { return this.project == project; }
 
     public Node getNode() {
         return node;

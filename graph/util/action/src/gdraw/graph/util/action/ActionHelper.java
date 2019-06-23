@@ -1,6 +1,5 @@
 package gdraw.graph.util.action;
 
-import gdraw.graph.util.MIandButtonPair;
 import gdraw.main.MainController;
 
 import java.util.Stack;

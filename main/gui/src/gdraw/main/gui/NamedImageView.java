@@ -1,6 +1,5 @@
-package gdraw.graph.node;
+package gdraw.main.gui;
 
-import javafx.collections.FXCollections;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.*;
@@ -14,13 +13,12 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 
-public class ImageViewWithName extends ImageView {
+public class NamedImageView extends ImageView {
     private String name;
     private NodeLibrary parent;
 
-    public ImageViewWithName(NodeLibrary parent, String name, Image image) {
+    public NamedImageView(NodeLibrary parent, String name, Image image) {
         super(image);
         setFitHeight(100);
         setFitWidth(100);
@@ -33,7 +31,6 @@ public class ImageViewWithName extends ImageView {
             select();
             parent.getOnContextMenuRequested().handle(event);
         });
-
     }
 
     public void contextMenu(ContextMenu contextMenu){

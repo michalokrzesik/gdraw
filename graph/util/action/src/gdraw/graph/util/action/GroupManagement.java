@@ -2,19 +2,11 @@ package gdraw.graph.util.action;
 
 import gdraw.graph.node.Node;
 import gdraw.graph.util.Selectable;
-import gdraw.graph.vertex.ArrowType;
-import gdraw.graph.vertex.LineType;
-import gdraw.graph.vertex.Vertex;
-import javafx.geometry.Point2D;
 import javafx.scene.control.TreeItem;
-import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 
 public class GroupManagement extends MultiAction {
-
-
 
     private enum ActionType{
         Multi,
@@ -24,11 +16,11 @@ public class GroupManagement extends MultiAction {
     }
 
     private ActionType type;
-    private SelectableCreationListener node, parent;
+    private SelectableReference node, parent;
 
     private GroupManagement(ActionHelper from, Node node, ActionHelper to) {
         super(from, to);
-        this.node = node.getCreationListener();
+        this.node = node.getReference();
         type = ActionType.ToGroup;
     }
 
@@ -39,8 +31,8 @@ public class GroupManagement extends MultiAction {
 
     private GroupManagement(ActionHelper from, Node node, Node newParent, ActionHelper to) {
         super(from, to);
-        this.node = node.getCreationListener();
-        this.parent = newParent.getCreationListener();
+        this.node = node.getReference();
+        this.parent = newParent.getReference();
         type = ActionType.Group;
     }
 
@@ -69,7 +61,7 @@ public class GroupManagement extends MultiAction {
         ActionHelper multiFrom = ma.multiFrom;
         ActionHelper multiTo = ma.multiTo;
 
-        SelectableCreationListener listener = node.getCreationListener();
+        SelectableReference listener = node.getReference();
 
         ma.actionHolder.add(NodeCreation.applyCreate(multiFrom, node, multiTo));
 
@@ -155,7 +147,7 @@ public class GroupManagement extends MultiAction {
                 break;
             }
             case Group: {
-                SelectableCreationListener oldParent = ((Node) node.getObject()).getTreeItem().getParent().getValue().getCreationListener();
+                SelectableReference oldParent = ((Node) node.getObject()).getTreeItem().getParent().getValue().getReference();
                 ((Node) parent.getObject()).groupNodes((Node) node.getObject());
                 parent = oldParent;
                 break;

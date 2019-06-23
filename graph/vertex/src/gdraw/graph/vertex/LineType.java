@@ -46,7 +46,7 @@ public enum LineType implements Serializable {
 //            path.getStrokeDashArray().clear();
 //            path.getStrokeDashArray().addAll(path.getStrokeWidth());
             gc.setLineWidth(width);
-            gc.setLineDashes(width);
+            gc.setLineDashes(width, width);
             gc.setLineDashOffset(width);
         }
 

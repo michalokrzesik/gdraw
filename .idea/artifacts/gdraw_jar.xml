@@ -7,6 +7,7 @@
       <element id="module-output" name="main" />
       <element id="module-output" name="vertex" />
       <element id="module-output" name="util" />
+      <element id="module-output" name="gui" />
     </root>
   </artifact>
 </component>

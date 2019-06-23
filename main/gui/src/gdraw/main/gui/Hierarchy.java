@@ -1,4 +1,4 @@
-package gdraw.graph.util;
+package gdraw.main.gui;
 
 import gdraw.graph.node.Node;
 import javafx.scene.control.TreeView;

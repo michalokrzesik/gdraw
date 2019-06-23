@@ -9,7 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 
 public class VertexEdit extends Action {
-    private SelectableCreationListener vertex;
+    private SelectableReference vertex;
     private LineType lineType;
     private ArrowType arrowType;
     private double width, value;
@@ -18,7 +18,7 @@ public class VertexEdit extends Action {
     private VertexEdit(ActionHelper from, Vertex vertex, LineType lineType, ArrowType arrowType, double w, Color c, double v, ActionHelper to) {
         this.from = from;
         this.to = to;
-        this.vertex = vertex.getCreationListener();
+        this.vertex = vertex.getReference();
         this.lineType = lineType;
         this.arrowType = arrowType;
         width = w;

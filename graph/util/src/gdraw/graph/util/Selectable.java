@@ -1,7 +1,7 @@
 package gdraw.graph.util;
 
 import gdraw.graph.node.Node;
-import gdraw.graph.util.action.SelectableCreationListener;
+import gdraw.graph.util.action.SelectableReference;
 import gdraw.graph.vertex.Vertex;
 import gdraw.main.MainController;
 import gdraw.main.Project;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 public abstract class Selectable implements Serializable {
     protected transient MainController controller;
-    private transient SelectableCreationListener creationListener;
+    private transient SelectableReference reference;
     protected transient Canvas canvas;
     protected transient boolean selected;
     protected Label label;
@@ -44,21 +44,13 @@ public abstract class Selectable implements Serializable {
         controller.select(this, false);
     }
 
-    protected void setSelected(MouseEvent e) {
-        controller.select(this, e.isControlDown());
-    }
+//    protected void setSelected(MouseEvent e) {  controller.select(this, e.isControlDown()); }
 
-    protected void onMousePressed(MouseEvent e){
-        controller.onMousePressed(e, this);
-    }
+//    protected void onMousePressed(MouseEvent e){  controller.onMousePressed(e, this); }
 
-    protected void onMouseReleased(MouseEvent e){
-        controller.onMouseReleased(e, this);
-    }
+//    protected void onMouseReleased(MouseEvent e){  controller.onMouseReleased(e, this);}
 
-    protected void onMouseDragged(MouseEvent e){
-        controller.onMouseDragged(e, this);
-    }
+//    protected void onMouseDragged(MouseEvent e){ controller.onMouseDragged(e, this); }
 
     public abstract Selectable copy();
 
@@ -72,13 +64,13 @@ public abstract class Selectable implements Serializable {
         if(label != null) label.refresh(project);
     }
 
-    public void setCreationListener(SelectableCreationListener listener){
-        creationListener = listener;
+    public void setReference(SelectableReference listener){
+        reference = listener;
     }
 
-    public SelectableCreationListener getCreationListener(){
-        if(creationListener == null) creationListener = new SelectableCreationListener(this);
-        return creationListener;
+    public SelectableReference getReference(){
+        if(reference == null) reference = new SelectableReference(this);
+        return reference;
     }
 
     public String getLabel(){
@@ -171,13 +163,12 @@ public abstract class Selectable implements Serializable {
         controller.forceDraw();
     }
 
-    public void setController(MainController controller) {
-        this.controller = controller;
-    }
+//    public void setController(MainController controller) { this.controller = controller; }
 
-    public void writeToFile(FileWriter writer, boolean json, int indent, String objectName) throws IOException {
+    public void writeToFile(FileWriter writer, boolean json, int indent) throws IOException {
         int code = this.hashCode();
-        String ind = indent(indent), ind1 = ind + "  ";
+        String objectName = isNode() ? "Node" : "Vertex",
+                ind = indent(indent), ind1 = ind + "  ";
         String toAppend = ind + (json ?
                 "{\n" + ind1 + "\"id\": \"" + code + "\",\n" + ind1 + "\"label\": \"" + getLabel() + "\"" :
                 "< " + objectName + " " + "id=\"" + code + "\" " + "label=\"" + getLabel() + "\" " );

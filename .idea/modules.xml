@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/graph/util/action/action.iml" filepath="$PROJECT_DIR$/graph/util/action/action.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/gdraw.iml" filepath="$PROJECT_DIR$/.idea/gdraw.iml" />
       <module fileurl="file://$PROJECT_DIR$/graph/graph.iml" filepath="$PROJECT_DIR$/graph/graph.iml" />
+      <module fileurl="file://$PROJECT_DIR$/main/gui.iml" filepath="$PROJECT_DIR$/main/gui.iml" />
       <module fileurl="file://$PROJECT_DIR$/main/main.iml" filepath="$PROJECT_DIR$/main/main.iml" />
       <module fileurl="file://$PROJECT_DIR$/graph/node/node.iml" filepath="$PROJECT_DIR$/graph/node/node.iml" />
       <module fileurl="file://$PROJECT_DIR$/graph/util/util.iml" filepath="$PROJECT_DIR$/graph/util/util.iml" />

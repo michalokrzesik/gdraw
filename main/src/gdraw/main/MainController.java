@@ -2,9 +2,12 @@ package gdraw.main;
 
 import gdraw.graph.node.Node;
 import gdraw.graph.util.*;
+import gdraw.graph.util.action.MIandButtonPair;
+import gdraw.graph.util.action.Request;
 import gdraw.graph.vertex.ArrowType;
 import gdraw.graph.vertex.LineType;
 import gdraw.graph.vertex.Vertex;
+import gdraw.main.gui.LibraryPane;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -19,23 +22,17 @@ import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.RenderedImage;
-import java.awt.image.WritableRaster;
 import java.io.*;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Objects;
 
-import gdraw.graph.node.NodeLibrary;
+import gdraw.main.gui.NodeLibrary;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -135,7 +132,7 @@ public class MainController {
     }
 
 
-    public void addNodeLibrary(ActionEvent actionEvent) throws URISyntaxException {
+    public void addNodeLibrary(ActionEvent actionEvent) {
         File path = (new FileChooser().showOpenDialog(null));
         if(path == null) return;
 
@@ -148,8 +145,6 @@ public class MainController {
     public void addNode(ActionEvent actionEvent){
         ((NodeLibrary)nodeLibraryAccordion.getExpandedPane()).toGraph();
     }
-
-
 
     public void addNode(Image image) {
         if(activeProject != null) activeProject.addNode(image);
@@ -169,17 +164,11 @@ public class MainController {
 
     public Tab tabForProject(Project project){
 
-        //żeby canvas był na środku
-        BorderPane borderPane = new BorderPane();
-        borderPane.setCenter(project.getCanvas());
-
-        ScrollPane scrollPane = new ScrollPane(borderPane);
+        ScrollPane scrollPane = new ScrollPane(project.getCanvas());
         scrollPane.setStyle("-fx-background-color: #FDF5E6; " +
                 "-fx-border-color: #FDF5E6;");
         project.getCanvas().setStyle("-fx-background-color: #FDF5E6; " +
                 "-fx-border-color: #FDF5E6;");
-
-
 
         Tab tab = new Tab(project.getName());
         tab.setContent(scrollPane);
@@ -477,7 +466,6 @@ public class MainController {
         if(activeProject != null) activeProject.undo();
     }
 
-
     public void redo(ActionEvent actionEvent) {
         if(activeProject != null) activeProject.redo();
     }
@@ -496,7 +484,7 @@ public class MainController {
                 request = r;
                 break;
             }
-        if(request == null) requestedVertices.add(new Request(activeProject, isFrom, node, vertex));
+        if(request == null) requestedVertices.add(new Request(isFrom, node, vertex));
         else {
             request.request(node);
             requestedNodes.remove(request);
@@ -510,7 +498,7 @@ public class MainController {
                 request = r;
                 break;
             }
-        if(request == null) requestedNodes.add(new Request(activeProject, isFrom, node, vertex));
+        if(request == null) requestedNodes.add(new Request(isFrom, node, vertex));
         else {
             request.request(vertex);
             requestedVertices.remove(request);
@@ -652,13 +640,7 @@ public class MainController {
         });
 
         MenuItem addNodeLibrary = new MenuItem("Dodaj bibliotekę węzłów");
-        addNodeLibrary.setOnAction(actionEvent -> {
-            try {
-                addNodeLibrary(actionEvent);
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
-        });
+        addNodeLibrary.setOnAction(this::addNodeLibrary);
 
         contextMenu.getItems().addAll(addNodeToActiveLibrary, addNodeLibrary);
 
@@ -700,7 +682,7 @@ public class MainController {
         gridPane.getChildren().addAll(label, cancel);
 
         GridPane.setConstraints(label, 0, 0, GridPane.REMAINING, 1);
-        GridPane.setConstraints(cancel, 10, 2, GridPane.REMAINING, 1);
+        GridPane.setConstraints(cancel, 12, 2, GridPane.REMAINING, 1);
 
         gridPane.setAlignment(Pos.CENTER);
 

@@ -1,4 +1,4 @@
-package gdraw.graph.util;
+package gdraw.graph.util.action;
 
 import gdraw.main.MainController;
 import javafx.scene.control.Button;

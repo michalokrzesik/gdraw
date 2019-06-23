@@ -19,10 +19,10 @@ public class VertexCreation extends Action {
     private Point2D.Double fromPoint, toPoint;
     private ArrowType arrowType;
     private LineType lineType;
-    private boolean duplex, curved;
+    private boolean duplex, curved, hidden;
     private double width, value;
     private Color color;
-    private SelectableCreationListener vertex, fromNode, toNode;
+    private SelectableReference vertex, fromNode, toNode;
 
     private ActionType type;
 
@@ -31,8 +31,8 @@ public class VertexCreation extends Action {
                      ArrowType arrowType, LineType lineType, boolean duplex, boolean curved, double width, double value, Color color,
                      ActionHelper to) {
         this.from = from; this.to = to;
-        this.fromNode = fromNode.getCreationListener(); this.fromPoint = fromPoint;
-        this.toNode = toNode.getCreationListener(); this.toPoint = toPoint;
+        this.fromNode = fromNode.getReference(); this.fromPoint = fromPoint;
+        this.toNode = toNode.getReference(); this.toPoint = toPoint;
         this.arrowType = arrowType; this.lineType = lineType; this.duplex = duplex; this.curved = curved;
         this.width = width; this.value = value; this.color = color;
         this.type = ActionType.Create;
@@ -41,9 +41,9 @@ public class VertexCreation extends Action {
 
     private VertexCreation(ActionHelper from, Vertex vertex, ActionHelper to){
         this.from = from; this.to = to;
-        this.vertex = vertex.getCreationListener();
-        fromNode = vertex.getFromNode().getCreationListener();
-        toNode = vertex.getToNode().getCreationListener();
+        this.vertex = vertex.getReference();
+        fromNode = vertex.getFromNode().getReference();
+        toNode = vertex.getToNode().getReference();
         getInfoFromVertex(vertex);
         type = ActionType.Delete;
 
@@ -56,6 +56,7 @@ public class VertexCreation extends Action {
         lineType = vertex.getLineType();
         duplex = vertex.isDuplex();
         curved = vertex.getVertexType() == VertexType.Curved;
+        hidden = vertex.hidden;
         value = vertex.getValue();
         width = vertex.getLineWidth();
         color = vertex.getColor();
@@ -65,8 +66,8 @@ public class VertexCreation extends Action {
     private VertexCreation(ActionHelper from, Vertex vertex, MultiAction requestManager, ActionHelper to) {
         this.from = from; this.to = to;
         getInfoFromVertex(vertex);
-        fromNode = requestManager.request(true, vertex).getCreationListener();
-        toNode = requestManager.request(false, vertex).getCreationListener();
+        fromNode = requestManager.request(true, vertex).getReference();
+        toNode = requestManager.request(false, vertex).getReference();
         type = ActionType.Create;
     }
 
@@ -101,8 +102,9 @@ public class VertexCreation extends Action {
             case Create:
                 Vertex object = ((Node) fromNode.getObject()).newVertex(fromPoint, toPoint, (Node) toNode.getObject(),
                         arrowType, lineType, duplex, curved, width, value, color);
-                if(vertex == null) vertex = new SelectableCreationListener(object);
+                if(vertex == null) vertex = new SelectableReference(object);
                 else vertex.setObject(object);
+                object.hide(hidden);
                 type = ActionType.Delete;
                 break;
             case Delete:

@@ -1,4 +1,4 @@
-package gdraw.graph.node;
+package gdraw.main.gui;
 
 public class NodeLibraryRef {
     private NodeLibrary library;

@@ -3,13 +3,13 @@ package gdraw.graph.util.action;
 import gdraw.graph.util.Selectable;
 
 public class Translate extends Action {
-    private SelectableCreationListener listener;
+    private SelectableReference listener;
     private double dx, dy;
 
     private Translate(ActionHelper from, Selectable object, double dx, double dy, ActionHelper to) {
         this.from = to;
         this.to = from;
-        listener = object.getCreationListener();
+        listener = object.getReference();
         this.dx = dx;
         this.dy = dy;
     }

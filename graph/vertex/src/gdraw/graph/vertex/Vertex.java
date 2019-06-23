@@ -33,10 +33,10 @@ public class Vertex extends Selectable {
     private boolean duplex;
     private VertexType vertexType;
     private transient Path path;
-    private Label label;
     private transient Color color;
     private int colorInt;
     private double width;
+    public boolean hidden;
 
     private double xl, xr, yu, yd;
 
@@ -50,6 +50,7 @@ public class Vertex extends Selectable {
         toNode = to;
         toNode.addVertex(this);
         this.canvas = canvas;
+        hidden = false;
         init(arrow, line, isDuplex, isCurved);
         points.addLast(new VertexPoint(toPoint, this));
         points.addFirst(new VertexPoint(fromPoint, this));
@@ -73,30 +74,14 @@ public class Vertex extends Selectable {
 
         if(from == to){
             double x = (bx + ex)/2, y = (by + ey)/2, w = from.getWidth(), h = from.getHeight();
-            Point2D.Double center = from.getCenter();
-            double cx = center.getX(), cy = center.getY();
-            x = cx + (cx > x ? -w : w);
-            y = cy + (cy > y ? -h : h);
-            double[] points = ArrowType.arrowPoints(new VertexPoint(center), new VertexPoint(x, y), (w + h)/8);
+            VertexPoint[] points = Vertex.getPointsForLoop(from, x, y, w, h);
 
             gc.beginPath();
-            gc.moveTo(cx, cy);
+            gc.moveTo(points[2].getX(), points[2].getY());
             VertexType type = VertexType.Curved;
-            VertexPoint a = new VertexPoint(cx, cy),
-                    b = new VertexPoint(points[0], points[1]),
-                    c = new VertexPoint(points[2], points[3]),
-                    d = new VertexPoint(points[4], points[5]);
-            if(Math.abs(points[1] - cy) < Math.abs(points[5] - cy)){
-                b.setOrientation(VertexPointOrientation.VERTICAL);
-                d.setOrientation(VertexPointOrientation.HORIZONTAL);
-            }
-            else {
-                b.setOrientation(VertexPointOrientation.HORIZONTAL);
-                d.setOrientation(VertexPointOrientation.VERTICAL);
-            }
-            type.newElement(gc, a, b);
-            type.newElement(gc, b, d);
-            type.newElement(gc, d, a);
+            type.newElement(gc, points[0], points[1]);
+            type.newElement(gc, points[1], points[2]);
+            type.newElement(gc, points[2], points[0]);
 //            gc.quadraticCurveTo(points[0], points[1], (cx + points[0])/2, (cy + points[1])/2);
 //            gc.quadraticCurveTo(points[2], points[3], (points[2] + points[0])/2, (points[3] + points[1])/2);
 //            gc.quadraticCurveTo(points[4], points[5], (points[2] + points[4])/2, (points[3] + points[5])/2);
@@ -106,15 +91,47 @@ public class Vertex extends Selectable {
         else gc.strokeLine(bx, by, ex, ey);
     }
 
+    /**
+     * Metoda wyznaczająca kolejne punkty pętli
+     * @param from wierzchołek, którego dotyczy pętla
+     * @param x współrzędna punktu w środku między pierwotnym punktem startowym i końcowym
+     * @param y współrzędna punktu w środku między pierwotnym punktem startowym i końcowym
+     * @param w szerokość wierzchołka
+     * @param h wysokość wierzchołka
+     * @return tabela kolejnych punktów pętli
+     */
+    private static VertexPoint[] getPointsForLoop(Node from, double x, double y, double w, double h) {
+        Point2D.Double center = from.getCenter();
+        double cx = center.getX(), cy = center.getY();
+        x = cx + (cx > x ? -w : w);
+        y = cy + (cy > y ? -h : h);
+        double[] points =
+                ArrowType.arrowPoints(new VertexPoint(center), new VertexPoint(x, y), (w + h)/8,
+                        VertexType.Straight);
+        VertexPoint a = new VertexPoint(points[2], points[3]),
+                b = new VertexPoint(points[0], points[1]),
+                c = new VertexPoint(points[4], points[5]);
+        if(Math.abs(points[1] - cy) < Math.abs(points[5] - cy)){
+            b.setOrientation(VertexPointOrientation.VERTICAL);
+            c.setOrientation(VertexPointOrientation.HORIZONTAL);
+        }
+        else {
+            b.setOrientation(VertexPointOrientation.HORIZONTAL);
+            c.setOrientation(VertexPointOrientation.VERTICAL);
+        }
+        a.setPointBounded(from);
+        return new VertexPoint[]{a, b, c};
+    }
+
     private void makePath(){
         path = new Path();
         path.setStroke(color);
         path.setStrokeWidth(width);
         path.setStrokeDashOffset(width);
-        path.setOnMouseClicked(this::setSelected);
-        path.setOnMousePressed(this::onMousePressed);
-        path.setOnMouseDragged(this::onMouseDragged);
-        path.setOnContextMenuRequested(controller::contextMenu);
+//        path.setOnMouseClicked(this::setSelected);
+//        path.setOnMousePressed(this::onMousePressed);
+//        path.setOnMouseDragged(this::onMouseDragged);
+//        path.setOnContextMenuRequested(controller::contextMenu);
     }
 
     private void init(ArrowType arrow, LineType line, boolean isDuplex, boolean isCurved){
@@ -155,6 +172,7 @@ public class Vertex extends Selectable {
         value = vertex.value;
         setColor(vertex.color);
         width = vertex.width;
+        hidden = vertex.hidden;
 //        makePath();
 
         copyPoints(vertex);
@@ -217,39 +235,21 @@ public class Vertex extends Selectable {
 //        path.toFront();
 //        arrows.clear();
 
+        if(hidden) return;
         GraphicsContext gc = canvas.getGraphicsContext2D();
         if (fromNode == toNode) {
             VertexPoint start = points.getFirst(), stop = points.getLast();
             double x = (start.getX() + stop.getX()) / 2, y = (start.getY() + stop.getY()) / 2,
                     w = fromNode.getWidth(), h = fromNode.getHeight();
-            Point2D.Double center = fromNode.getCenter();
-            double cx = center.getX(), cy = center.getY();
-            x = cx + (cx > x ? -w : w);
-            y = cy + (cy > y ? -h : h);
-            double[] points = ArrowType.arrowPoints(new VertexPoint(center), new VertexPoint(x, y), (w + h) / 8);
-
-            VertexPoint a = new VertexPoint(cx, cy),
-                    b = new VertexPoint(points[0], points[1]),
-                    c = new VertexPoint(points[2], points[3]),
-                    d = new VertexPoint(points[4], points[5]);
-            if (Math.abs(points[1] - cy) < Math.abs(points[5] - cy)) {
-                b.setOrientation(VertexPointOrientation.VERTICAL);
-                d.setOrientation(VertexPointOrientation.HORIZONTAL);
-            } else {
-                b.setOrientation(VertexPointOrientation.HORIZONTAL);
-                d.setOrientation(VertexPointOrientation.VERTICAL);
-            }
-
-            c.setPointBounded(fromNode);
-            stop = new VertexPoint(c.getX(), c.getY());
-            start = new VertexPoint(c.getX(), c.getY());
+            VertexPoint[] points = Vertex.getPointsForLoop(fromNode, x, y, w, h);
+            stop = new VertexPoint(points[0].getX(), points[0].getY());
 
             vertexType = VertexType.Curved;
             this.points.clear();
             this.points.addFirst(stop);
-            this.points.addFirst(d);
-            this.points.addFirst(b);
-            this.points.addFirst(start);
+            this.points.addFirst(points[2]);
+            this.points.addFirst(points[1]);
+            this.points.addFirst(points[0]);
         }
 
         Iterator<VertexPoint> it = points.listIterator();
@@ -276,8 +276,8 @@ public class Vertex extends Selectable {
         if (selected) points.forEach(this::drawSelect);
         else if (!controller.isToSnapshot()) points.forEach(p -> p.draw(gc, width, false));
 
-        arrowType.draw(gc, color, prev, now);
-        if (duplex) arrowType.draw(gc, color, points.get(1), points.getFirst());
+        arrowType.draw(gc, color, prev, now, vertexType);
+        if (duplex) arrowType.draw(gc, color, points.get(1), points.getFirst(), vertexType);
 //        if(!arrows.isEmpty()) {
 ////            pane.getChildren().addAll(arrows);
 ////            arrows.forEach(javafx.scene.Node::toFront);
@@ -409,7 +409,7 @@ public class Vertex extends Selectable {
 
     public void writeToFile(FileWriter writer, boolean json, int indent) throws IOException {
         String ind = indent(indent), ind1 = ind + "  ";
-        super.writeToFile(writer, json, indent, "Vertex");
+        super.writeToFile(writer, json, indent);
         int codeFrom = fromNode.hashCode(), codeTo = toNode.hashCode();
 
         writer.append((json ? ",\n" + ind1 + "\"from-id\": \"" + codeFrom + "\",\n" +
@@ -452,13 +452,15 @@ public class Vertex extends Selectable {
 
     @Override
     public void checkSelect(Rectangle rectangle) {
+        if(hidden) return;
         setSelected(rectangle.contains(xl, yu) && rectangle.contains(xr, yd));
     }
 
-    public VertexPoint interactedPoint(double x, double y){
-        for(VertexPoint point : points)
-            if(point.contains(x, y))
-                return point;
+    public VertexPoint interactedPoint(double x, double y) {
+        if (!hidden)
+            for (VertexPoint point : points)
+                if (point.contains(x, y))
+                    return point;
         return null;
     }
 
@@ -508,6 +510,7 @@ public class Vertex extends Selectable {
     @Override
     public void refresh(Project project) {
         super.refresh(project);
+        project.newObject(this);
         color = Color.rgb(
                 colorInt & 0xFF,
                 (colorInt >>> 010) & 0xFF,
@@ -565,5 +568,11 @@ public class Vertex extends Selectable {
     public void moveInteractedPoint(double x, double y, double nx, double ny) {
         move(interactedPoint(x, y), new Point2D.Double(nx, ny));
         forceProjectDraw();
+    }
+
+    public void hide(boolean hide) {
+        hidden = hide;
+        if(label != null)
+            label.hide(hide);
     }
 }

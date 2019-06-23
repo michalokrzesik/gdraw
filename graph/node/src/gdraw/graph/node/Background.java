@@ -1,7 +1,8 @@
-package gdraw.graph.util;
+package gdraw.graph.node;
 
 import gdraw.graph.node.Node;
-import gdraw.graph.util.action.SelectableCreationListener;
+import gdraw.graph.util.Label;
+import gdraw.graph.util.action.SelectableReference;
 import gdraw.main.MainController;
 
 import gdraw.main.Project;
@@ -25,7 +26,7 @@ public class Background extends Node {
     public Background(MainController mainController, Image image, Canvas canvas, double w, double h){
         this(new Point2D.Double(w/2, h/2), image, canvas, mainController);
         treeItem = new TreeItem<>(this);
-        setCreationListener(new SelectableCreationListener(this));
+        setReference(new SelectableReference(this));
         width = w;
         height = h;
         this.canvas = canvas;
@@ -82,7 +83,7 @@ public class Background extends Node {
 
     private Background(Point2D.Double center, Image image, Canvas canvas, MainController mainController) {
         super(center, image, canvas, mainController, false);
-        setCreationListener(new SelectableCreationListener(this));
+        setReference(new SelectableReference(this));
     }
 
     @Override
@@ -139,4 +140,7 @@ public class Background extends Node {
         });
         writer.append(ind + (json ? "]\n" : "< /Nodes >\n"));
     }
+
+    @Override
+    public void unGroup(Node node){ }
 }

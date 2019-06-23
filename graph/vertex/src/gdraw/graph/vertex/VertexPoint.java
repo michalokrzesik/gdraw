@@ -62,10 +62,10 @@ public class VertexPoint implements Serializable {
 //        circle.setFill(Color.BLUE);
 //    }
 
-    public void refresh(Vertex vertex){
+//    public void refresh(Vertex vertex){
 //        setCircle();
 //        setVertex(vertex);
-    }
+//    }
 
     public double getX(){
         return point.getX();
@@ -106,7 +106,6 @@ public class VertexPoint implements Serializable {
 //    public Circle getCircle(){
 //        return circle;
 //    }
-
 
     public void setPointBounded(Point2D newPoint, Node node) {
         double x = newPoint.getX(), y = newPoint.getY(), newX, newY;

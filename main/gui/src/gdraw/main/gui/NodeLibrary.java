@@ -1,6 +1,5 @@
-package gdraw.graph.node;
+package gdraw.main.gui;
 
-import gdraw.graph.util.LibraryPane;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Accordion;
@@ -22,7 +21,7 @@ public class NodeLibrary extends TitledPane {
     private File path;
     private Accordion parent;
     private LibraryPane pane;
-    private ImageViewWithName selected;
+    private NamedImageView selected;
     private NodeLibraryRef ref;
 
     public NodeLibrary(File path, Accordion parent, MainController controller, LibraryPane pane) {
@@ -50,7 +49,7 @@ public class NodeLibrary extends TitledPane {
         if(path.isDirectory() && path.listFiles().length > 0)
             for(File file: path.listFiles()) {
                 pane.add(
-                        new ImageViewWithName(
+                        new NamedImageView(
                                 this,
                                 file.getName(),
                                 new Image(file.toURI().toString())));
@@ -115,7 +114,7 @@ public class NodeLibrary extends TitledPane {
         inputStream.close();
     }*/
 
-    public void setSelected(ImageViewWithName selected) {
+    public void setSelected(NamedImageView selected) {
         this.selected = selected;
     }
 
@@ -199,3 +198,4 @@ public class NodeLibrary extends TitledPane {
         return FXCollections.observableList(res);
     }
 }
+
