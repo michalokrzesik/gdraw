@@ -36,7 +36,6 @@ public class Vertex extends Selectable {
     private transient Color color;
     private int colorInt;
     private double width;
-    public boolean hidden;
 
     private double xl, xr, yu, yd;
 
@@ -50,7 +49,6 @@ public class Vertex extends Selectable {
         toNode = to;
         toNode.addVertex(this);
         this.canvas = canvas;
-        hidden = false;
         init(arrow, line, isDuplex, isCurved);
         points.addLast(new VertexPoint(toPoint, this));
         points.addFirst(new VertexPoint(fromPoint, this));
@@ -77,8 +75,9 @@ public class Vertex extends Selectable {
             VertexPoint[] points = Vertex.getPointsForLoop(from, x, y, w, h);
 
             gc.beginPath();
-            gc.moveTo(points[2].getX(), points[2].getY());
+            gc.moveTo(points[0].getX(), points[0].getY());
             VertexType type = VertexType.Curved;
+            points[0].setPointBounded(from);
             type.newElement(gc, points[0], points[1]);
             type.newElement(gc, points[1], points[2]);
             type.newElement(gc, points[2], points[0]);
@@ -103,24 +102,28 @@ public class Vertex extends Selectable {
     private static VertexPoint[] getPointsForLoop(Node from, double x, double y, double w, double h) {
         Point2D.Double center = from.getCenter();
         double cx = center.getX(), cy = center.getY();
-        x = cx + (cx > x ? -w : w);
-        y = cy + (cy > y ? -h : h);
+        x += cx > x ? -w : w;
+        y += cy > y ? -h : h;
         double[] points =
                 ArrowType.arrowPoints(new VertexPoint(center), new VertexPoint(x, y), (w + h)/8,
                         VertexType.Straight);
-        VertexPoint a = new VertexPoint(points[2], points[3]),
+        VertexPoint first = new VertexPoint(points[2], points[3]),
                 b = new VertexPoint(points[0], points[1]),
-                c = new VertexPoint(points[4], points[5]);
-        if(Math.abs(points[1] - cy) < Math.abs(points[5] - cy)){
+                c = new VertexPoint(points[4], points[5]), second, third;
+        if(Math.abs(points[1] - y) > Math.abs(points[5] - y)){
             b.setOrientation(VertexPointOrientation.VERTICAL);
             c.setOrientation(VertexPointOrientation.HORIZONTAL);
+            second = c;
+            third = b;
         }
         else {
             b.setOrientation(VertexPointOrientation.HORIZONTAL);
             c.setOrientation(VertexPointOrientation.VERTICAL);
+            second = b;
+            third = c;
         }
-        a.setPointBounded(from);
-        return new VertexPoint[]{a, b, c};
+        first.setPointBounded(from);
+        return new VertexPoint[]{first, second, third};
     }
 
     private void makePath(){
@@ -172,7 +175,6 @@ public class Vertex extends Selectable {
         value = vertex.value;
         setColor(vertex.color);
         width = vertex.width;
-        hidden = vertex.hidden;
 //        makePath();
 
         copyPoints(vertex);
@@ -235,7 +237,6 @@ public class Vertex extends Selectable {
 //        path.toFront();
 //        arrows.clear();
 
-        if(hidden) return;
         GraphicsContext gc = canvas.getGraphicsContext2D();
         if (fromNode == toNode) {
             VertexPoint start = points.getFirst(), stop = points.getLast();
@@ -452,15 +453,13 @@ public class Vertex extends Selectable {
 
     @Override
     public void checkSelect(Rectangle rectangle) {
-        if(hidden) return;
         setSelected(rectangle.contains(xl, yu) && rectangle.contains(xr, yd));
     }
 
     public VertexPoint interactedPoint(double x, double y) {
-        if (!hidden)
-            for (VertexPoint point : points)
-                if (point.contains(x, y))
-                    return point;
+        for (VertexPoint point : points)
+            if (point.contains(x, y))
+                return point;
         return null;
     }
 
@@ -570,9 +569,8 @@ public class Vertex extends Selectable {
         forceProjectDraw();
     }
 
-    public void hide(boolean hide) {
-        hidden = hide;
-        if(label != null)
-            label.hide(hide);
+    public void hide(boolean hide, Node node) {
+        VertexPoint point = (node == fromNode ? points.getFirst() : points.getLast());
+        point.setPointBounded(hide ? node.getTreeItem().getParent().getValue() : node);
     }
 }

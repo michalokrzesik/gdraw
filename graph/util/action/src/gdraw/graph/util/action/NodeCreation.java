@@ -111,6 +111,7 @@ public class NodeCreation extends MultiAction {
                 object.hide(hidden);
 
                 type = ActionType.Delete;
+                object.forceProjectDraw();
                 return;
             case Delete:
                 Node objectToDelete = (Node) node.getObject();

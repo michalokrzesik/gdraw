@@ -116,7 +116,7 @@ public enum DragModel implements Serializable {
                         from, start.getPoint(), stop.getPoint(), to, arrowType, lineType, duplex, curved, width, 1, color,
                         project.getRedo()));
             }
-            else project.draw();
+            project.draw();
         }
     },
     Grouping{

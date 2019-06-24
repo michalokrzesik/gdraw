@@ -80,6 +80,7 @@ public class MainController {
     private ArrayList<Request> requestedNodes;
     private ArrayList<Request> requestedVertices;
     private boolean toSnapshot;
+    private boolean closing;
 
     public void initialize() {
         nodeLibraryAccordion.setOnContextMenuRequested(this::libraryContextMenu);
@@ -325,7 +326,10 @@ public class MainController {
         Button close = new Button("Nie");
         Button saveAndClose = new Button("Tak");
 
-        cancel.setOnAction(e -> window.close());
+        cancel.setOnAction(e -> {
+            closing = false;
+            window.close();
+        });
         close.setOnAction(e -> {
             closeProject(project);
             window.close();
@@ -378,7 +382,7 @@ public class MainController {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("graphDRAW format","*.gdf"));
         fileChooser.setInitialFileName(name + ".gdf");
         project.setFile(fileChooser.showSaveDialog(null));
-        saveProject(project);
+        if(project.getFile() != null) saveProject(project);
     }
 
     private void closeProject(Project project) {
@@ -400,9 +404,12 @@ public class MainController {
     }
 
     public void closeProgram(Event actionEvent) {
-        while(!projects.isEmpty()) closeProject(actionEvent);
-        Platform.exit();
-        System.exit(0);
+        closing = true;
+        while(closing && !projects.isEmpty()) closeProject(actionEvent);
+        if(closing) {
+            Platform.exit();
+            System.exit(0);
+        }
     }
 
 

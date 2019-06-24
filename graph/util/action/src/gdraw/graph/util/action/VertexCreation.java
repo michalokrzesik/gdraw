@@ -19,7 +19,7 @@ public class VertexCreation extends Action {
     private Point2D.Double fromPoint, toPoint;
     private ArrowType arrowType;
     private LineType lineType;
-    private boolean duplex, curved, hidden;
+    private boolean duplex, curved;
     private double width, value;
     private Color color;
     private SelectableReference vertex, fromNode, toNode;
@@ -56,7 +56,6 @@ public class VertexCreation extends Action {
         lineType = vertex.getLineType();
         duplex = vertex.isDuplex();
         curved = vertex.getVertexType() == VertexType.Curved;
-        hidden = vertex.hidden;
         value = vertex.getValue();
         width = vertex.getLineWidth();
         color = vertex.getColor();
@@ -104,7 +103,6 @@ public class VertexCreation extends Action {
                         arrowType, lineType, duplex, curved, width, value, color);
                 if(vertex == null) vertex = new SelectableReference(object);
                 else vertex.setObject(object);
-                object.hide(hidden);
                 type = ActionType.Delete;
                 break;
             case Delete:

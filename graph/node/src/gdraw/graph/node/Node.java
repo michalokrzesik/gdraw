@@ -442,9 +442,9 @@ public class Node extends Selectable {
 //        if(!pane.getChildren().contains(imageView)) pane.getChildren().add(imageView);
 //        imageView.toFront();
         //hidden = false;
-
-        double w = getWidth(), h = getHeight();
-        double x = center.getX() - w/2, y = center.getY() - h/2;
+        if(!hidden) {
+            double w = getWidth(), h = getHeight();
+            double x = center.getX() - w / 2, y = center.getY() - h / 2;
 //        imageView.setFitWidth(w);
 //        imageView.setFitHeight(h);
 //        imageView.setX(x);
@@ -453,30 +453,32 @@ public class Node extends Selectable {
 //        imageView.setLayoutY(y);
 //        imageView.getGraphicsContext2D().drawImage(image, 0, 0, w, h);
 
-        ImageView view = new ImageView(image);
-        view.setPreserveRatio(false);
-        view.setSmooth(true);
-        view.setFitHeight(h);
-        view.setFitWidth(w);
+            ImageView view = new ImageView(image);
+            view.setPreserveRatio(false);
+            view.setSmooth(true);
+            view.setFitHeight(h);
+            view.setFitWidth(w);
 
-        Pane pane = new Pane(view);
-        Scene offScreenScene = new Scene(pane);
-        WritableImage croppedImage = view.snapshot(null, null);
+            Pane pane = new Pane(view);
+            Scene offScreenScene = new Scene(pane);
+            WritableImage croppedImage = view.snapshot(null, null);
 
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.setGlobalBlendMode(BlendMode.SRC_OVER);
-        gc.drawImage(croppedImage, x, y, w, h);
-        if(selected && !controller.isToSnapshot()) {
-            setCircles();
-            gc.setStroke(Color.BLUE);
-            gc.setFill(Color.BLUE);
-            for (int i = 0; i < circles.length; i++)
-                gc.fillOval(circles[i].getCenterX() - 1, circles[i].getCenterY() - 1, 2, 2);
+            GraphicsContext gc = canvas.getGraphicsContext2D();
+            gc.setGlobalBlendMode(BlendMode.SRC_OVER);
+            gc.drawImage(croppedImage, x, y, w, h);
+            if (selected && !controller.isToSnapshot()) {
+                setCircles();
+                gc.setStroke(Color.BLUE);
+                gc.setFill(Color.BLUE);
+                for (int i = 0; i < circles.length; i++)
+                    gc.fillOval(circles[i].getCenterX() - 1, circles[i].getCenterY() - 1, 2, 2);
+            }
+
         }
-        if(!subNodes.isEmpty()) {
-            if (!isCollapsed) subNodes.forEach(Node::draw);
-        }
-        if(label != null) label.draw();
+        if(!subNodes.isEmpty())
+            subNodes.forEach(Node::draw);
+
+        if(!hidden && label != null) label.draw();
     }
 
     public void hide(boolean hide) {
@@ -484,7 +486,7 @@ public class Node extends Selectable {
         if (!subNodes.isEmpty())
             subNodes.forEach(n -> n.hide(isCollapsed && hide));
         if(!vertices.isEmpty())
-            vertices.forEach(v -> v.hide(hide));
+            vertices.forEach(v -> v.hide(hide, this));
         hidden = hide;
     }
 
