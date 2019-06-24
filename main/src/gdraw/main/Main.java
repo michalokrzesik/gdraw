@@ -12,8 +12,9 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("main.fxml"));
+        MainController controller = new MainController();
+        loader.setController(controller);
         Parent root = loader.load();
-        MainController controller = loader.getController();
         primaryStage.setTitle("GraphDRAW");
         primaryStage.setScene(new Scene(root, 1280, 700));
         primaryStage.show();

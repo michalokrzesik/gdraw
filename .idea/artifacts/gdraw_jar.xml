@@ -8,6 +8,7 @@
       <element id="module-output" name="vertex" />
       <element id="module-output" name="util" />
       <element id="module-output" name="gui" />
+      <element id="dir-copy" path="$PROJECT_DIR$/libraries" />
     </root>
   </artifact>
 </component>
